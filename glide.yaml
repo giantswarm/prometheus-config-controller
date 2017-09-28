@@ -1,0 +1,10 @@
+package: github.com/giantswarm/prometheus-config-controller
+import:
+- package: github.com/giantswarm/microerror
+  version: master
+- package: github.com/giantswarm/microkit
+  version: master
+- package: github.com/giantswarm/micrologger
+  version: master
+- package: github.com/giantswarm/microstorage
+  version: master
