@@ -4,10 +4,12 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/giantswarm/microerror"
 	microserver "github.com/giantswarm/microkit/server"
 	"github.com/giantswarm/micrologger"
 	kithttp "github.com/go-kit/kit/transport/http"
 
+	"github.com/giantswarm/prometheus-config-controller/server/endpoint"
 	"github.com/giantswarm/prometheus-config-controller/service"
 )
 
@@ -26,13 +28,32 @@ func DefaultConfig() Config {
 }
 
 func New(config Config) (microserver.Server, error) {
+	var err error
+
+	var newEndpointCollection *endpoint.Endpoint
+	{
+		endpointConfig := endpoint.DefaultConfig()
+
+		endpointConfig.Logger = config.MicroServerConfig.Logger
+		endpointConfig.Service = config.Service
+
+		newEndpointCollection, err = endpoint.New(endpointConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	newServer := &server{
 		logger: config.MicroServerConfig.Logger,
 
 		config: config.MicroServerConfig,
 	}
 
-	newServer.config.Endpoints = []microserver.Endpoint{}
+	newServer.config.Endpoints = []microserver.Endpoint{
+		newEndpointCollection.Healthz,
+		newEndpointCollection.Version,
+	}
+
 	newServer.config.ErrorEncoder = newServer.newErrorEncoder()
 
 	return newServer, nil
