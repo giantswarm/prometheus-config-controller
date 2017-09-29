@@ -2,7 +2,9 @@ package service
 
 import (
 	"sync"
+	"time"
 
+	"github.com/cenk/backoff"
 	"github.com/spf13/viper"
 	"k8s.io/client-go/kubernetes"
 
@@ -10,9 +12,15 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/client/k8s"
+	"github.com/giantswarm/operatorkit/framework"
+	"github.com/giantswarm/operatorkit/framework/logresource"
+	"github.com/giantswarm/operatorkit/framework/metricsresource"
+	"github.com/giantswarm/operatorkit/framework/retryresource"
 
 	"github.com/giantswarm/prometheus-config-controller/flag"
+	"github.com/giantswarm/prometheus-config-controller/service/controller"
 	"github.com/giantswarm/prometheus-config-controller/service/healthz"
+	configmapresource "github.com/giantswarm/prometheus-config-controller/service/resource/configmap"
 )
 
 type Config struct {
@@ -24,6 +32,9 @@ type Config struct {
 	GitCommit   string
 	Name        string
 	Source      string
+
+	ResourceRetries           int
+	ControllerBackOffDuration time.Duration
 }
 
 func DefaultConfig() Config {
@@ -36,12 +47,16 @@ func DefaultConfig() Config {
 		GitCommit:   "",
 		Name:        "",
 		Source:      "",
+
+		ResourceRetries:           0,
+		ControllerBackOffDuration: time.Duration(0),
 	}
 }
 
 type Service struct {
-	Healthz *healthz.Service
-	Version *version.Service
+	Controller *controller.Controller
+	Healthz    *healthz.Service
+	Version    *version.Service
 
 	bootOnce sync.Once
 }
@@ -52,6 +67,13 @@ func New(config Config) (*Service, error) {
 	}
 	if config.Viper == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Viper must not be empty")
+	}
+
+	if config.ResourceRetries == 0 {
+		return nil, microerror.Maskf(invalidConfigError, "config.ResourceRetries must not be zero")
+	}
+	if config.ControllerBackOffDuration == 0 {
+		return nil, microerror.Maskf(invalidConfigError, "config.ControllerBackOffDuration must not be zero")
 	}
 
 	var err error
@@ -74,6 +96,66 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
+	var newConfigMapResource framework.Resource
+	{
+		configMapConfig := configmapresource.DefaultConfig()
+
+		newConfigMapResource, err = configmapresource.New(configMapConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var resources []framework.Resource
+	{
+		resources = []framework.Resource{
+			newConfigMapResource,
+		}
+
+		logWrapConfig := logresource.DefaultWrapConfig()
+		logWrapConfig.Logger = config.Logger
+		resources, err = logresource.Wrap(resources, logWrapConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		retryWrapConfig := retryresource.DefaultWrapConfig()
+		retryWrapConfig.BackOffFactory = func() backoff.BackOff {
+			return backoff.WithMaxTries(backoff.NewExponentialBackOff(), uint64(config.ResourceRetries))
+		}
+		retryWrapConfig.Logger = config.Logger
+		resources, err = retryresource.Wrap(resources, retryWrapConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		metricsWrapConfig := metricsresource.DefaultWrapConfig()
+		metricsWrapConfig.Namespace = config.Name
+		resources, err = metricsresource.Wrap(resources, metricsWrapConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var newControllerBackOff *backoff.ExponentialBackOff
+	{
+		newControllerBackOff = backoff.NewExponentialBackOff()
+		newControllerBackOff.MaxElapsedTime = config.ControllerBackOffDuration
+	}
+
+	var newOperatorFramework *framework.Framework
+	{
+		frameworkConfig := framework.DefaultConfig()
+
+		frameworkConfig.Logger = config.Logger
+		frameworkConfig.Resources = resources
+
+		newOperatorFramework, err = framework.New(frameworkConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var newHealthzService *healthz.Service
 	{
 		healthzConfig := healthz.DefaultConfig()
@@ -82,6 +164,23 @@ func New(config Config) (*Service, error) {
 		healthzConfig.Logger = config.Logger
 
 		newHealthzService, err = healthz.New(healthzConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var newController *controller.Controller
+	{
+		controllerConfig := controller.DefaultConfig()
+
+		controllerConfig.BackOff = newControllerBackOff
+		controllerConfig.K8sClient = newK8sClient
+		controllerConfig.Logger = config.Logger
+		controllerConfig.OperatorFramework = newOperatorFramework
+
+		controllerConfig.ResyncPeriod = config.Viper.GetDuration(config.Flag.Service.Controller.ResyncPeriod)
+
+		newController, err = controller.New(controllerConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -103,8 +202,9 @@ func New(config Config) (*Service, error) {
 	}
 
 	newService := &Service{
-		Healthz: newHealthzService,
-		Version: newVersionService,
+		Controller: newController,
+		Healthz:    newHealthzService,
+		Version:    newVersionService,
 
 		bootOnce: sync.Once{},
 	}
@@ -113,5 +213,7 @@ func New(config Config) (*Service, error) {
 }
 
 func (s *Service) Boot() {
-	s.bootOnce.Do(func() {})
+	s.bootOnce.Do(func() {
+		s.Controller.Boot()
+	})
 }
