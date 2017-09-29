@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/spf13/viper"
 
@@ -69,6 +70,9 @@ func mainWithError() error {
 			serviceConfig.GitCommit = gitCommit
 			serviceConfig.Name = name
 			serviceConfig.Source = source
+
+			serviceConfig.ResourceRetries = v.GetInt(f.Service.Resource.Retries)
+			serviceConfig.ControllerBackOffDuration = v.GetDuration(f.Service.Controller.BackOffDuration)
 
 			newService, err = service.New(serviceConfig)
 			panicOnErr(err)
@@ -138,6 +142,9 @@ func mainWithError() error {
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.TLS.CAFile, "", "Certificate authority file path to use to authenticate with Kubernetes.")
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.TLS.CrtFile, "", "Certificate file path to use to authenticate with Kubernetes.")
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.TLS.KeyFile, "", "Key file path to use to authenticate with Kubernetes.")
+	daemonCommand.PersistentFlags().Int(f.Service.Resource.Retries, 3, "Number of times to retry resources.")
+	daemonCommand.PersistentFlags().Duration(f.Service.Controller.BackOffDuration, time.Minute*5, "Maximum backoff duration for controller")
+	daemonCommand.PersistentFlags().Duration(f.Service.Controller.ResyncPeriod, time.Minute*1, "Controller resync period")
 
 	newCommand.CobraCommand().Execute()
 
