@@ -142,7 +142,12 @@ func mainWithError() error {
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.TLS.CAFile, "", "Certificate authority file path to use to authenticate with Kubernetes.")
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.TLS.CrtFile, "", "Certificate file path to use to authenticate with Kubernetes.")
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.TLS.KeyFile, "", "Key file path to use to authenticate with Kubernetes.")
+
 	daemonCommand.PersistentFlags().Int(f.Service.Resource.Retries, 3, "Number of times to retry resources.")
+
+	daemonCommand.PersistentFlags().String(f.Service.Resource.ConfigMap.Name, "prometheus", "Name of prometheus configmap to control.")
+	daemonCommand.PersistentFlags().String(f.Service.Resource.ConfigMap.Namespace, "monitoring", "Namespace of prometheus configmap to control.")
+
 	daemonCommand.PersistentFlags().Duration(f.Service.Controller.BackOffDuration, time.Minute*5, "Maximum backoff duration for controller")
 	daemonCommand.PersistentFlags().Duration(f.Service.Controller.ResyncPeriod, time.Minute*1, "Controller resync period")
 
