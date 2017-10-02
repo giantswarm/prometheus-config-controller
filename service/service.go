@@ -100,6 +100,12 @@ func New(config Config) (*Service, error) {
 	{
 		configMapConfig := configmapresource.DefaultConfig()
 
+		configMapConfig.K8sClient = newK8sClient
+		configMapConfig.Logger = config.Logger
+
+		configMapConfig.ConfigMapName = config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Name)
+		configMapConfig.ConfigMapNamespace = config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Namespace)
+
 		newConfigMapResource, err = configmapresource.New(configMapConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
