@@ -12,3 +12,7 @@ import:
   version: master
 - package: github.com/giantswarm/operatorkit
   version: master
+- package: github.com/prometheus/prometheus
+  version: v1.6.3
+- package: github.com/prometheus/common
+  version: master
