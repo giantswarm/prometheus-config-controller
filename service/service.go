@@ -103,6 +103,7 @@ func New(config Config) (*Service, error) {
 		configMapConfig.K8sClient = newK8sClient
 		configMapConfig.Logger = config.Logger
 
+		configMapConfig.ConfigMapKey = config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Key)
 		configMapConfig.ConfigMapName = config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Name)
 		configMapConfig.ConfigMapNamespace = config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Namespace)
 
