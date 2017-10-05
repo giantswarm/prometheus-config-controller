@@ -16,6 +16,8 @@ type Config struct {
 	K8sClient kubernetes.Interface
 	Logger    micrologger.Logger
 
+	// ConfigMapKey is the key in the configmap under which the prometheus configuration is held.
+	ConfigMapKey       string
 	ConfigMapName      string
 	ConfigMapNamespace string
 }
@@ -25,6 +27,7 @@ func DefaultConfig() Config {
 		K8sClient: nil,
 		Logger:    nil,
 
+		ConfigMapKey:       "",
 		ConfigMapName:      "",
 		ConfigMapNamespace: "",
 	}
@@ -34,6 +37,7 @@ type Resource struct {
 	k8sClient kubernetes.Interface
 	logger    micrologger.Logger
 
+	configMapKey       string
 	configMapName      string
 	configMapNamespace string
 }
@@ -46,6 +50,9 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
 	}
 
+	if config.ConfigMapKey == "" {
+		return nil, microerror.Maskf(invalidConfigError, "config.ConfigMapKey must not be empty")
+	}
 	if config.ConfigMapName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "config.ConfigMapName must not be empty")
 	}
@@ -57,6 +64,7 @@ func New(config Config) (*Resource, error) {
 		k8sClient: config.K8sClient,
 		logger:    config.Logger,
 
+		configMapKey:       config.ConfigMapKey,
 		configMapName:      config.ConfigMapName,
 		configMapNamespace: config.ConfigMapNamespace,
 	}

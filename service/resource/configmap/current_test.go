@@ -65,6 +65,7 @@ func Test_Resource_ConfigMap_GetCurrentState(t *testing.T) {
 		resourceConfig.K8sClient = fakeK8sClient
 		resourceConfig.Logger = microloggertest.New()
 
+		resourceConfig.ConfigMapKey = "prometheus.yml"
 		resourceConfig.ConfigMapName = configMapName
 		resourceConfig.ConfigMapNamespace = configMapNamespace
 

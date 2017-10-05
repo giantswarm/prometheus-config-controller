@@ -18,6 +18,7 @@ func Test_Resource_ConfigMap_GetCreateState(t *testing.T) {
 	resourceConfig.K8sClient = fakeK8sClient
 	resourceConfig.Logger = microloggertest.New()
 
+	resourceConfig.ConfigMapKey = "prometheus.yml"
 	resourceConfig.ConfigMapName = "prometheus"
 	resourceConfig.ConfigMapNamespace = "monitoring"
 
@@ -45,6 +46,7 @@ func Test_Resource_ConfigMap_ProcessCreateState(t *testing.T) {
 	resourceConfig.K8sClient = fakeK8sClient
 	resourceConfig.Logger = microloggertest.New()
 
+	resourceConfig.ConfigMapKey = "prometheus.yml"
 	resourceConfig.ConfigMapName = "prometheus"
 	resourceConfig.ConfigMapNamespace = "monitoring"
 

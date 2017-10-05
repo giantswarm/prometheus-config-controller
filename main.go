@@ -145,6 +145,7 @@ func mainWithError() error {
 
 	daemonCommand.PersistentFlags().Int(f.Service.Resource.Retries, 3, "Number of times to retry resources.")
 
+	daemonCommand.PersistentFlags().String(f.Service.Resource.ConfigMap.Key, "prometheus.yml", "Key in configmap under which prometheus configuration is held.")
 	daemonCommand.PersistentFlags().String(f.Service.Resource.ConfigMap.Name, "prometheus", "Name of prometheus configmap to control.")
 	daemonCommand.PersistentFlags().String(f.Service.Resource.ConfigMap.Namespace, "monitoring", "Namespace of prometheus configmap to control.")
 
