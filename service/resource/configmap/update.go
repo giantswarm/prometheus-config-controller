@@ -9,57 +9,70 @@ import (
 )
 
 func (r *Resource) GetUpdateState(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, interface{}, interface{}, error) {
-	currentStateConfigMap, ok := currentState.(*v1.ConfigMap)
-	if !ok {
-		return nil, nil, nil, configMapAssertionError
+	currentConfigMap, err := toConfigMap(currentState)
+	if err != nil {
+		return nil, nil, nil, microerror.Mask(err)
 	}
 
-	desiredStateConfigMap, ok := desiredState.(*v1.ConfigMap)
-	if !ok {
-		return nil, nil, nil, configMapAssertionError
+	desiredConfigMap, err := toConfigMap(desiredState)
+	if err != nil {
+		return nil, nil, nil, microerror.Mask(err)
 	}
 
 	// If the current or desired state configmaps are empty,
 	// perform no action.
-	if currentStateConfigMap == nil {
+	if currentConfigMap == nil {
 		return nil, nil, nil, nil
 	}
-	if desiredStateConfigMap == nil {
+	if desiredConfigMap == nil {
 		return nil, nil, nil, nil
 	}
 
 	// If the current and desired state configmaps have different names or namespaces,
 	// something bad is going on, so error out.
-	if currentStateConfigMap.Name != desiredStateConfigMap.Name {
-		return nil, nil, nil, configMapWrongNameError
+	if currentConfigMap.Name != desiredConfigMap.Name {
+		return nil, nil, nil, microerror.Mask(wrongNameError)
 	}
-	if currentStateConfigMap.Namespace != desiredStateConfigMap.Namespace {
-		return nil, nil, nil, configMapWrongNamespaceError
+	if currentConfigMap.Namespace != desiredConfigMap.Namespace {
+		return nil, nil, nil, microerror.Mask(wrongNamespaceError)
 	}
 
 	// If the current state does not match the desired state,
 	// return the desired state as update.
-	if currentStateConfigMap.Data[r.configMapKey] != desiredStateConfigMap.Data[r.configMapKey] {
-		return nil, desiredStateConfigMap, nil, nil
+	if currentConfigMap.Data[r.configMapKey] != desiredConfigMap.Data[r.configMapKey] {
+		return nil, desiredConfigMap, nil, nil
 	}
 
 	return nil, nil, nil, nil
 }
 
 func (r *Resource) ProcessUpdateState(ctx context.Context, obj, updateState interface{}) error {
-	updateStateConfigmap, ok := updateState.(*v1.ConfigMap)
-	if !ok {
-		return configMapAssertionError
+	configMapsToUpdate, err := toConfigMap(updateState)
+	if err != nil {
+		return microerror.Mask(err)
 	}
 
-	if updateStateConfigmap != nil {
-		_, err := r.k8sClient.CoreV1().ConfigMaps(r.configMapNamespace).Update(updateStateConfigmap)
+	if configMapsToUpdate != nil {
+		_, err := r.k8sClient.CoreV1().ConfigMaps(r.configMapNamespace).Update(configMapsToUpdate)
 		if errors.IsNotFound(err) {
-			return configMapNotFoundError
+			return microerror.Mask(configMapNotFoundError)
 		} else if err != nil {
 			return microerror.Mask(err)
 		}
 	}
 
 	return nil
+}
+
+func toConfigMap(v interface{}) (*v1.ConfigMap, error) {
+	if v == nil {
+		return nil, nil
+	}
+
+	configMap, ok := v.(*v1.ConfigMap)
+	if !ok {
+		return nil, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", v1.ConfigMap{}, v)
+	}
+
+	return configMap, nil
 }

@@ -37,7 +37,7 @@ func Test_Resource_ConfigMap_GetUpdateState(t *testing.T) {
 			expectedErrorHandler:         nil,
 		},
 
-		// Test that that if the current state and desired state are the same,
+		// Test that if the current state and desired state are the same,
 		// and the configmap is empty,
 		// the update state is nil.
 		{
@@ -143,7 +143,7 @@ func Test_Resource_ConfigMap_GetUpdateState(t *testing.T) {
 			},
 
 			expectedUpdateStateConfigMap: nil,
-			expectedErrorHandler:         IsConfigMapWrongName,
+			expectedErrorHandler:         IsWrongName,
 		},
 
 		// Test that if the current state and desired state configmaps are in
@@ -169,7 +169,7 @@ func Test_Resource_ConfigMap_GetUpdateState(t *testing.T) {
 			},
 
 			expectedUpdateStateConfigMap: nil,
-			expectedErrorHandler:         IsConfigMapWrongNamespace,
+			expectedErrorHandler:         IsWrongNamespace,
 		},
 	}
 
@@ -375,7 +375,7 @@ func Test_Resource_ConfigMap_ProcessUpdateState(t *testing.T) {
 
 		resource, err := New(resourceConfig)
 		if err != nil {
-			t.Fatalf("%v: error returned creating resource: %v\n", index, err)
+			t.Fatalf("%d: error returned creating resource: %s\n", index, err)
 		}
 
 		if test.setUpConfigMap != nil {
