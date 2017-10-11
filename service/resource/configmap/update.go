@@ -3,6 +3,8 @@ package configmap
 import (
 	"context"
 
+	"github.com/giantswarm/microerror"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/pkg/api/v1"
 )
 
@@ -45,5 +47,19 @@ func (r *Resource) GetUpdateState(ctx context.Context, obj, currentState, desire
 }
 
 func (r *Resource) ProcessUpdateState(ctx context.Context, obj, updateState interface{}) error {
+	updateStateConfigmap, ok := updateState.(*v1.ConfigMap)
+	if !ok {
+		return configMapAssertionError
+	}
+
+	if updateStateConfigmap != nil {
+		_, err := r.k8sClient.CoreV1().ConfigMaps(r.configMapNamespace).Update(updateStateConfigmap)
+		if errors.IsNotFound(err) {
+			return configMapNotFoundError
+		} else if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
 	return nil
 }
