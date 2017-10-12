@@ -18,6 +18,7 @@ import (
 	"github.com/giantswarm/prometheus-config-controller/service/prometheus"
 )
 
+// Test_Resource_ConfigMap_GetDesiredState tests the GetDesiredState method.
 func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 	configMapKey := "prometheus.yml"
 	configMapName := "prometheus"

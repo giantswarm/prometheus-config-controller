@@ -31,3 +31,24 @@ var invalidConfigMapError = microerror.New("invalid config map")
 func IsInvalidConfigMap(err error) bool {
 	return microerror.Cause(err) == invalidConfigMapError
 }
+
+var wrongNameError = microerror.New("wrong name")
+
+// IsWrongName asserts wrongNameError.
+func IsWrongName(err error) bool {
+	return microerror.Cause(err) == wrongNameError
+}
+
+var wrongNamespaceError = microerror.New("wrong namespace")
+
+// IsWrongNamespace asserts wrongNamespaceError.
+func IsWrongNamespace(err error) bool {
+	return microerror.Cause(err) == wrongNamespaceError
+}
+
+var wrongTypeError = microerror.New("wrong type")
+
+// IsWrongTypeError asserts wrongTypeError.
+func IsWrongTypeError(err error) bool {
+	return microerror.Cause(err) == wrongTypeError
+}
