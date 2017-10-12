@@ -2,6 +2,7 @@ package configmap
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/prometheus/prometheus/config"
 	"gopkg.in/yaml.v2"
@@ -14,6 +15,7 @@ import (
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
+	r.logger.Log("debug", fmt.Sprintf("fetching configmap: %s/%s", r.configMapNamespace, r.configMapName))
 	configMap, err := r.k8sClient.CoreV1().ConfigMaps(r.configMapNamespace).Get(
 		r.configMapName, metav1.GetOptions{},
 	)
@@ -33,11 +35,13 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Maskf(invalidConfigMapError, err.Error())
 	}
 
+	r.logger.Log("debug", fmt.Sprintf("fetching all services"))
 	services, err := r.k8sClient.CoreV1().Services("").List(metav1.ListOptions{})
 	if err != nil {
 		return nil, microerror.Maskf(err, "an error occurred listing all services")
 	}
 
+	r.logger.Log("debug", fmt.Sprintf("computing desired state of configmap"))
 	scrapeConfigs, err := prometheus.GetScrapeConfigs(services.Items)
 	if err != nil {
 		return nil, microerror.Maskf(err, "an error occurred creating scrape configs")

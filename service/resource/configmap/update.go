@@ -40,20 +40,24 @@ func (r *Resource) GetUpdateState(ctx context.Context, obj, currentState, desire
 	// If the current state does not match the desired state,
 	// return the desired state as update.
 	if currentConfigMap.Data[r.configMapKey] != desiredConfigMap.Data[r.configMapKey] {
-		return nil, desiredConfigMap, nil, nil
+		r.logger.Log("debug", "current configmap does not match desired configmap, need to update")
+		return nil, nil, desiredConfigMap, nil
 	}
+
+	r.logger.Log("debug", "current configmap matches desired configmap, no update needed")
 
 	return nil, nil, nil, nil
 }
 
 func (r *Resource) ProcessUpdateState(ctx context.Context, obj, updateState interface{}) error {
-	configMapsToUpdate, err := toConfigMap(updateState)
+	configMapToUpdate, err := toConfigMap(updateState)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	if configMapsToUpdate != nil {
-		_, err := r.k8sClient.CoreV1().ConfigMaps(r.configMapNamespace).Update(configMapsToUpdate)
+	if configMapToUpdate != nil {
+		r.logger.Log("debug", "updating configmap")
+		_, err := r.k8sClient.CoreV1().ConfigMaps(r.configMapNamespace).Update(configMapToUpdate)
 		if errors.IsNotFound(err) {
 			return microerror.Mask(configMapNotFoundError)
 		} else if err != nil {
