@@ -190,7 +190,7 @@ func Test_Resource_ConfigMap_GetUpdateState(t *testing.T) {
 			t.Fatalf("%d: error returned creating resource: %s\n", index, err)
 		}
 
-		createState, updateState, deleteState, err := resource.GetUpdateState(
+		createState, deleteState, updateState, err := resource.GetUpdateState(
 			context.TODO(), v1.Service{}, test.currentState, test.desiredState,
 		)
 
