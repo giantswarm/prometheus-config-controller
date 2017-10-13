@@ -26,7 +26,7 @@ func GetTarget(service v1.Service) model.LabelSet {
 
 // GetScrapeConfigs takes a list of Kubernetes Services,
 // and returns a list of Prometheus ScrapeConfigs.
-func GetScrapeConfigs(services []v1.Service) ([]config.ScrapeConfig, error) {
+func GetScrapeConfigs(services []v1.Service, certificateDirectory string) ([]config.ScrapeConfig, error) {
 	filteredServices := FilterInvalidServices(services)
 	groupedServices := GroupServices(filteredServices)
 
@@ -42,9 +42,9 @@ func GetScrapeConfigs(services []v1.Service) ([]config.ScrapeConfig, error) {
 			Scheme:  httpsScheme,
 			HTTPClientConfig: config.HTTPClientConfig{
 				TLSConfig: config.TLSConfig{
-					CAFile:   key.CAPath(groupName),
-					CertFile: key.CrtPath(groupName),
-					KeyFile:  key.KeyPath(groupName),
+					CAFile:   key.CAPath(certificateDirectory, groupName),
+					CertFile: key.CrtPath(certificateDirectory, groupName),
+					KeyFile:  key.KeyPath(certificateDirectory, groupName),
 				},
 			},
 			ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{

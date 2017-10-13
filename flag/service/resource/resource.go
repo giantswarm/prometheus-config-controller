@@ -5,6 +5,7 @@ import (
 )
 
 type Resource struct {
-	ConfigMap configmap.ConfigMap
-	Retries   string
+	CertificateDirectory string
+	ConfigMap            configmap.ConfigMap
+	Retries              string
 }
