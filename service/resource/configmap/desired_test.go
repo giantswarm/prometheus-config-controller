@@ -221,9 +221,9 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 						Scheme:  "https",
 						HTTPClientConfig: config.HTTPClientConfig{
 							TLSConfig: config.TLSConfig{
-								CAFile:             "/certs/xa5ly/ca.pem",
-								CertFile:           "/certs/xa5ly/crt.pem",
-								KeyFile:            "/certs/xa5ly/key.pem",
+								CAFile:             "/certs/xa5ly-ca.pem",
+								CertFile:           "/certs/xa5ly-crt.pem",
+								KeyFile:            "/certs/xa5ly-key.pem",
 								InsecureSkipVerify: false,
 							},
 						},
@@ -251,6 +251,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 		resourceConfig.K8sClient = fakeK8sClient
 		resourceConfig.Logger = microloggertest.New()
 
+		resourceConfig.CertificateDirectory = "/certs"
 		resourceConfig.ConfigMapKey = configMapKey
 		resourceConfig.ConfigMapName = configMapName
 		resourceConfig.ConfigMapNamespace = configMapNamespace

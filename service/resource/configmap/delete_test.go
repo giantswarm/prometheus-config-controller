@@ -18,6 +18,7 @@ func Test_Resource_ConfigMap_GetDeleteState(t *testing.T) {
 	resourceConfig.K8sClient = fakeK8sClient
 	resourceConfig.Logger = microloggertest.New()
 
+	resourceConfig.CertificateDirectory = "/certs"
 	resourceConfig.ConfigMapKey = "prometheus.yml"
 	resourceConfig.ConfigMapName = "prometheus"
 	resourceConfig.ConfigMapNamespace = "monitoring"
@@ -46,6 +47,7 @@ func Test_Resource_ConfigMap_ProcessDeleteState(t *testing.T) {
 	resourceConfig.K8sClient = fakeK8sClient
 	resourceConfig.Logger = microloggertest.New()
 
+	resourceConfig.CertificateDirectory = "/certs"
 	resourceConfig.ConfigMapKey = "prometheus.yml"
 	resourceConfig.ConfigMapName = "prometheus"
 	resourceConfig.ConfigMapNamespace = "monitoring"
