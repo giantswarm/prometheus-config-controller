@@ -45,13 +45,17 @@ func Test_Prometheus_GetTarget(t *testing.T) {
 // Test_Prometheus_GetScrapeConfigs tests the GetScrapeConfigs function.
 func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 	tests := []struct {
-		services              []v1.Service
+		services             []v1.Service
+		certificateDirectory string
+
 		expectedScrapeConfigs []config.ScrapeConfig
 	}{
 		// Test that when there are no services available,
 		// no scrape configs are returned.
 		{
-			services:              nil,
+			services:             nil,
+			certificateDirectory: "/certs",
+
 			expectedScrapeConfigs: []config.ScrapeConfig{},
 		},
 
@@ -65,6 +69,8 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 					},
 				},
 			},
+			certificateDirectory: "/certs",
+
 			expectedScrapeConfigs: []config.ScrapeConfig{},
 		},
 
@@ -83,6 +89,8 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 					},
 				},
 			},
+			certificateDirectory: "/certs",
+
 			expectedScrapeConfigs: []config.ScrapeConfig{},
 		},
 
@@ -101,15 +109,17 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 					},
 				},
 			},
+			certificateDirectory: "/certs",
+
 			expectedScrapeConfigs: []config.ScrapeConfig{
 				{
 					JobName: "xa5ly",
 					Scheme:  "https",
 					HTTPClientConfig: config.HTTPClientConfig{
 						TLSConfig: config.TLSConfig{
-							CAFile:             "/certs/xa5ly/ca.pem",
-							CertFile:           "/certs/xa5ly/crt.pem",
-							KeyFile:            "/certs/xa5ly/key.pem",
+							CAFile:             "/certs/xa5ly-ca.pem",
+							CertFile:           "/certs/xa5ly-crt.pem",
+							KeyFile:            "/certs/xa5ly-key.pem",
 							InsecureSkipVerify: false,
 						},
 					},
@@ -151,15 +161,17 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 					},
 				},
 			},
+			certificateDirectory: "/certs",
+
 			expectedScrapeConfigs: []config.ScrapeConfig{
 				{
 					JobName: "xa5ly",
 					Scheme:  "https",
 					HTTPClientConfig: config.HTTPClientConfig{
 						TLSConfig: config.TLSConfig{
-							CAFile:             "/certs/xa5ly/ca.pem",
-							CertFile:           "/certs/xa5ly/crt.pem",
-							KeyFile:            "/certs/xa5ly/key.pem",
+							CAFile:             "/certs/xa5ly-ca.pem",
+							CertFile:           "/certs/xa5ly-crt.pem",
+							KeyFile:            "/certs/xa5ly-key.pem",
 							InsecureSkipVerify: false,
 						},
 					},
@@ -179,7 +191,7 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 	}
 
 	for index, test := range tests {
-		scrapeConfigs, err := GetScrapeConfigs(test.services)
+		scrapeConfigs, err := GetScrapeConfigs(test.services, test.certificateDirectory)
 		if err != nil {
 			t.Fatalf("%d: error returned creating scrape configs: %s\n", index, err)
 		}

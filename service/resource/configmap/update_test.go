@@ -181,6 +181,7 @@ func Test_Resource_ConfigMap_GetUpdateState(t *testing.T) {
 		resourceConfig.K8sClient = fakeK8sClient
 		resourceConfig.Logger = microloggertest.New()
 
+		resourceConfig.CertificateDirectory = "/certs"
 		resourceConfig.ConfigMapKey = configMapKey
 		resourceConfig.ConfigMapName = configMapName
 		resourceConfig.ConfigMapNamespace = configMapNamespace
@@ -369,6 +370,7 @@ func Test_Resource_ConfigMap_ProcessUpdateState(t *testing.T) {
 		resourceConfig.K8sClient = fakeK8sClient
 		resourceConfig.Logger = microloggertest.New()
 
+		resourceConfig.CertificateDirectory = "/certs"
 		resourceConfig.ConfigMapKey = configMapKey
 		resourceConfig.ConfigMapName = configMapName
 		resourceConfig.ConfigMapNamespace = configMapNamespace
