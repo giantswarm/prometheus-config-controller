@@ -10,21 +10,33 @@ import (
 // Test_Key_CAPath tests the CAPath function.
 func Test_Key_CAPath(t *testing.T) {
 	tests := []struct {
-		groupName    string
+		certificateDirectory string
+		groupName            string
+
 		expectedPath string
 	}{
 		{
-			groupName:    "xa5ly",
-			expectedPath: "/certs/xa5ly/ca.pem",
+			certificateDirectory: "/certs",
+			groupName:            "xa5ly",
+
+			expectedPath: "/certs/xa5ly-ca.pem",
 		},
 		{
-			groupName:    "fah0a",
-			expectedPath: "/certs/fah0a/ca.pem",
+			certificateDirectory: "/certs",
+			groupName:            "fah0a",
+
+			expectedPath: "/certs/fah0a-ca.pem",
+		},
+		{
+			certificateDirectory: "/certificates",
+			groupName:            "fah0a",
+
+			expectedPath: "/certificates/fah0a-ca.pem",
 		},
 	}
 
 	for index, test := range tests {
-		path := CAPath(test.groupName)
+		path := CAPath(test.certificateDirectory, test.groupName)
 
 		if !reflect.DeepEqual(test.expectedPath, path) {
 			t.Fatalf(
@@ -40,21 +52,33 @@ func Test_Key_CAPath(t *testing.T) {
 // Test_Key_CrtPath tests the CrtPath function.
 func Test_Key_CrtPath(t *testing.T) {
 	tests := []struct {
-		groupName    string
+		certificateDirectory string
+		groupName            string
+
 		expectedPath string
 	}{
 		{
-			groupName:    "xa5ly",
-			expectedPath: "/certs/xa5ly/crt.pem",
+			certificateDirectory: "/certs",
+			groupName:            "xa5ly",
+
+			expectedPath: "/certs/xa5ly-crt.pem",
 		},
 		{
-			groupName:    "fah0a",
-			expectedPath: "/certs/fah0a/crt.pem",
+			certificateDirectory: "/certs",
+			groupName:            "fah0a",
+
+			expectedPath: "/certs/fah0a-crt.pem",
+		},
+		{
+			certificateDirectory: "/certificates",
+			groupName:            "fah0a",
+
+			expectedPath: "/certificates/fah0a-crt.pem",
 		},
 	}
 
 	for index, test := range tests {
-		path := CrtPath(test.groupName)
+		path := CrtPath(test.certificateDirectory, test.groupName)
 
 		if !reflect.DeepEqual(test.expectedPath, path) {
 			t.Fatalf(
@@ -70,21 +94,33 @@ func Test_Key_CrtPath(t *testing.T) {
 // Test_Key_KeyPath tests the KeyPath function.
 func Test_Key_KeyPath(t *testing.T) {
 	tests := []struct {
-		groupName    string
+		certificateDirectory string
+		groupName            string
+
 		expectedPath string
 	}{
 		{
-			groupName:    "xa5ly",
-			expectedPath: "/certs/xa5ly/key.pem",
+			certificateDirectory: "/certs",
+			groupName:            "xa5ly",
+
+			expectedPath: "/certs/xa5ly-key.pem",
 		},
 		{
-			groupName:    "fah0a",
-			expectedPath: "/certs/fah0a/key.pem",
+			certificateDirectory: "/certs",
+			groupName:            "fah0a",
+
+			expectedPath: "/certs/fah0a-key.pem",
+		},
+		{
+			certificateDirectory: "/certificates",
+			groupName:            "fah0a",
+
+			expectedPath: "/certificates/fah0a-key.pem",
 		},
 	}
 
 	for index, test := range tests {
-		path := KeyPath(test.groupName)
+		path := KeyPath(test.certificateDirectory, test.groupName)
 
 		if !reflect.DeepEqual(test.expectedPath, path) {
 			t.Fatalf(

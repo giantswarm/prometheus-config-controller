@@ -42,7 +42,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	}
 
 	r.logger.Log("debug", fmt.Sprintf("computing desired state of configmap"))
-	scrapeConfigs, err := prometheus.GetScrapeConfigs(services.Items)
+	scrapeConfigs, err := prometheus.GetScrapeConfigs(services.Items, r.certificateDirectory)
 	if err != nil {
 		return nil, microerror.Maskf(err, "an error occurred creating scrape configs")
 	}
