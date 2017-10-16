@@ -8,6 +8,7 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/spf13/afero"
+	"k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/pkg/api/v1"
 
 	"github.com/giantswarm/microerror"
@@ -90,10 +91,12 @@ func Test_Resource_Certificate_GetCurrentState(t *testing.T) {
 
 	for index, test := range tests {
 		fs := afero.NewMemMapFs()
+		fakeK8sClient := fake.NewSimpleClientset()
 
 		resourceConfig := DefaultConfig()
 
 		resourceConfig.Fs = fs
+		resourceConfig.K8sClient = fakeK8sClient
 		resourceConfig.Logger = microloggertest.New()
 
 		resourceConfig.CertificateDirectory = test.certificateDirectory

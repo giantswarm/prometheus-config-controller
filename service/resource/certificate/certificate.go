@@ -5,6 +5,7 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/framework"
 	"github.com/spf13/afero"
+	"k8s.io/client-go/kubernetes"
 )
 
 const (
@@ -12,24 +13,27 @@ const (
 )
 
 type Config struct {
-	Fs     afero.Fs
-	Logger micrologger.Logger
+	Fs        afero.Fs
+	K8sClient kubernetes.Interface
+	Logger    micrologger.Logger
 
 	CertificateDirectory string
 }
 
 func DefaultConfig() Config {
 	return Config{
-		Fs:     nil,
-		Logger: nil,
+		Fs:        nil,
+		K8sClient: nil,
+		Logger:    nil,
 
 		CertificateDirectory: "",
 	}
 }
 
 type Resource struct {
-	fs     afero.Fs
-	logger micrologger.Logger
+	fs        afero.Fs
+	k8sClient kubernetes.Interface
+	logger    micrologger.Logger
 
 	certificateDirectory string
 }
@@ -37,6 +41,9 @@ type Resource struct {
 func New(config Config) (*Resource, error) {
 	if config.Fs == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Fs must not be empty")
+	}
+	if config.K8sClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.K8sClient must not be empty")
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
@@ -47,8 +54,9 @@ func New(config Config) (*Resource, error) {
 	}
 
 	resource := &Resource{
-		fs:     config.Fs,
-		logger: config.Logger,
+		fs:        config.Fs,
+		k8sClient: config.K8sClient,
+		logger:    config.Logger,
 
 		certificateDirectory: config.CertificateDirectory,
 	}
