@@ -11,16 +11,16 @@ import (
 	"github.com/giantswarm/microendpoint/service/version"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/client/k8s"
+	"github.com/giantswarm/operatorkit/client/k8sclient"
 	"github.com/giantswarm/operatorkit/framework"
-	"github.com/giantswarm/operatorkit/framework/logresource"
-	"github.com/giantswarm/operatorkit/framework/metricsresource"
-	"github.com/giantswarm/operatorkit/framework/retryresource"
+	"github.com/giantswarm/operatorkit/framework/resource/logresource"
+	"github.com/giantswarm/operatorkit/framework/resource/metricsresource"
+	"github.com/giantswarm/operatorkit/framework/resource/retryresource"
 
 	"github.com/giantswarm/prometheus-config-controller/flag"
 	"github.com/giantswarm/prometheus-config-controller/service/controller"
 	"github.com/giantswarm/prometheus-config-controller/service/healthz"
-	configmapresource "github.com/giantswarm/prometheus-config-controller/service/resource/configmap"
+	"github.com/giantswarm/prometheus-config-controller/service/resource/configmap"
 )
 
 type Config struct {
@@ -80,7 +80,7 @@ func New(config Config) (*Service, error) {
 
 	var newK8sClient kubernetes.Interface
 	{
-		k8sConfig := k8s.DefaultConfig()
+		k8sConfig := k8sclient.DefaultConfig()
 
 		k8sConfig.Logger = config.Logger
 
@@ -90,7 +90,7 @@ func New(config Config) (*Service, error) {
 		k8sConfig.TLS.CrtFile = config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CrtFile)
 		k8sConfig.TLS.KeyFile = config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.KeyFile)
 
-		newK8sClient, err = k8s.NewClient(k8sConfig)
+		newK8sClient, err = k8sclient.New(k8sConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -98,7 +98,7 @@ func New(config Config) (*Service, error) {
 
 	var newConfigMapResource framework.Resource
 	{
-		configMapConfig := configmapresource.DefaultConfig()
+		configMapConfig := configmap.DefaultConfig()
 
 		configMapConfig.K8sClient = newK8sClient
 		configMapConfig.Logger = config.Logger
@@ -108,7 +108,7 @@ func New(config Config) (*Service, error) {
 		configMapConfig.ConfigMapName = config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Name)
 		configMapConfig.ConfigMapNamespace = config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Namespace)
 
-		newConfigMapResource, err = configmapresource.New(configMapConfig)
+		newConfigMapResource, err = configmap.New(configMapConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -138,7 +138,7 @@ func New(config Config) (*Service, error) {
 		}
 
 		metricsWrapConfig := metricsresource.DefaultWrapConfig()
-		metricsWrapConfig.Namespace = config.Name
+		metricsWrapConfig.Name = config.Name
 		resources, err = metricsresource.Wrap(resources, metricsWrapConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)

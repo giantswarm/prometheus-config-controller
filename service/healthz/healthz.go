@@ -1,11 +1,12 @@
 package healthz
 
 import (
+	"k8s.io/client-go/kubernetes"
+
+	"github.com/giantswarm/k8shealthz"
 	"github.com/giantswarm/microendpoint/service/healthz"
-	"github.com/giantswarm/microendpoint/service/healthz/k8s"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"k8s.io/client-go/kubernetes"
 )
 
 type Config struct {
@@ -36,12 +37,12 @@ func New(config Config) (*Service, error) {
 
 	var newK8sService healthz.Service
 	{
-		k8sConfig := k8s.DefaultConfig()
+		k8sConfig := k8shealthz.DefaultConfig()
 
 		k8sConfig.K8sClient = config.K8sClient
 		k8sConfig.Logger = config.Logger
 
-		newK8sService, err = k8s.New(k8sConfig)
+		newK8sService, err = k8shealthz.New(k8sConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
