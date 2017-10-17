@@ -15,7 +15,7 @@ func Test_Prometheus_FilterInvalidServices(t *testing.T) {
 		services         []v1.Service
 		expectedServices []v1.Service
 	}{
-		// Test a service without either cluster or certificate annotations is filtered.
+		// Test a service without a cluster annotation is filtered.
 		{
 			services: []v1.Service{
 				{
@@ -28,68 +28,7 @@ func Test_Prometheus_FilterInvalidServices(t *testing.T) {
 			expectedServices: []v1.Service{},
 		},
 
-		// Test a service with just a cluster annotation is filtered.
-		{
-			services: []v1.Service{
-				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "foo",
-						Namespace: "bar",
-						Annotations: map[string]string{
-							ClusterAnnotation: "xa5ly",
-						},
-					},
-				},
-			},
-			expectedServices: []v1.Service{},
-		},
-
-		// Test a service with just a certificate annotation is filtered.
-		{
-			services: []v1.Service{
-				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "foo",
-						Namespace: "bar",
-						Annotations: map[string]string{
-							CertificateAnnotation: "default/xa5ly-prometheus",
-						},
-					},
-				},
-			},
-			expectedServices: []v1.Service{},
-		},
-
-		// Test that a service with both cluster and certificate annotations
-		// is not filtered.
-		{
-			services: []v1.Service{
-				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "foo",
-						Namespace: "bar",
-						Annotations: map[string]string{
-							ClusterAnnotation:     "xa5ly",
-							CertificateAnnotation: "default/xa5ly-prometheus",
-						},
-					},
-				},
-			},
-			expectedServices: []v1.Service{
-				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "foo",
-						Namespace: "bar",
-						Annotations: map[string]string{
-							ClusterAnnotation:     "xa5ly",
-							CertificateAnnotation: "default/xa5ly-prometheus",
-						},
-					},
-				},
-			},
-		},
-
-		// Test that two services without either annotations are filtered.
+		// Test that two services without cluster annotations are filtered.
 		{
 			services: []v1.Service{
 				{
@@ -107,6 +46,32 @@ func Test_Prometheus_FilterInvalidServices(t *testing.T) {
 				},
 			},
 			expectedServices: []v1.Service{},
+		},
+
+		// Test a service with a cluster annotation is not filtered.
+		{
+			services: []v1.Service{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "foo",
+						Namespace: "bar",
+						Annotations: map[string]string{
+							ClusterAnnotation: "xa5ly",
+						},
+					},
+				},
+			},
+			expectedServices: []v1.Service{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "foo",
+						Namespace: "bar",
+						Annotations: map[string]string{
+							ClusterAnnotation: "xa5ly",
+						},
+					},
+				},
+			},
 		},
 	}
 

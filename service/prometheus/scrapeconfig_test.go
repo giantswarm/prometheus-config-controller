@@ -74,28 +74,7 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 			expectedScrapeConfigs: []config.ScrapeConfig{},
 		},
 
-		// Test that a service with the cluster annotation,
-		// but without a certificate annotation,
-		// does not create a scrape config.
-		{
-			services: []v1.Service{
-				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "foo",
-						Namespace: "bar",
-						Annotations: map[string]string{
-							ClusterAnnotation: "xa5ly",
-						},
-					},
-				},
-			},
-			certificateDirectory: "/certs",
-
-			expectedScrapeConfigs: []config.ScrapeConfig{},
-		},
-
-		// Test that a service that specifies both the cluster and certificate
-		// annotations creates a scrape config.
+		// Test that a service that specifies the cluster annotation creates a scrape config.
 		{
 			services: []v1.Service{
 				{
@@ -103,8 +82,7 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 						Name:      "apiserver",
 						Namespace: "xa5ly",
 						Annotations: map[string]string{
-							ClusterAnnotation:     "xa5ly",
-							CertificateAnnotation: "default/xa5ly-prometheus",
+							ClusterAnnotation: "xa5ly",
 						},
 					},
 				},
@@ -136,8 +114,8 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 			},
 		},
 
-		// Test that two services that specify the same cluster and certificate
-		// annotations create a scrape config together.
+		// Test that two services that specify the same cluster annotation
+		//  create a scrape config together.
 		{
 			services: []v1.Service{
 				{
@@ -145,8 +123,7 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 						Name:      "apiserver",
 						Namespace: "xa5ly",
 						Annotations: map[string]string{
-							ClusterAnnotation:     "xa5ly",
-							CertificateAnnotation: "default/xa5ly-prometheus",
+							ClusterAnnotation: "xa5ly",
 						},
 					},
 				},
@@ -155,8 +132,7 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 						Name:      "kubelet",
 						Namespace: "xa5ly",
 						Annotations: map[string]string{
-							ClusterAnnotation:     "xa5ly",
-							CertificateAnnotation: "default/xa5ly-prometheus",
+							ClusterAnnotation: "xa5ly",
 						},
 					},
 				},

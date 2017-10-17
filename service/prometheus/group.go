@@ -14,10 +14,6 @@ func FilterInvalidServices(services []v1.Service) []v1.Service {
 			continue
 		}
 
-		if _, ok := service.ObjectMeta.Annotations[CertificateAnnotation]; !ok {
-			continue
-		}
-
 		filteredServices = append(filteredServices, service)
 	}
 
