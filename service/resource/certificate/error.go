@@ -11,9 +11,9 @@ func IsInvalidConfig(err error) bool {
 	return microerror.Cause(err) == invalidConfigError
 }
 
-var missingCertificateError = microerror.New("missing certificate")
+var missingError = microerror.New("missing")
 
-// IsMissingCertificate asserts missingCertificateError.
-func IsMissingCertificate(err error) bool {
-	return microerror.Cause(err) == missingCertificateError
+// IsMissing asserts missingError.
+func IsMissing(err error) bool {
+	return microerror.Cause(err) == missingError
 }

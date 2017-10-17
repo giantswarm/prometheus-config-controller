@@ -35,7 +35,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 
 		certificate, err := r.k8sClient.CoreV1().Secrets(namespace).Get(name, metav1.GetOptions{})
 		if errors.IsNotFound(err) {
-			return nil, microerror.Maskf(missingCertificateError, "%s/%s", namespace, name)
+			return nil, microerror.Maskf(missingError, "certificate %s/%s", namespace, name)
 		} else if err != nil {
 			return nil, microerror.Maskf(err, "an error occurred fetching certificate %s/%s", namespace, name)
 		}

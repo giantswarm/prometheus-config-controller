@@ -95,7 +95,7 @@ func Test_Resource_Certificate_GetDesiredState(t *testing.T) {
 			secrets: nil,
 
 			expectedCertificateFiles: nil,
-			expectedErrorHandler:     IsMissingCertificate,
+			expectedErrorHandler:     IsMissing,
 		},
 
 		// Test that a service with a cluster and certificate annotation,
