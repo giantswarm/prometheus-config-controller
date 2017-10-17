@@ -1,5 +1,5 @@
-hash: 93d82150fa367e50fce4e772d10afa9b9084d9336990096ce97c2f86b2b438f7
-updated: 2017-10-02T15:46:09.51242458+01:00
+hash: ccafdc1e3a36b33b5d9eb125212c8bc74e51e08014c17b9957b013f79f01c1b6
+updated: 2017-10-17T11:40:13.904563+01:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -17,21 +17,23 @@ imports:
   - digest
   - reference
 - name: github.com/emicklei/go-restful
-  version: 09691a3b6378b740595c1002f40c34dd5f218a22
+  version: ff4f55a206334ef123e4f79bbf348980da81ca46
   subpackages:
   - log
-  - swagger
+- name: github.com/emicklei/go-restful-swagger12
+  version: dcef7f55730566d41eae5db10e7d6981829720f6
 - name: github.com/fsnotify/fsnotify
   version: 4da3e2cfbabc9f751898f250b49f2439785783a1
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
+- name: github.com/giantswarm/k8shealthz
+  version: 5eaeffb4476a420af88b7f95b478fc9fe2da38ac
 - name: github.com/giantswarm/microendpoint
-  version: 52df81f27120f66c3055812e991df32ee2dda2aa
+  version: 1ea4d8cd5f0167625f134c855ae42fc747191890
   subpackages:
   - endpoint/healthz
   - endpoint/version
   - service/healthz
-  - service/healthz/k8s
   - service/version
 - name: github.com/giantswarm/microerror
   version: 5ade94eb4ee35ef72eb9382228470caeddb29989
@@ -58,18 +60,18 @@ imports:
   subpackages:
   - microloggertest
 - name: github.com/giantswarm/microstorage
-  version: 15d1f4ae1c9149071d75eca931c541c8edabd24a
+  version: 99418478ec8f5c68f9b5fc5e6be7e0474948f80d
   subpackages:
   - memory
 - name: github.com/giantswarm/operatorkit
-  version: 5af8bea7556167de4d457582ba1d7ae5f3cf9dae
+  version: 57dd6cec0cc811e2bc2e2c8a56ea40f163673514
   subpackages:
-  - client/k8s
+  - client/k8sclient
   - framework
-  - framework/canceledcontext
-  - framework/logresource
-  - framework/metricsresource
-  - framework/retryresource
+  - framework/context/canceledcontext
+  - framework/resource/logresource
+  - framework/resource/metricsresource
+  - framework/resource/retryresource
 - name: github.com/go-kit/kit
   version: a9ca6725cbbea455e61c6bc8a1ed28e81eb3493b
   subpackages:
@@ -78,10 +80,14 @@ imports:
   - transport/http
 - name: github.com/go-logfmt/logfmt
   version: 390ab7935ee28ec6b286364bba9b4dd6410cb3d5
+- name: github.com/go-openapi/analysis
+  version: b44dc874b601d9e4e2f6e19140e794ba24bead3b
 - name: github.com/go-openapi/jsonpointer
   version: 46af16f9f7b149af66e5d1bd010e3574dc06de98
 - name: github.com/go-openapi/jsonreference
   version: 13c6e3589ad90f49bd3e3bbe2c2cb3d7a4142272
+- name: github.com/go-openapi/loads
+  version: 18441dfa706d924a39a030ee2c3b1d8d81917b38
 - name: github.com/go-openapi/spec
   version: 6aced65f8501fe1217321abf0749d354824ba2ff
 - name: github.com/go-openapi/swag
@@ -89,14 +95,14 @@ imports:
 - name: github.com/go-stack/stack
   version: 100eb0c0a9c5b306ca2fb4f165df21d80ada4b82
 - name: github.com/gogo/protobuf
-  version: e18d7aa8f8c624c915db340349aad4c49b10d173
+  version: c0656edd0d9eab7c66d1eb0c568f9039345796f7
   subpackages:
   - proto
   - sortkeys
 - name: github.com/golang/glog
   version: 44145f04b68cf362d9c4df2182967c2275eaefed
 - name: github.com/golang/protobuf
-  version: 8616e8ee5e20a1704615e6c8d7afcdac06087a67
+  version: 4bd1920723d7b7c925de087aa32e2187708897f7
   subpackages:
   - proto
 - name: github.com/google/gofuzz
@@ -105,8 +111,12 @@ imports:
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/gorilla/mux
   version: 0eeaf8392f5b04950925b8a69fe70f110fa7cbfc
+- name: github.com/hashicorp/golang-lru
+  version: a0d98a5f288019575c6d1f4bb1573fef2d1fcdc4
+  subpackages:
+  - simplelru
 - name: github.com/hashicorp/hcl
-  version: 68e816d1c783414e79bc65b3994d9ab6b0a722ab
+  version: 42e33e2d55a0ff1d6263f738896ea8c13571a8d0
   subpackages:
   - hcl/ast
   - hcl/parser
@@ -121,7 +131,7 @@ imports:
 - name: github.com/juju/errgo
   version: 08cceb5d0b5331634b9826762a8fd53b29b86ad8
 - name: github.com/juju/ratelimit
-  version: 77ed1c8a01217656d2080ad51981f6e99adaa177
+  version: 5b9ff866471762aa2ab2dced63c9fb6f53921342
 - name: github.com/kr/logfmt
   version: b84e30acd515aadc4b783ad4ff83aff3299bdfe0
 - name: github.com/magiconair/properties
@@ -141,7 +151,7 @@ imports:
 - name: github.com/pelletier/go-toml
   version: 2009e44b6f182e34d8ce081ac2767622937ea3d4
 - name: github.com/prometheus/client_golang
-  version: 353b8c3f3776541879f9abfd8fa8b1ae162ab394
+  version: 5cec1d0429b02e4323e042eb04dafdb079ddf568
   subpackages:
   - prometheus
   - prometheus/promhttp
@@ -150,7 +160,7 @@ imports:
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: 2f17f4a9d485bf34b4bfaccc273805040e4f86c8
+  version: 1bab55dd05dbff384524a6a1c99006d9eb5f139b
   subpackages:
   - expfmt
   - internal/bitbucket.org/ww/goautoneg
@@ -168,17 +178,17 @@ imports:
 - name: github.com/PuerkitoBio/urlesc
   version: 5bd2802263f21d8788851d5305584c82a5c75d7e
 - name: github.com/spf13/afero
-  version: ee1bd8ee15a1306d1f9201acc41ef39cd9f99a1b
+  version: e67d870304c4bca21331b02f414f970df13aa694
   subpackages:
   - mem
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: 0dacccfbaabc71b872087c1719c5380d3e185173
+  version: 7b2c5ac9fc04fc5efafb60700713d4fa609b777b
 - name: github.com/spf13/jwalterweatherman
   version: 12bd96e66386c1960ab0f74ced1362f66f552f7b
 - name: github.com/spf13/pflag
-  version: be7121dd7a937a85e1e4b1ddda6a3edce3466110
+  version: 1f33b80956cde38911d1f23d764deb8d77a649ce
 - name: github.com/spf13/viper
   version: d9cca5ef33035202efb1586825bdbb15ff9ec3ba
 - name: github.com/tylerb/graceful
@@ -188,7 +198,7 @@ imports:
   subpackages:
   - codec
 - name: golang.org/x/net
-  version: e90d6d0afc4c315a0d87a568ae68577cc15149a0
+  version: f2499483f923065a842d38eb4c7f1927e6fc6e6d
   subpackages:
   - context
   - http2
@@ -217,7 +227,7 @@ imports:
 - name: gopkg.in/yaml.v2
   version: eb3733d160e74a9c7e442f435eb3bea458e1d19f
 - name: k8s.io/apimachinery
-  version: 85ace5365f33b16fc735c866a12e3c765b9700f2
+  version: 8ab5f3d8a330c2e9baaf84e39042db8d49034ae2
   subpackages:
   - pkg/api/equality
   - pkg/api/errors
@@ -228,8 +238,10 @@ imports:
   - pkg/apimachinery/registered
   - pkg/apis/meta/v1
   - pkg/apis/meta/v1/unstructured
+  - pkg/apis/meta/v1alpha1
   - pkg/conversion
   - pkg/conversion/queryparams
+  - pkg/conversion/unstructured
   - pkg/fields
   - pkg/labels
   - pkg/openapi
@@ -243,34 +255,34 @@ imports:
   - pkg/runtime/serializer/versioning
   - pkg/selection
   - pkg/types
+  - pkg/util/cache
+  - pkg/util/clock
   - pkg/util/diff
   - pkg/util/errors
   - pkg/util/framer
-  - pkg/util/httpstream
   - pkg/util/intstr
   - pkg/util/json
-  - pkg/util/mergepatch
   - pkg/util/net
   - pkg/util/rand
   - pkg/util/runtime
   - pkg/util/sets
-  - pkg/util/strategicpatch
   - pkg/util/validation
   - pkg/util/validation/field
   - pkg/util/wait
   - pkg/util/yaml
   - pkg/version
   - pkg/watch
-  - third_party/forked/golang/json
   - third_party/forked/golang/reflect
 - name: k8s.io/client-go
-  version: 21300e3e11c918b8e6a70fb7293b310683d6c046
+  version: d92e8497f71b7b4e0494e5bd204b48d34bd6f254
   subpackages:
   - discovery
   - discovery/fake
   - kubernetes
   - kubernetes/fake
   - kubernetes/scheme
+  - kubernetes/typed/admissionregistration/v1alpha1
+  - kubernetes/typed/admissionregistration/v1alpha1/fake
   - kubernetes/typed/apps/v1beta1
   - kubernetes/typed/apps/v1beta1/fake
   - kubernetes/typed/authentication/v1
@@ -295,6 +307,8 @@ imports:
   - kubernetes/typed/core/v1/fake
   - kubernetes/typed/extensions/v1beta1
   - kubernetes/typed/extensions/v1beta1/fake
+  - kubernetes/typed/networking/v1
+  - kubernetes/typed/networking/v1/fake
   - kubernetes/typed/policy/v1beta1
   - kubernetes/typed/policy/v1beta1/fake
   - kubernetes/typed/rbac/v1alpha1
@@ -308,45 +322,38 @@ imports:
   - kubernetes/typed/storage/v1beta1
   - kubernetes/typed/storage/v1beta1/fake
   - pkg/api
-  - pkg/api/install
   - pkg/api/v1
+  - pkg/api/v1/ref
+  - pkg/apis/admissionregistration
+  - pkg/apis/admissionregistration/v1alpha1
   - pkg/apis/apps
-  - pkg/apis/apps/install
   - pkg/apis/apps/v1beta1
   - pkg/apis/authentication
-  - pkg/apis/authentication/install
   - pkg/apis/authentication/v1
   - pkg/apis/authentication/v1beta1
   - pkg/apis/authorization
-  - pkg/apis/authorization/install
   - pkg/apis/authorization/v1
   - pkg/apis/authorization/v1beta1
   - pkg/apis/autoscaling
-  - pkg/apis/autoscaling/install
   - pkg/apis/autoscaling/v1
   - pkg/apis/autoscaling/v2alpha1
   - pkg/apis/batch
-  - pkg/apis/batch/install
   - pkg/apis/batch/v1
   - pkg/apis/batch/v2alpha1
   - pkg/apis/certificates
-  - pkg/apis/certificates/install
   - pkg/apis/certificates/v1beta1
   - pkg/apis/extensions
-  - pkg/apis/extensions/install
   - pkg/apis/extensions/v1beta1
+  - pkg/apis/networking
+  - pkg/apis/networking/v1
   - pkg/apis/policy
-  - pkg/apis/policy/install
   - pkg/apis/policy/v1beta1
   - pkg/apis/rbac
-  - pkg/apis/rbac/install
   - pkg/apis/rbac/v1alpha1
   - pkg/apis/rbac/v1beta1
   - pkg/apis/settings
-  - pkg/apis/settings/install
   - pkg/apis/settings/v1alpha1
   - pkg/apis/storage
-  - pkg/apis/storage/install
   - pkg/apis/storage/v1
   - pkg/apis/storage/v1beta1
   - pkg/util
@@ -360,7 +367,6 @@ imports:
   - tools/metrics
   - transport
   - util/cert
-  - util/clock
   - util/flowcontrol
   - util/integer
 testImports: []
