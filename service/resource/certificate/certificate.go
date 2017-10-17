@@ -1,11 +1,13 @@
 package certificate
 
 import (
+	"github.com/spf13/afero"
+	"k8s.io/client-go/kubernetes"
+
+	"github.com/giantswarm/certificatetpr"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/framework"
-	"github.com/spf13/afero"
-	"k8s.io/client-go/kubernetes"
 )
 
 const (
@@ -31,9 +33,10 @@ func DefaultConfig() Config {
 }
 
 type Resource struct {
-	fs        afero.Fs
-	k8sClient kubernetes.Interface
-	logger    micrologger.Logger
+	certificatetprService *certificatetpr.Service
+	fs                    afero.Fs
+	k8sClient             kubernetes.Interface
+	logger                micrologger.Logger
 
 	certificateDirectory string
 }
@@ -53,7 +56,18 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "config.CertificateDirectory must not be empty")
 	}
 
+	certificatetprConfig := certificatetpr.DefaultServiceConfig()
+
+	certificatetprConfig.K8sClient = config.K8sClient
+	certificatetprConfig.Logger = config.Logger
+
+	certificatetprService, err := certificatetpr.NewService(certificatetprConfig)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
 	resource := &Resource{
+		certificatetprService: certificatetprService,
 		fs:        config.Fs,
 		k8sClient: config.K8sClient,
 		logger:    config.Logger,

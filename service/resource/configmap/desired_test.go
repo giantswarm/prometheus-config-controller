@@ -195,8 +195,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 						Name:      "apiserver",
 						Namespace: "xa5ly",
 						Annotations: map[string]string{
-							prometheus.ClusterAnnotation:     "xa5ly",
-							prometheus.CertificateAnnotation: "default/xa5ly-prometheus",
+							prometheus.ClusterAnnotation: "xa5ly",
 						},
 					},
 				},
