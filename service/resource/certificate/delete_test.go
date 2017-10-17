@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/spf13/afero"
+	"k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/pkg/api/v1"
 
 	"github.com/giantswarm/micrologger/microloggertest"
@@ -13,10 +14,12 @@ import (
 // Test_Resource_Certificate_GetDeleteState tests the GetDeleteState method.
 func Test_Resource_Certificate_GetDeleteState(t *testing.T) {
 	fs := afero.NewMemMapFs()
+	fakeK8sClient := fake.NewSimpleClientset()
 
 	resourceConfig := DefaultConfig()
 
 	resourceConfig.Fs = fs
+	resourceConfig.K8sClient = fakeK8sClient
 	resourceConfig.Logger = microloggertest.New()
 
 	resourceConfig.CertificateDirectory = "/certs"
@@ -39,10 +42,12 @@ func Test_Resource_Certificate_GetDeleteState(t *testing.T) {
 // Test_Resource_Certificate_ProcessDeleteState tests the ProcessDeleteState method.
 func Test_Resource_Certificate_ProcessDeleteState(t *testing.T) {
 	fs := afero.NewMemMapFs()
+	fakeK8sClient := fake.NewSimpleClientset()
 
 	resourceConfig := DefaultConfig()
 
 	resourceConfig.Fs = fs
+	resourceConfig.K8sClient = fakeK8sClient
 	resourceConfig.Logger = microloggertest.New()
 
 	resourceConfig.CertificateDirectory = "/certs"
