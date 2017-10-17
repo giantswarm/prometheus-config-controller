@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/spf13/afero"
+	"k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/pkg/api/v1"
 
 	"github.com/giantswarm/micrologger/microloggertest"
@@ -13,10 +14,12 @@ import (
 // Test_Resource_Certificate_GetCreateState tests the GetCreateState method.
 func Test_Resource_Certificate_GetCreateState(t *testing.T) {
 	fs := afero.NewMemMapFs()
+	fakeK8sClient := fake.NewSimpleClientset()
 
 	resourceConfig := DefaultConfig()
 
 	resourceConfig.Fs = fs
+	resourceConfig.K8sClient = fakeK8sClient
 	resourceConfig.Logger = microloggertest.New()
 
 	resourceConfig.CertificateDirectory = "/certs"
@@ -39,10 +42,12 @@ func Test_Resource_Certificate_GetCreateState(t *testing.T) {
 // Test_Resource_Certificate_ProcessCreateState tests the ProcessCreateState method.
 func Test_Resource_Certificate_ProcessCreateState(t *testing.T) {
 	fs := afero.NewMemMapFs()
+	fakeK8sClient := fake.NewSimpleClientset()
 
 	resourceConfig := DefaultConfig()
 
 	resourceConfig.Fs = fs
+	resourceConfig.K8sClient = fakeK8sClient
 	resourceConfig.Logger = microloggertest.New()
 
 	resourceConfig.CertificateDirectory = "/certs"
