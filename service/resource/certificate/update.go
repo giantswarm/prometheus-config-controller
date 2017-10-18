@@ -2,8 +2,10 @@ package certificate
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 
+	"github.com/spf13/afero"
 	"k8s.io/client-go/pkg/api/v1"
 
 	"github.com/giantswarm/microerror"
@@ -35,6 +37,18 @@ func (r *Resource) GetUpdateState(ctx context.Context, obj, currentState, desire
 }
 
 func (r *Resource) ProcessUpdateState(ctx context.Context, obj, updateState interface{}) error {
+	updateCertificateFiles, err := toCertificateFiles(updateState)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	for _, certificateFile := range updateCertificateFiles {
+		r.logger.Log("debug", fmt.Sprintf("writing certificate: %s", certificateFile.path))
+		if err := afero.WriteFile(r.fs, certificateFile.path, []byte(certificateFile.data), r.certificatePermission); err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
 	return nil
 }
 

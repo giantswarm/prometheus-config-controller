@@ -295,6 +295,7 @@ func Test_Resource_Certificate_GetDesiredState(t *testing.T) {
 		resourceConfig.Logger = microloggertest.New()
 
 		resourceConfig.CertificateDirectory = test.certificateDirectory
+		resourceConfig.CertificatePermission = 0644
 
 		resource, err := New(resourceConfig)
 		if err != nil {

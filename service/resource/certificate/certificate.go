@@ -1,6 +1,8 @@
 package certificate
 
 import (
+	"os"
+
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/framework"
@@ -17,7 +19,8 @@ type Config struct {
 	K8sClient kubernetes.Interface
 	Logger    micrologger.Logger
 
-	CertificateDirectory string
+	CertificateDirectory  string
+	CertificatePermission int
 }
 
 func DefaultConfig() Config {
@@ -26,7 +29,8 @@ func DefaultConfig() Config {
 		K8sClient: nil,
 		Logger:    nil,
 
-		CertificateDirectory: "",
+		CertificateDirectory:  "",
+		CertificatePermission: 0,
 	}
 }
 
@@ -35,7 +39,8 @@ type Resource struct {
 	k8sClient kubernetes.Interface
 	logger    micrologger.Logger
 
-	certificateDirectory string
+	certificateDirectory  string
+	certificatePermission os.FileMode
 }
 
 func New(config Config) (*Resource, error) {
@@ -52,13 +57,17 @@ func New(config Config) (*Resource, error) {
 	if config.CertificateDirectory == "" {
 		return nil, microerror.Maskf(invalidConfigError, "config.CertificateDirectory must not be empty")
 	}
+	if config.CertificatePermission == 0 {
+		return nil, microerror.Maskf(invalidConfigError, "config.CertificatePermission must not be zero")
+	}
 
 	resource := &Resource{
 		fs:        config.Fs,
 		k8sClient: config.K8sClient,
 		logger:    config.Logger,
 
-		certificateDirectory: config.CertificateDirectory,
+		certificateDirectory:  config.CertificateDirectory,
+		certificatePermission: os.FileMode(config.CertificatePermission),
 	}
 
 	return resource, nil

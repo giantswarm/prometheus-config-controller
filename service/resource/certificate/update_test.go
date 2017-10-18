@@ -132,6 +132,7 @@ func Test_Resource_Certificate_GetUpdateState(t *testing.T) {
 		resourceConfig.Logger = microloggertest.New()
 
 		resourceConfig.CertificateDirectory = "/certs"
+		resourceConfig.CertificatePermission = 0644
 
 		resource, err := New(resourceConfig)
 		if err != nil {
@@ -183,4 +184,121 @@ func Test_Resource_Certificate_GetUpdateState(t *testing.T) {
 
 // Test_Resource_Certificate_ProcessUpdateState tests the ProcessUpdateState method.
 func Test_Resource_Certificate_ProcessUpdateState(t *testing.T) {
+	tests := []struct {
+		updateState []certificateFile
+
+		expectedCertificateFiles []certificateFile
+		expectedErrorHandler     func(error) bool
+	}{
+		// Test that when the updateState is nil, no certificates are written,
+		// and no error is returned.
+		{
+			updateState: nil,
+
+			expectedCertificateFiles: []certificateFile{},
+			expectedErrorHandler:     nil,
+		},
+
+		// Test that when the updateState is empty, no certificates are written,
+		// and no error is returned.
+		{
+			updateState: []certificateFile{},
+
+			expectedCertificateFiles: []certificateFile{},
+			expectedErrorHandler:     nil,
+		},
+
+		// Test that when the updateState contains one certificate,
+		// one certificate is written, and no error is returned.
+		{
+			updateState: []certificateFile{
+				{
+					path: "/certs/foo",
+					data: "foo",
+				},
+			},
+
+			expectedCertificateFiles: []certificateFile{
+				{
+					path: "/certs/foo",
+					data: "foo",
+				},
+			},
+			expectedErrorHandler: nil,
+		},
+
+		// Test that when the updateState contains two certificates,
+		// two certificates are written, and no error is returned.
+		{
+			updateState: []certificateFile{
+				{
+					path: "/certs/foo",
+					data: "foo",
+				},
+				{
+					path: "/certs/bar",
+					data: "bar",
+				},
+			},
+
+			expectedCertificateFiles: []certificateFile{
+				{
+					path: "/certs/foo",
+					data: "foo",
+				},
+				{
+					path: "/certs/bar",
+					data: "bar",
+				},
+			},
+			expectedErrorHandler: nil,
+		},
+	}
+
+	for index, test := range tests {
+		fs := afero.NewMemMapFs()
+		fakeK8sClient := fake.NewSimpleClientset()
+
+		resourceConfig := DefaultConfig()
+
+		resourceConfig.Fs = fs
+		resourceConfig.K8sClient = fakeK8sClient
+		resourceConfig.Logger = microloggertest.New()
+
+		resourceConfig.CertificateDirectory = "/certs"
+		resourceConfig.CertificatePermission = 0644
+
+		resource, err := New(resourceConfig)
+		if err != nil {
+			t.Fatalf("%d: error returned creating resource: %s\n", index, err)
+		}
+
+		updateErr := resource.ProcessUpdateState(context.TODO(), v1.Service{}, test.updateState)
+
+		if updateErr != nil && test.expectedErrorHandler == nil {
+			t.Fatalf("%d: unexpected error returned processing update state: %s\n", index, updateErr)
+		}
+		if updateErr != nil && !test.expectedErrorHandler(updateErr) {
+			t.Fatalf("%d: incorrect error returned processing update state: %s\n", index, updateErr)
+		}
+		if updateErr == nil && test.expectedErrorHandler != nil {
+			t.Fatalf("%d: expected error not returned processing update state\n", index)
+		}
+
+		for _, expectedCertificateFile := range test.expectedCertificateFiles {
+			data, err := afero.ReadFile(fs, expectedCertificateFile.path)
+			if err != nil {
+				t.Fatalf("%d: could not read expected certificate file: %s\n", index, err)
+			}
+
+			if string(data) != expectedCertificateFile.data {
+				t.Fatalf(
+					"%d: expected certificate does not match written certificate.\nexpected: %s\nreturned: %s\n",
+					index,
+					expectedCertificateFile.data,
+					string(data),
+				)
+			}
+		}
+	}
 }

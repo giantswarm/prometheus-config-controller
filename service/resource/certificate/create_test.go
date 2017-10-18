@@ -23,6 +23,7 @@ func Test_Resource_Certificate_GetCreateState(t *testing.T) {
 	resourceConfig.Logger = microloggertest.New()
 
 	resourceConfig.CertificateDirectory = "/certs"
+	resourceConfig.CertificatePermission = 0644
 
 	resource, err := New(resourceConfig)
 	if err != nil {
@@ -51,6 +52,7 @@ func Test_Resource_Certificate_ProcessCreateState(t *testing.T) {
 	resourceConfig.Logger = microloggertest.New()
 
 	resourceConfig.CertificateDirectory = "/certs"
+	resourceConfig.CertificatePermission = 0644
 
 	resource, err := New(resourceConfig)
 	if err != nil {
