@@ -5,18 +5,18 @@ import (
 	"path"
 )
 
-func certPath(certificateDirectory, groupName, suffix string) string {
-	return path.Join(certificateDirectory, fmt.Sprintf("%s-%s.pem", groupName, suffix))
+func certPath(certificateDirectory, clusterID, suffix string) string {
+	return path.Join(certificateDirectory, fmt.Sprintf("%s-%s.pem", clusterID, suffix))
 }
 
-func CAPath(certificateDirectory, groupName string) string {
-	return certPath(certificateDirectory, groupName, "ca")
+func CAPath(certificateDirectory, clusterID string) string {
+	return certPath(certificateDirectory, clusterID, "ca")
 }
 
-func CrtPath(certificateDirectory, groupName string) string {
-	return certPath(certificateDirectory, groupName, "crt")
+func CrtPath(certificateDirectory, clusterID string) string {
+	return certPath(certificateDirectory, clusterID, "crt")
 }
 
-func KeyPath(certificateDirectory, groupName string) string {
-	return certPath(certificateDirectory, groupName, "key")
+func KeyPath(certificateDirectory, clusterID string) string {
+	return certPath(certificateDirectory, clusterID, "key")
 }

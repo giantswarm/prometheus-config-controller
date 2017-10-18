@@ -22,7 +22,9 @@ func Test_Resource_Certificate_GetDeleteState(t *testing.T) {
 	resourceConfig.K8sClient = fakeK8sClient
 	resourceConfig.Logger = microloggertest.New()
 
+	resourceConfig.CertificateComponentName = "prometheus"
 	resourceConfig.CertificateDirectory = "/certs"
+	resourceConfig.CertificateNamespace = "default"
 
 	resource, err := New(resourceConfig)
 	if err != nil {
@@ -50,7 +52,9 @@ func Test_Resource_Certificate_ProcessDeleteState(t *testing.T) {
 	resourceConfig.K8sClient = fakeK8sClient
 	resourceConfig.Logger = microloggertest.New()
 
+	resourceConfig.CertificateComponentName = "prometheus"
 	resourceConfig.CertificateDirectory = "/certs"
+	resourceConfig.CertificateNamespace = "default"
 
 	resource, err := New(resourceConfig)
 	if err != nil {
