@@ -71,8 +71,9 @@ func mainWithError() error {
 			serviceConfig.Name = name
 			serviceConfig.Source = source
 
-			serviceConfig.ResourceRetries = v.GetInt(f.Service.Resource.Retries)
 			serviceConfig.ControllerBackOffDuration = v.GetDuration(f.Service.Controller.BackOffDuration)
+			serviceConfig.FrameworkBackOffDuration = v.GetDuration(f.Service.Controller.FrameworkBackOffDuration)
+			serviceConfig.ResourceRetries = v.GetInt(f.Service.Resource.Retries)
 
 			newService, err = service.New(serviceConfig)
 			panicOnErr(err)
@@ -155,6 +156,7 @@ func mainWithError() error {
 	daemonCommand.PersistentFlags().String(f.Service.Resource.ConfigMap.Namespace, "monitoring", "Namespace of prometheus configmap to control.")
 
 	daemonCommand.PersistentFlags().Duration(f.Service.Controller.BackOffDuration, time.Minute*5, "Maximum backoff duration for controller")
+	daemonCommand.PersistentFlags().Duration(f.Service.Controller.FrameworkBackOffDuration, time.Minute*5, "Maximum backoff duration for controller framework")
 	daemonCommand.PersistentFlags().Duration(f.Service.Controller.ResyncPeriod, time.Minute*1, "Controller resync period")
 
 	newCommand.CobraCommand().Execute()

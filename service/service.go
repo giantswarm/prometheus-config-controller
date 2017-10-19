@@ -36,8 +36,9 @@ type Config struct {
 	Name        string
 	Source      string
 
-	ResourceRetries           int
 	ControllerBackOffDuration time.Duration
+	FrameworkBackOffDuration  time.Duration
+	ResourceRetries           int
 }
 
 func DefaultConfig() Config {
@@ -51,8 +52,9 @@ func DefaultConfig() Config {
 		Name:        "",
 		Source:      "",
 
-		ResourceRetries:           0,
 		ControllerBackOffDuration: time.Duration(0),
+		FrameworkBackOffDuration:  time.Duration(0),
+		ResourceRetries:           0,
 	}
 }
 
@@ -72,11 +74,14 @@ func New(config Config) (*Service, error) {
 		return nil, microerror.Maskf(invalidConfigError, "config.Viper must not be empty")
 	}
 
-	if config.ResourceRetries == 0 {
-		return nil, microerror.Maskf(invalidConfigError, "config.ResourceRetries must not be zero")
-	}
 	if config.ControllerBackOffDuration == 0 {
 		return nil, microerror.Maskf(invalidConfigError, "config.ControllerBackOffDuration must not be zero")
+	}
+	if config.FrameworkBackOffDuration == 0 {
+		return nil, microerror.Maskf(invalidConfigError, "config.FrameworkBackOffDuration must not be zero")
+	}
+	if config.ResourceRetries == 0 {
+		return nil, microerror.Maskf(invalidConfigError, "config.ResourceRetries must not be zero")
 	}
 
 	var err error
@@ -173,17 +178,14 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var newBackOff *backoff.ExponentialBackOff
-	{
-		newBackOff = backoff.NewExponentialBackOff()
-		newBackOff.MaxElapsedTime = config.ControllerBackOffDuration
-	}
-
 	var newOperatorFramework *framework.Framework
 	{
+		backOff := backoff.NewExponentialBackOff()
+		backOff.MaxElapsedTime = config.FrameworkBackOffDuration
+
 		frameworkConfig := framework.DefaultConfig()
 
-		frameworkConfig.BackOff = newBackOff
+		frameworkConfig.BackOff = backOff
 		frameworkConfig.Logger = config.Logger
 		frameworkConfig.Resources = resources
 
@@ -208,9 +210,12 @@ func New(config Config) (*Service, error) {
 
 	var newController *controller.Controller
 	{
+		backOff := backoff.NewExponentialBackOff()
+		backOff.MaxElapsedTime = config.ControllerBackOffDuration
+
 		controllerConfig := controller.DefaultConfig()
 
-		controllerConfig.BackOff = newBackOff
+		controllerConfig.BackOff = backOff
 		controllerConfig.K8sClient = newK8sClient
 		controllerConfig.Logger = config.Logger
 		controllerConfig.OperatorFramework = newOperatorFramework
