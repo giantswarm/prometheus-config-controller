@@ -19,8 +19,10 @@ type Config struct {
 	K8sClient kubernetes.Interface
 	Logger    micrologger.Logger
 
-	CertificateDirectory  string
-	CertificatePermission int
+	CertificateComponentName string
+	CertificateDirectory     string
+	CertificateNamespace     string
+	CertificatePermission    os.FileMode
 }
 
 func DefaultConfig() Config {
@@ -29,8 +31,10 @@ func DefaultConfig() Config {
 		K8sClient: nil,
 		Logger:    nil,
 
-		CertificateDirectory:  "",
-		CertificatePermission: 0,
+		CertificateComponentName: "",
+		CertificateDirectory:     "",
+		CertificateNamespace:     "",
+		CertificatePermission:    0,
 	}
 }
 
@@ -39,8 +43,10 @@ type Resource struct {
 	k8sClient kubernetes.Interface
 	logger    micrologger.Logger
 
-	certificateDirectory  string
-	certificatePermission os.FileMode
+	certificateComponentName string
+	certificateDirectory     string
+	certificateNamespace     string
+	certificatePermission    os.FileMode
 }
 
 func New(config Config) (*Resource, error) {
@@ -54,8 +60,14 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
 	}
 
+	if config.CertificateComponentName == "" {
+		return nil, microerror.Maskf(invalidConfigError, "config.CertificateComponentName must not be empty")
+	}
 	if config.CertificateDirectory == "" {
 		return nil, microerror.Maskf(invalidConfigError, "config.CertificateDirectory must not be empty")
+	}
+	if config.CertificateNamespace == "" {
+		return nil, microerror.Maskf(invalidConfigError, "config.CertificateNamespace must not be empty")
 	}
 	if config.CertificatePermission == 0 {
 		return nil, microerror.Maskf(invalidConfigError, "config.CertificatePermission must not be zero")
@@ -66,8 +78,10 @@ func New(config Config) (*Resource, error) {
 		k8sClient: config.K8sClient,
 		logger:    config.Logger,
 
-		certificateDirectory:  config.CertificateDirectory,
-		certificatePermission: os.FileMode(config.CertificatePermission),
+		certificateComponentName: config.CertificateComponentName,
+		certificateDirectory:     config.CertificateDirectory,
+		certificateNamespace:     config.CertificateNamespace,
+		certificatePermission:    config.CertificatePermission,
 	}
 
 	return resource, nil

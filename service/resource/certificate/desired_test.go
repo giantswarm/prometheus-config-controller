@@ -56,7 +56,8 @@ func Test_Resource_Certificate_GetDesiredState(t *testing.T) {
 			expectedErrorHandler:     nil,
 		},
 
-		// Test that a service with just a cluster annotation does not create a certificate file.
+		// Test that a service with a cluster annotation,
+		// but the certificate is missing, produces an error.
 		{
 			certificateDirectory: defaultCertificateDirectory,
 			services: []*v1.Service{
@@ -72,33 +73,11 @@ func Test_Resource_Certificate_GetDesiredState(t *testing.T) {
 			},
 			secrets: nil,
 
-			expectedCertificateFiles: []certificateFile{},
-			expectedErrorHandler:     nil,
-		},
-
-		// Test that a service with a cluster and certificate annotation,
-		// but the certificate is missing, produces an error.
-		{
-			certificateDirectory: defaultCertificateDirectory,
-			services: []*v1.Service{
-				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "apiserver",
-						Namespace: "xa5ly",
-						Annotations: map[string]string{
-							prometheus.ClusterAnnotation:     "xa5ly",
-							prometheus.CertificateAnnotation: "default/xa5ly-prometheus",
-						},
-					},
-				},
-			},
-			secrets: nil,
-
 			expectedCertificateFiles: nil,
 			expectedErrorHandler:     IsMissing,
 		},
 
-		// Test that a service with a cluster and certificate annotation,
+		// Test that a service with a cluster annotation,
 		// and the certificate (containing just a ca) being present, returns the certificate.
 		{
 			certificateDirectory: defaultCertificateDirectory,
@@ -108,8 +87,7 @@ func Test_Resource_Certificate_GetDesiredState(t *testing.T) {
 						Name:      "apiserver",
 						Namespace: "xa5ly",
 						Annotations: map[string]string{
-							prometheus.ClusterAnnotation:     "xa5ly",
-							prometheus.CertificateAnnotation: "default/xa5ly-prometheus",
+							prometheus.ClusterAnnotation: "xa5ly",
 						},
 					},
 				},
@@ -119,6 +97,10 @@ func Test_Resource_Certificate_GetDesiredState(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "xa5ly-prometheus",
 						Namespace: "default",
+						Labels: map[string]string{
+							"clusterComponent": "prometheus",
+							"clusterID":        "xa5ly",
+						},
 					},
 					Data: map[string][]byte{
 						"ca": []byte("foo"),
@@ -138,7 +120,7 @@ func Test_Resource_Certificate_GetDesiredState(t *testing.T) {
 			expectedErrorHandler: nil,
 		},
 
-		// Test that a service with a cluster and certificate annotation,
+		// Test that a service with a cluster annotation,
 		// and a certificate with ca, crt, and key fields, returns three certificates.
 		{
 			certificateDirectory: defaultCertificateDirectory,
@@ -148,8 +130,7 @@ func Test_Resource_Certificate_GetDesiredState(t *testing.T) {
 						Name:      "apiserver",
 						Namespace: "xa5ly",
 						Annotations: map[string]string{
-							prometheus.ClusterAnnotation:     "xa5ly",
-							prometheus.CertificateAnnotation: "default/xa5ly-prometheus",
+							prometheus.ClusterAnnotation: "xa5ly",
 						},
 					},
 				},
@@ -159,6 +140,10 @@ func Test_Resource_Certificate_GetDesiredState(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "xa5ly-prometheus",
 						Namespace: "default",
+						Labels: map[string]string{
+							"clusterComponent": "prometheus",
+							"clusterID":        "xa5ly",
+						},
 					},
 					Data: map[string][]byte{
 						"ca":  []byte("foo"),
@@ -185,7 +170,7 @@ func Test_Resource_Certificate_GetDesiredState(t *testing.T) {
 			expectedErrorHandler: nil,
 		},
 
-		// Test that two services, both with cluster and certificate annotations,
+		// Test that two services, both with cluster annotations,
 		// and certificates that have only ca field, return two certificates.
 		{
 			certificateDirectory: defaultCertificateDirectory,
@@ -195,8 +180,7 @@ func Test_Resource_Certificate_GetDesiredState(t *testing.T) {
 						Name:      "apiserver",
 						Namespace: "xa5ly",
 						Annotations: map[string]string{
-							prometheus.ClusterAnnotation:     "xa5ly",
-							prometheus.CertificateAnnotation: "default/xa5ly-prometheus",
+							prometheus.ClusterAnnotation: "xa5ly",
 						},
 					},
 				},
@@ -205,8 +189,7 @@ func Test_Resource_Certificate_GetDesiredState(t *testing.T) {
 						Name:      "apiserver",
 						Namespace: "al9qy",
 						Annotations: map[string]string{
-							prometheus.ClusterAnnotation:     "al9qy",
-							prometheus.CertificateAnnotation: "default/al9qy-prometheus",
+							prometheus.ClusterAnnotation: "al9qy",
 						},
 					},
 				},
@@ -216,6 +199,10 @@ func Test_Resource_Certificate_GetDesiredState(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "xa5ly-prometheus",
 						Namespace: "default",
+						Labels: map[string]string{
+							"clusterComponent": "prometheus",
+							"clusterID":        "xa5ly",
+						},
 					},
 					Data: map[string][]byte{
 						"ca": []byte("foo"),
@@ -225,6 +212,10 @@ func Test_Resource_Certificate_GetDesiredState(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "al9qy-prometheus",
 						Namespace: "default",
+						Labels: map[string]string{
+							"clusterComponent": "prometheus",
+							"clusterID":        "al9qy",
+						},
 					},
 					Data: map[string][]byte{
 						"ca": []byte("bar"),
@@ -245,7 +236,7 @@ func Test_Resource_Certificate_GetDesiredState(t *testing.T) {
 			expectedErrorHandler: nil,
 		},
 
-		// Test that a service with a cluster and certificate annotation,
+		// Test that a service with a cluster annotation,
 		// and a certificate with a ca field, returns one certificate,
 		// with the correct certificate directory.
 		{
@@ -256,8 +247,7 @@ func Test_Resource_Certificate_GetDesiredState(t *testing.T) {
 						Name:      "apiserver",
 						Namespace: "xa5ly",
 						Annotations: map[string]string{
-							prometheus.ClusterAnnotation:     "xa5ly",
-							prometheus.CertificateAnnotation: "default/xa5ly-prometheus",
+							prometheus.ClusterAnnotation: "xa5ly",
 						},
 					},
 				},
@@ -267,6 +257,10 @@ func Test_Resource_Certificate_GetDesiredState(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "xa5ly-prometheus",
 						Namespace: "default",
+						Labels: map[string]string{
+							"clusterComponent": "prometheus",
+							"clusterID":        "xa5ly",
+						},
 					},
 					Data: map[string][]byte{
 						"ca": []byte("foo"),
@@ -294,7 +288,9 @@ func Test_Resource_Certificate_GetDesiredState(t *testing.T) {
 		resourceConfig.K8sClient = fakeK8sClient
 		resourceConfig.Logger = microloggertest.New()
 
+		resourceConfig.CertificateComponentName = "prometheus"
 		resourceConfig.CertificateDirectory = test.certificateDirectory
+		resourceConfig.CertificateNamespace = "default"
 		resourceConfig.CertificatePermission = 0644
 
 		resource, err := New(resourceConfig)

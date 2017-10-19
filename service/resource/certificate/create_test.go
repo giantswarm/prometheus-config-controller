@@ -22,7 +22,9 @@ func Test_Resource_Certificate_GetCreateState(t *testing.T) {
 	resourceConfig.K8sClient = fakeK8sClient
 	resourceConfig.Logger = microloggertest.New()
 
+	resourceConfig.CertificateComponentName = "prometheus"
 	resourceConfig.CertificateDirectory = "/certs"
+	resourceConfig.CertificateNamespace = "default"
 	resourceConfig.CertificatePermission = 0644
 
 	resource, err := New(resourceConfig)
@@ -51,7 +53,9 @@ func Test_Resource_Certificate_ProcessCreateState(t *testing.T) {
 	resourceConfig.K8sClient = fakeK8sClient
 	resourceConfig.Logger = microloggertest.New()
 
+	resourceConfig.CertificateComponentName = "prometheus"
 	resourceConfig.CertificateDirectory = "/certs"
+	resourceConfig.CertificateNamespace = "default"
 	resourceConfig.CertificatePermission = 0644
 
 	resource, err := New(resourceConfig)
