@@ -31,20 +31,20 @@ func GetScrapeConfigs(services []v1.Service, certificateDirectory string) ([]con
 	groupedServices := GroupServices(filteredServices)
 
 	scrapeConfigs := []config.ScrapeConfig{}
-	for groupName, services := range groupedServices {
+	for clusterID, services := range groupedServices {
 		targets := []model.LabelSet{}
 		for _, service := range services {
 			targets = append(targets, GetTarget(service))
 		}
 
 		scrapeConfig := config.ScrapeConfig{
-			JobName: groupName,
+			JobName: clusterID,
 			Scheme:  httpsScheme,
 			HTTPClientConfig: config.HTTPClientConfig{
 				TLSConfig: config.TLSConfig{
-					CAFile:   key.CAPath(certificateDirectory, groupName),
-					CertFile: key.CrtPath(certificateDirectory, groupName),
-					KeyFile:  key.KeyPath(certificateDirectory, groupName),
+					CAFile:   key.CAPath(certificateDirectory, clusterID),
+					CertFile: key.CrtPath(certificateDirectory, clusterID),
+					KeyFile:  key.KeyPath(certificateDirectory, clusterID),
 				},
 			},
 			ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{

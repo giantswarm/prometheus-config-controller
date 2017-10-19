@@ -17,7 +17,9 @@ type Config struct {
 	K8sClient kubernetes.Interface
 	Logger    micrologger.Logger
 
-	CertificateDirectory string
+	CertificateComponentName string
+	CertificateDirectory     string
+	CertificateNamespace     string
 }
 
 func DefaultConfig() Config {
@@ -26,7 +28,9 @@ func DefaultConfig() Config {
 		K8sClient: nil,
 		Logger:    nil,
 
-		CertificateDirectory: "",
+		CertificateComponentName: "",
+		CertificateDirectory:     "",
+		CertificateNamespace:     "",
 	}
 }
 
@@ -35,7 +39,9 @@ type Resource struct {
 	k8sClient kubernetes.Interface
 	logger    micrologger.Logger
 
-	certificateDirectory string
+	certificateComponentName string
+	certificateDirectory     string
+	certificateNamespace     string
 }
 
 func New(config Config) (*Resource, error) {
@@ -49,8 +55,14 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
 	}
 
+	if config.CertificateComponentName == "" {
+		return nil, microerror.Maskf(invalidConfigError, "config.CertificateComponentName must not be empty")
+	}
 	if config.CertificateDirectory == "" {
 		return nil, microerror.Maskf(invalidConfigError, "config.CertificateDirectory must not be empty")
+	}
+	if config.CertificateNamespace == "" {
+		return nil, microerror.Maskf(invalidConfigError, "config.CertificateNamespace must not be empty")
 	}
 
 	resource := &Resource{
@@ -58,7 +70,9 @@ func New(config Config) (*Resource, error) {
 		k8sClient: config.K8sClient,
 		logger:    config.Logger,
 
-		certificateDirectory: config.CertificateDirectory,
+		certificateComponentName: config.CertificateComponentName,
+		certificateDirectory:     config.CertificateDirectory,
+		certificateNamespace:     config.CertificateNamespace,
 	}
 
 	return resource, nil

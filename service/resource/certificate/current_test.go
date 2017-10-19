@@ -99,7 +99,9 @@ func Test_Resource_Certificate_GetCurrentState(t *testing.T) {
 		resourceConfig.K8sClient = fakeK8sClient
 		resourceConfig.Logger = microloggertest.New()
 
+		resourceConfig.CertificateComponentName = "prometheus"
 		resourceConfig.CertificateDirectory = test.certificateDirectory
+		resourceConfig.CertificateNamespace = "default"
 
 		resource, err := New(resourceConfig)
 		if err != nil {

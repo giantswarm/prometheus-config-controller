@@ -170,7 +170,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 		},
 
 		// Test that if the configmap does exist, with a valid config,
-		// and am annotated service exists,
+		// and an annotated service exists,
 		// the configmap is returned with the new service.
 		{
 			setUpPrometheusConfiguration: &config.Config{
@@ -195,8 +195,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 						Name:      "apiserver",
 						Namespace: "xa5ly",
 						Annotations: map[string]string{
-							prometheus.ClusterAnnotation:     "xa5ly",
-							prometheus.CertificateAnnotation: "default/xa5ly-prometheus",
+							prometheus.ClusterAnnotation: "xa5ly",
 						},
 					},
 				},
