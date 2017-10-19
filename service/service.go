@@ -1,10 +1,12 @@
 package service
 
 import (
+	"os"
 	"sync"
 	"time"
 
 	"github.com/cenk/backoff"
+	"github.com/spf13/afero"
 	"github.com/spf13/viper"
 	"k8s.io/client-go/kubernetes"
 
@@ -20,6 +22,7 @@ import (
 	"github.com/giantswarm/prometheus-config-controller/flag"
 	"github.com/giantswarm/prometheus-config-controller/service/controller"
 	"github.com/giantswarm/prometheus-config-controller/service/healthz"
+	"github.com/giantswarm/prometheus-config-controller/service/resource/certificate"
 	"github.com/giantswarm/prometheus-config-controller/service/resource/configmap"
 )
 
@@ -78,6 +81,11 @@ func New(config Config) (*Service, error) {
 
 	var err error
 
+	var newFs afero.Fs
+	{
+		newFs = afero.NewOsFs()
+	}
+
 	var newK8sClient kubernetes.Interface
 	{
 		k8sConfig := k8sclient.DefaultConfig()
@@ -96,6 +104,25 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
+	var newCertificateResource framework.Resource
+	{
+		certificateConfig := certificate.DefaultConfig()
+
+		certificateConfig.Fs = newFs
+		certificateConfig.K8sClient = newK8sClient
+		certificateConfig.Logger = config.Logger
+
+		certificateConfig.CertificateComponentName = config.Viper.GetString(config.Flag.Service.Resource.Certificate.ComponentName)
+		certificateConfig.CertificateDirectory = config.Viper.GetString(config.Flag.Service.Resource.Certificate.Directory)
+		certificateConfig.CertificateNamespace = config.Viper.GetString(config.Flag.Service.Resource.Certificate.Namespace)
+		certificateConfig.CertificatePermission = os.FileMode(config.Viper.GetInt(config.Flag.Service.Resource.Certificate.Permission))
+
+		newCertificateResource, err = certificate.New(certificateConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var newConfigMapResource framework.Resource
 	{
 		configMapConfig := configmap.DefaultConfig()
@@ -103,7 +130,7 @@ func New(config Config) (*Service, error) {
 		configMapConfig.K8sClient = newK8sClient
 		configMapConfig.Logger = config.Logger
 
-		configMapConfig.CertificateDirectory = config.Viper.GetString(config.Flag.Service.Resource.CertificateDirectory)
+		configMapConfig.CertificateDirectory = config.Viper.GetString(config.Flag.Service.Resource.Certificate.Directory)
 		configMapConfig.ConfigMapKey = config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Key)
 		configMapConfig.ConfigMapName = config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Name)
 		configMapConfig.ConfigMapNamespace = config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Namespace)
@@ -117,6 +144,7 @@ func New(config Config) (*Service, error) {
 	var resources []framework.Resource
 	{
 		resources = []framework.Resource{
+			newCertificateResource,
 			newConfigMapResource,
 		}
 
@@ -145,16 +173,17 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var newControllerBackOff *backoff.ExponentialBackOff
+	var newBackOff *backoff.ExponentialBackOff
 	{
-		newControllerBackOff = backoff.NewExponentialBackOff()
-		newControllerBackOff.MaxElapsedTime = config.ControllerBackOffDuration
+		newBackOff = backoff.NewExponentialBackOff()
+		newBackOff.MaxElapsedTime = config.ControllerBackOffDuration
 	}
 
 	var newOperatorFramework *framework.Framework
 	{
 		frameworkConfig := framework.DefaultConfig()
 
+		frameworkConfig.BackOff = newBackOff
 		frameworkConfig.Logger = config.Logger
 		frameworkConfig.Resources = resources
 
@@ -181,7 +210,7 @@ func New(config Config) (*Service, error) {
 	{
 		controllerConfig := controller.DefaultConfig()
 
-		controllerConfig.BackOff = newControllerBackOff
+		controllerConfig.BackOff = newBackOff
 		controllerConfig.K8sClient = newK8sClient
 		controllerConfig.Logger = config.Logger
 		controllerConfig.OperatorFramework = newOperatorFramework
