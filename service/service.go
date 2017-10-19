@@ -1,10 +1,12 @@
 package service
 
 import (
+	"os"
 	"sync"
 	"time"
 
 	"github.com/cenk/backoff"
+	"github.com/spf13/afero"
 	"github.com/spf13/viper"
 	"k8s.io/client-go/kubernetes"
 
@@ -20,6 +22,7 @@ import (
 	"github.com/giantswarm/prometheus-config-controller/flag"
 	"github.com/giantswarm/prometheus-config-controller/service/controller"
 	"github.com/giantswarm/prometheus-config-controller/service/healthz"
+	"github.com/giantswarm/prometheus-config-controller/service/resource/certificate"
 	"github.com/giantswarm/prometheus-config-controller/service/resource/configmap"
 )
 
@@ -33,8 +36,9 @@ type Config struct {
 	Name        string
 	Source      string
 
-	ResourceRetries           int
 	ControllerBackOffDuration time.Duration
+	FrameworkBackOffDuration  time.Duration
+	ResourceRetries           int
 }
 
 func DefaultConfig() Config {
@@ -48,8 +52,9 @@ func DefaultConfig() Config {
 		Name:        "",
 		Source:      "",
 
-		ResourceRetries:           0,
 		ControllerBackOffDuration: time.Duration(0),
+		FrameworkBackOffDuration:  time.Duration(0),
+		ResourceRetries:           0,
 	}
 }
 
@@ -69,14 +74,22 @@ func New(config Config) (*Service, error) {
 		return nil, microerror.Maskf(invalidConfigError, "config.Viper must not be empty")
 	}
 
-	if config.ResourceRetries == 0 {
-		return nil, microerror.Maskf(invalidConfigError, "config.ResourceRetries must not be zero")
-	}
 	if config.ControllerBackOffDuration == 0 {
 		return nil, microerror.Maskf(invalidConfigError, "config.ControllerBackOffDuration must not be zero")
 	}
+	if config.FrameworkBackOffDuration == 0 {
+		return nil, microerror.Maskf(invalidConfigError, "config.FrameworkBackOffDuration must not be zero")
+	}
+	if config.ResourceRetries == 0 {
+		return nil, microerror.Maskf(invalidConfigError, "config.ResourceRetries must not be zero")
+	}
 
 	var err error
+
+	var newFs afero.Fs
+	{
+		newFs = afero.NewOsFs()
+	}
 
 	var newK8sClient kubernetes.Interface
 	{
@@ -96,6 +109,25 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
+	var newCertificateResource framework.Resource
+	{
+		certificateConfig := certificate.DefaultConfig()
+
+		certificateConfig.Fs = newFs
+		certificateConfig.K8sClient = newK8sClient
+		certificateConfig.Logger = config.Logger
+
+		certificateConfig.CertificateComponentName = config.Viper.GetString(config.Flag.Service.Resource.Certificate.ComponentName)
+		certificateConfig.CertificateDirectory = config.Viper.GetString(config.Flag.Service.Resource.Certificate.Directory)
+		certificateConfig.CertificateNamespace = config.Viper.GetString(config.Flag.Service.Resource.Certificate.Namespace)
+		certificateConfig.CertificatePermission = os.FileMode(config.Viper.GetInt(config.Flag.Service.Resource.Certificate.Permission))
+
+		newCertificateResource, err = certificate.New(certificateConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var newConfigMapResource framework.Resource
 	{
 		configMapConfig := configmap.DefaultConfig()
@@ -103,7 +135,7 @@ func New(config Config) (*Service, error) {
 		configMapConfig.K8sClient = newK8sClient
 		configMapConfig.Logger = config.Logger
 
-		configMapConfig.CertificateDirectory = config.Viper.GetString(config.Flag.Service.Resource.CertificateDirectory)
+		configMapConfig.CertificateDirectory = config.Viper.GetString(config.Flag.Service.Resource.Certificate.Directory)
 		configMapConfig.ConfigMapKey = config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Key)
 		configMapConfig.ConfigMapName = config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Name)
 		configMapConfig.ConfigMapNamespace = config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Namespace)
@@ -117,6 +149,7 @@ func New(config Config) (*Service, error) {
 	var resources []framework.Resource
 	{
 		resources = []framework.Resource{
+			newCertificateResource,
 			newConfigMapResource,
 		}
 
@@ -145,16 +178,14 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var newControllerBackOff *backoff.ExponentialBackOff
-	{
-		newControllerBackOff = backoff.NewExponentialBackOff()
-		newControllerBackOff.MaxElapsedTime = config.ControllerBackOffDuration
-	}
-
 	var newOperatorFramework *framework.Framework
 	{
+		backOff := backoff.NewExponentialBackOff()
+		backOff.MaxElapsedTime = config.FrameworkBackOffDuration
+
 		frameworkConfig := framework.DefaultConfig()
 
+		frameworkConfig.BackOff = backOff
 		frameworkConfig.Logger = config.Logger
 		frameworkConfig.Resources = resources
 
@@ -179,9 +210,12 @@ func New(config Config) (*Service, error) {
 
 	var newController *controller.Controller
 	{
+		backOff := backoff.NewExponentialBackOff()
+		backOff.MaxElapsedTime = config.ControllerBackOffDuration
+
 		controllerConfig := controller.DefaultConfig()
 
-		controllerConfig.BackOff = newControllerBackOff
+		controllerConfig.BackOff = backOff
 		controllerConfig.K8sClient = newK8sClient
 		controllerConfig.Logger = config.Logger
 		controllerConfig.OperatorFramework = newOperatorFramework

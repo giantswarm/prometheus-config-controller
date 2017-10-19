@@ -1,6 +1,7 @@
 package controller
 
 type Controller struct {
-	BackOffDuration string
-	ResyncPeriod    string
+	ControllerBackOffDuration string
+	FrameworkBackOffDuration  string
+	ResyncPeriod              string
 }

@@ -71,8 +71,9 @@ func mainWithError() error {
 			serviceConfig.Name = name
 			serviceConfig.Source = source
 
+			serviceConfig.ControllerBackOffDuration = v.GetDuration(f.Service.Controller.ControllerBackOffDuration)
+			serviceConfig.FrameworkBackOffDuration = v.GetDuration(f.Service.Controller.FrameworkBackOffDuration)
 			serviceConfig.ResourceRetries = v.GetInt(f.Service.Resource.Retries)
-			serviceConfig.ControllerBackOffDuration = v.GetDuration(f.Service.Controller.BackOffDuration)
 
 			newService, err = service.New(serviceConfig)
 			panicOnErr(err)
@@ -143,15 +144,20 @@ func mainWithError() error {
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.TLS.CrtFile, "", "Certificate file path to use to authenticate with Kubernetes.")
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.TLS.KeyFile, "", "Key file path to use to authenticate with Kubernetes.")
 
-	daemonCommand.PersistentFlags().String(f.Service.Resource.CertificateDirectory, "/certs", "Directory in which to store certificates.")
 	daemonCommand.PersistentFlags().Int(f.Service.Resource.Retries, 3, "Number of times to retry resources.")
+
+	daemonCommand.PersistentFlags().String(f.Service.Resource.Certificate.ComponentName, "prometheus", "Component name label for certificates.")
+	daemonCommand.PersistentFlags().String(f.Service.Resource.Certificate.Directory, "/certs", "Directory in which to store certificates.")
+	daemonCommand.PersistentFlags().String(f.Service.Resource.Certificate.Namespace, "default", "Namespace for certificates.")
+	daemonCommand.PersistentFlags().Int(f.Service.Resource.Certificate.Permission, 0600, "File permission for certificates.")
 
 	daemonCommand.PersistentFlags().String(f.Service.Resource.ConfigMap.Key, "prometheus.yml", "Key in configmap under which prometheus configuration is held.")
 	daemonCommand.PersistentFlags().String(f.Service.Resource.ConfigMap.Name, "prometheus", "Name of prometheus configmap to control.")
 	daemonCommand.PersistentFlags().String(f.Service.Resource.ConfigMap.Namespace, "monitoring", "Namespace of prometheus configmap to control.")
 
-	daemonCommand.PersistentFlags().Duration(f.Service.Controller.BackOffDuration, time.Minute*5, "Maximum backoff duration for controller")
-	daemonCommand.PersistentFlags().Duration(f.Service.Controller.ResyncPeriod, time.Minute*1, "Controller resync period")
+	daemonCommand.PersistentFlags().Duration(f.Service.Controller.ControllerBackOffDuration, time.Minute*5, "Maximum backoff duration for controller.")
+	daemonCommand.PersistentFlags().Duration(f.Service.Controller.FrameworkBackOffDuration, time.Minute*5, "Maximum backoff duration for operator framework.")
+	daemonCommand.PersistentFlags().Duration(f.Service.Controller.ResyncPeriod, time.Minute*1, "Controller resync period.")
 
 	newCommand.CobraCommand().Execute()
 
