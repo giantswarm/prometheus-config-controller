@@ -105,6 +105,32 @@ func Test_Resource_Certificate_GetUpdateState(t *testing.T) {
 		},
 
 		// Test that when the current state contains a certificate,
+		// and the desired state contains the same certificate, with different data,
+		// the update state is the new certificate.
+		{
+			currentState: []certificateFile{
+				{
+					path: "/certs/foo",
+					data: "foo",
+				},
+			},
+			desiredState: []certificateFile{
+				{
+					path: "/certs/foo",
+					data: "bar",
+				},
+			},
+
+			expectedUpdateStateCertificateFiles: []certificateFile{
+				{
+					path: "/certs/foo",
+					data: "bar",
+				},
+			},
+			expectedErrorHandler: nil,
+		},
+
+		// Test that when the current state contains a certificate,
 		// and the desired state is empty,
 		// the update state is empty.
 		{
