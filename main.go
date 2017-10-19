@@ -71,7 +71,7 @@ func mainWithError() error {
 			serviceConfig.Name = name
 			serviceConfig.Source = source
 
-			serviceConfig.ControllerBackOffDuration = v.GetDuration(f.Service.Controller.BackOffDuration)
+			serviceConfig.ControllerBackOffDuration = v.GetDuration(f.Service.Controller.ControllerBackOffDuration)
 			serviceConfig.FrameworkBackOffDuration = v.GetDuration(f.Service.Controller.FrameworkBackOffDuration)
 			serviceConfig.ResourceRetries = v.GetInt(f.Service.Resource.Retries)
 
@@ -155,9 +155,9 @@ func mainWithError() error {
 	daemonCommand.PersistentFlags().String(f.Service.Resource.ConfigMap.Name, "prometheus", "Name of prometheus configmap to control.")
 	daemonCommand.PersistentFlags().String(f.Service.Resource.ConfigMap.Namespace, "monitoring", "Namespace of prometheus configmap to control.")
 
-	daemonCommand.PersistentFlags().Duration(f.Service.Controller.BackOffDuration, time.Minute*5, "Maximum backoff duration for controller")
-	daemonCommand.PersistentFlags().Duration(f.Service.Controller.FrameworkBackOffDuration, time.Minute*5, "Maximum backoff duration for controller framework")
-	daemonCommand.PersistentFlags().Duration(f.Service.Controller.ResyncPeriod, time.Minute*1, "Controller resync period")
+	daemonCommand.PersistentFlags().Duration(f.Service.Controller.ControllerBackOffDuration, time.Minute*5, "Maximum backoff duration for controller.")
+	daemonCommand.PersistentFlags().Duration(f.Service.Controller.FrameworkBackOffDuration, time.Minute*5, "Maximum backoff duration for operator framework.")
+	daemonCommand.PersistentFlags().Duration(f.Service.Controller.ResyncPeriod, time.Minute*1, "Controller resync period.")
 
 	newCommand.CobraCommand().Execute()
 
