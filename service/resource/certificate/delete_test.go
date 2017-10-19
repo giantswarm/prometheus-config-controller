@@ -25,6 +25,7 @@ func Test_Resource_Certificate_GetDeleteState(t *testing.T) {
 	resourceConfig.CertificateComponentName = "prometheus"
 	resourceConfig.CertificateDirectory = "/certs"
 	resourceConfig.CertificateNamespace = "default"
+	resourceConfig.CertificatePermission = 0644
 
 	resource, err := New(resourceConfig)
 	if err != nil {
@@ -55,6 +56,7 @@ func Test_Resource_Certificate_ProcessDeleteState(t *testing.T) {
 	resourceConfig.CertificateComponentName = "prometheus"
 	resourceConfig.CertificateDirectory = "/certs"
 	resourceConfig.CertificateNamespace = "default"
+	resourceConfig.CertificatePermission = 0644
 
 	resource, err := New(resourceConfig)
 	if err != nil {

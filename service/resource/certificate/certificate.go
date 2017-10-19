@@ -1,6 +1,8 @@
 package certificate
 
 import (
+	"os"
+
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/framework"
@@ -20,6 +22,7 @@ type Config struct {
 	CertificateComponentName string
 	CertificateDirectory     string
 	CertificateNamespace     string
+	CertificatePermission    os.FileMode
 }
 
 func DefaultConfig() Config {
@@ -31,6 +34,7 @@ func DefaultConfig() Config {
 		CertificateComponentName: "",
 		CertificateDirectory:     "",
 		CertificateNamespace:     "",
+		CertificatePermission:    0,
 	}
 }
 
@@ -42,6 +46,7 @@ type Resource struct {
 	certificateComponentName string
 	certificateDirectory     string
 	certificateNamespace     string
+	certificatePermission    os.FileMode
 }
 
 func New(config Config) (*Resource, error) {
@@ -64,6 +69,9 @@ func New(config Config) (*Resource, error) {
 	if config.CertificateNamespace == "" {
 		return nil, microerror.Maskf(invalidConfigError, "config.CertificateNamespace must not be empty")
 	}
+	if config.CertificatePermission == 0 {
+		return nil, microerror.Maskf(invalidConfigError, "config.CertificatePermission must not be zero")
+	}
 
 	resource := &Resource{
 		fs:        config.Fs,
@@ -73,6 +81,7 @@ func New(config Config) (*Resource, error) {
 		certificateComponentName: config.CertificateComponentName,
 		certificateDirectory:     config.CertificateDirectory,
 		certificateNamespace:     config.CertificateNamespace,
+		certificatePermission:    config.CertificatePermission,
 	}
 
 	return resource, nil

@@ -3,9 +3,10 @@ package configmap
 import (
 	"context"
 
-	"github.com/giantswarm/microerror"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/pkg/api/v1"
+
+	"github.com/giantswarm/microerror"
 )
 
 func (r *Resource) GetUpdateState(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, interface{}, interface{}, error) {

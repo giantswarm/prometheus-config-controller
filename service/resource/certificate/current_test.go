@@ -102,6 +102,7 @@ func Test_Resource_Certificate_GetCurrentState(t *testing.T) {
 		resourceConfig.CertificateComponentName = "prometheus"
 		resourceConfig.CertificateDirectory = test.certificateDirectory
 		resourceConfig.CertificateNamespace = "default"
+		resourceConfig.CertificatePermission = fileMode
 
 		resource, err := New(resourceConfig)
 		if err != nil {

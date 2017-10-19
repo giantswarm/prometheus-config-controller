@@ -291,6 +291,7 @@ func Test_Resource_Certificate_GetDesiredState(t *testing.T) {
 		resourceConfig.CertificateComponentName = "prometheus"
 		resourceConfig.CertificateDirectory = test.certificateDirectory
 		resourceConfig.CertificateNamespace = "default"
+		resourceConfig.CertificatePermission = 0644
 
 		resource, err := New(resourceConfig)
 		if err != nil {

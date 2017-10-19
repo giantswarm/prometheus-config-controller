@@ -17,3 +17,10 @@ var missingError = microerror.New("missing")
 func IsMissing(err error) bool {
 	return microerror.Cause(err) == missingError
 }
+
+var wrongTypeError = microerror.New("wrong type")
+
+// IsWrongTypeError asserts wrongTypeError.
+func IsWrongTypeError(err error) bool {
+	return microerror.Cause(err) == wrongTypeError
+}
