@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	ClusterAnnotation = "giantswarm.io/prometheus-config-controller/cluster"
+	ClusterAnnotation = "giantswarm.io/prometheus-cluster"
 )
 
 // GetClusterID returns the value of the cluster annotation.
