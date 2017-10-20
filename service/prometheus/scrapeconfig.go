@@ -18,8 +18,10 @@ const (
 // GetTarget takes a Kubernetes Service, and returns a LabelSet,
 // suitable for use as a target.
 func GetTarget(service v1.Service) model.LabelSet {
+	fmt.Printf("GetTarget: %s/%s\n", service.Name, service.Namespace)
+
 	targetName := fmt.Sprintf("%s.%s", service.Name, service.Namespace)
-	target := model.LabelSet{model.LabelName(targetName): ""}
+	target := model.LabelSet{model.LabelName(targetName): model.LabelValue(targetName)}
 
 	return target
 }

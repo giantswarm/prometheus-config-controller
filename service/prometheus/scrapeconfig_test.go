@@ -24,7 +24,7 @@ func Test_Prometheus_GetTarget(t *testing.T) {
 					Namespace: "bar",
 				},
 			},
-			expectedTarget: model.LabelSet{model.LabelName("foo.bar"): ""},
+			expectedTarget: model.LabelSet{model.LabelName("foo.bar"): "foo.bar"},
 		},
 	}
 
@@ -105,7 +105,7 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 						StaticConfigs: []*config.TargetGroup{
 							{
 								Targets: []model.LabelSet{
-									model.LabelSet{"apiserver.xa5ly": ""},
+									model.LabelSet{"apiserver.xa5ly": "apiserver.xa5ly"},
 								},
 							},
 						},
@@ -154,8 +154,8 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 						StaticConfigs: []*config.TargetGroup{
 							{
 								Targets: []model.LabelSet{
-									model.LabelSet{"apiserver.xa5ly": ""},
-									model.LabelSet{"kubelet.xa5ly": ""},
+									model.LabelSet{"apiserver.xa5ly": "apiserver.xa5ly"},
+									model.LabelSet{"kubelet.xa5ly": "kubelet.xa5ly"},
 								},
 							},
 						},
