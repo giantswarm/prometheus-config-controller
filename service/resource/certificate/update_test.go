@@ -193,17 +193,17 @@ func Test_Resource_Certificate_GetUpdateState(t *testing.T) {
 		}
 
 		if updateState != nil {
-			updateStateCertificateFiles, ok := updateState.(*[]certificateFile)
-			if !ok {
+			updateStateCertificateFiles, err := toCertificateFiles(updateState)
+			if err != nil {
 				t.Fatalf("%d: could not cast update state to certificate files: %s\n", index, spew.Sdump(updateState))
 			}
 
-			if !reflect.DeepEqual(test.expectedUpdateStateCertificateFiles, *updateStateCertificateFiles) {
+			if !reflect.DeepEqual(test.expectedUpdateStateCertificateFiles, updateStateCertificateFiles) {
 				t.Fatalf(
 					"%d: expected update state does not match returned update state.\nexpected: %s\nreturned: %s\n",
 					index,
 					spew.Sdump(test.expectedUpdateStateCertificateFiles),
-					spew.Sdump(*updateStateCertificateFiles),
+					spew.Sdump(updateStateCertificateFiles),
 				)
 			}
 		}
@@ -329,6 +329,65 @@ func Test_Resource_Certificate_ProcessUpdateState(t *testing.T) {
 					string(data),
 				)
 			}
+		}
+	}
+}
+
+// Test_Resource_Certificate_toCertificateFiles tests the Test_Resource_Certificate_toCertificateFiles function.
+func Test_Resource_Certificate_toCertificateFiles(t *testing.T) {
+	tests := []struct {
+		v interface{}
+
+		expectedCertificateFiles []certificateFile
+		expectedErrorHandler     func(error) bool
+	}{
+		// Test that a nil interface returns nil.
+		{
+			v: nil,
+
+			expectedCertificateFiles: nil,
+			expectedErrorHandler:     nil,
+		},
+
+		// Test that a pointer to a slice of certificate files
+		// returns an error.
+		{
+			v: &[]certificateFile{},
+
+			expectedCertificateFiles: nil,
+			expectedErrorHandler:     IsWrongTypeError,
+		},
+
+		// Test that a slice of certificate files
+		// returns a slice of certificate files.
+		{
+			v: []certificateFile{},
+
+			expectedCertificateFiles: []certificateFile{},
+			expectedErrorHandler:     nil,
+		},
+	}
+
+	for index, test := range tests {
+		returnedCertificateFiles, err := toCertificateFiles(test.v)
+
+		if err != nil && test.expectedErrorHandler == nil {
+			t.Fatalf("%d: unexpected error returned processing update state: %s\n", index, err)
+		}
+		if err != nil && !test.expectedErrorHandler(err) {
+			t.Fatalf("%d: incorrect error returned processing update state: %s\n", index, err)
+		}
+		if err == nil && test.expectedErrorHandler != nil {
+			t.Fatalf("%d: expected error not returned processing update state\n", index)
+		}
+
+		if !reflect.DeepEqual(test.expectedCertificateFiles, returnedCertificateFiles) {
+			t.Fatalf(
+				"%d: expected certificate files do not match returned certificate files.\nexpected: %s\nreturned: %s\n",
+				index,
+				spew.Sdump(test.expectedCertificateFiles),
+				spew.Sdump(returnedCertificateFiles),
+			)
 		}
 	}
 }

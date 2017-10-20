@@ -323,12 +323,17 @@ func Test_Resource_Certificate_GetDesiredState(t *testing.T) {
 		}
 
 		if test.expectedCertificateFiles != nil {
-			if !reflect.DeepEqual(test.expectedCertificateFiles, desiredState) {
+			desiredStateCertificateFiles, err := toCertificateFiles(desiredState)
+			if err != nil {
+				t.Fatalf("%d: could not cast update state to certificate files: %s\n", index, spew.Sdump(desiredState))
+			}
+
+			if !reflect.DeepEqual(test.expectedCertificateFiles, desiredStateCertificateFiles) {
 				t.Fatalf(
 					"%d: expected certificate files do not match returned certificate files.\nexpected:\n%s\nreturned:\n%s\n",
 					index,
 					spew.Sdump(test.expectedCertificateFiles),
-					spew.Sdump(desiredState),
+					spew.Sdump(desiredStateCertificateFiles),
 				)
 			}
 		}
