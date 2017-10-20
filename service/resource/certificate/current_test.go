@@ -122,14 +122,20 @@ func Test_Resource_Certificate_GetCurrentState(t *testing.T) {
 			t.Fatalf("%d: error returned getting current state: %v\n", index, err)
 		}
 
-		if !(test.expectedCertificateFiles == nil && currentState == nil) &&
-			!reflect.DeepEqual(test.expectedCertificateFiles, currentState) {
-			t.Fatalf(
-				"%d: expected configmap does not match returned current state.\nexpected: %s\nreturned: %s\n",
-				index,
-				spew.Sdump(test.expectedCertificateFiles),
-				spew.Sdump(currentState),
-			)
+		if test.expectedCertificateFiles == nil {
+			currentStateCertificateFiles, err := toCertificateFiles(currentState)
+			if err != nil {
+				t.Fatalf("%d: could not cast update state to certificate files: %s\n", index, spew.Sdump(currentState))
+			}
+
+			if !reflect.DeepEqual(test.expectedCertificateFiles, currentStateCertificateFiles) {
+				t.Fatalf(
+					"%d: expected configmap does not match returned current state.\nexpected: %s\nreturned: %s\n",
+					index,
+					spew.Sdump(test.expectedCertificateFiles),
+					spew.Sdump(currentStateCertificateFiles),
+				)
+			}
 		}
 	}
 }

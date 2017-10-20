@@ -6,7 +6,6 @@ import (
 	"reflect"
 
 	"github.com/spf13/afero"
-	"k8s.io/client-go/pkg/api/v1"
 
 	"github.com/giantswarm/microerror"
 )
@@ -28,7 +27,7 @@ func (r *Resource) GetUpdateState(ctx context.Context, obj, currentState, desire
 
 	if !reflect.DeepEqual(currentCertificateFiles, desiredCertificateFiles) {
 		r.logger.Log("debug", "current certificates do not match desired certificates, need to update")
-		return nil, nil, &desiredCertificateFiles, nil
+		return nil, nil, desiredCertificateFiles, nil
 	}
 
 	r.logger.Log("debug", "current certificates matches desired certificates, no update needed")
@@ -59,7 +58,7 @@ func toCertificateFiles(v interface{}) ([]certificateFile, error) {
 
 	certificateFiles, ok := v.([]certificateFile)
 	if !ok {
-		return nil, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", v1.ConfigMap{}, v)
+		return nil, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", []certificateFile{}, v)
 	}
 
 	return certificateFiles, nil
