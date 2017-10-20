@@ -3,6 +3,7 @@ package prometheus
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/prometheus/common/model"
@@ -92,8 +93,9 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 
 			expectedScrapeConfigs: []config.ScrapeConfig{
 				{
-					JobName: "xa5ly",
-					Scheme:  "https",
+					JobName:       "xa5ly",
+					Scheme:        "https",
+					ScrapeTimeout: model.Duration(30 * time.Second),
 					HTTPClientConfig: config.HTTPClientConfig{
 						TLSConfig: config.TLSConfig{
 							CAFile:             "/certs/xa5ly-ca.pem",
@@ -141,8 +143,9 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 
 			expectedScrapeConfigs: []config.ScrapeConfig{
 				{
-					JobName: "xa5ly",
-					Scheme:  "https",
+					JobName:       "xa5ly",
+					Scheme:        "https",
+					ScrapeTimeout: model.Duration(30 * time.Second),
 					HTTPClientConfig: config.HTTPClientConfig{
 						TLSConfig: config.TLSConfig{
 							CAFile:             "/certs/xa5ly-ca.pem",

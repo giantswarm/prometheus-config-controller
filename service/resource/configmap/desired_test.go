@@ -216,8 +216,9 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 						Scheme:         "http",
 					},
 					{
-						JobName: "xa5ly",
-						Scheme:  "https",
+						JobName:       "xa5ly",
+						ScrapeTimeout: model.Duration(30 * time.Second),
+						Scheme:        "https",
 						HTTPClientConfig: config.HTTPClientConfig{
 							TLSConfig: config.TLSConfig{
 								CAFile:             "/certs/xa5ly-ca.pem",
