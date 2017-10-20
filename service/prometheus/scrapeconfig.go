@@ -19,7 +19,7 @@ const (
 // suitable for use as a target.
 func GetTarget(service v1.Service) model.LabelSet {
 	targetName := fmt.Sprintf("%s.%s", service.Name, service.Namespace)
-	target := model.LabelSet{model.LabelName(targetName): ""}
+	target := model.LabelSet{model.AddressLabel: model.LabelValue(targetName)}
 
 	return target
 }

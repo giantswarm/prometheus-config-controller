@@ -230,7 +230,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 							StaticConfigs: []*config.TargetGroup{
 								{
 									Targets: []model.LabelSet{
-										model.LabelSet{"apiserver.xa5ly": ""},
+										model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
 									},
 								},
 							},

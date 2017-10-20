@@ -7,6 +7,7 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/config"
+	yaml "gopkg.in/yaml.v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/pkg/api/v1"
 )
@@ -24,7 +25,7 @@ func Test_Prometheus_GetTarget(t *testing.T) {
 					Namespace: "bar",
 				},
 			},
-			expectedTarget: model.LabelSet{model.LabelName("foo.bar"): ""},
+			expectedTarget: model.LabelSet{model.AddressLabel: "foo.bar"},
 		},
 	}
 
@@ -105,7 +106,7 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 						StaticConfigs: []*config.TargetGroup{
 							{
 								Targets: []model.LabelSet{
-									model.LabelSet{"apiserver.xa5ly": ""},
+									model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
 								},
 							},
 						},
@@ -154,8 +155,8 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 						StaticConfigs: []*config.TargetGroup{
 							{
 								Targets: []model.LabelSet{
-									model.LabelSet{"apiserver.xa5ly": ""},
-									model.LabelSet{"kubelet.xa5ly": ""},
+									model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
+									model.LabelSet{model.AddressLabel: "kubelet.xa5ly"},
 								},
 							},
 						},
@@ -177,6 +178,67 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 				index,
 				spew.Sdump(test.expectedScrapeConfigs),
 				spew.Sdump(scrapeConfigs),
+			)
+		}
+	}
+}
+
+// Test_Prometheus_YamlMarshal tests that Prometheus marshals yaml correctly.
+func Test_Prometheus_YamlMarshal(t *testing.T) {
+	tests := []struct {
+		scrapeConfig config.ScrapeConfig
+
+		expectedConfig string
+	}{
+		{
+			scrapeConfig: config.ScrapeConfig{
+				JobName: "xa5ly",
+				Scheme:  "https",
+				HTTPClientConfig: config.HTTPClientConfig{
+					TLSConfig: config.TLSConfig{
+						CAFile:             "/certs/xa5ly-ca.pem",
+						CertFile:           "/certs/xa5ly-crt.pem",
+						KeyFile:            "/certs/xa5ly-key.pem",
+						InsecureSkipVerify: false,
+					},
+				},
+				ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
+					StaticConfigs: []*config.TargetGroup{
+						{
+							Targets: []model.LabelSet{
+								model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
+							},
+						},
+					},
+				},
+			},
+
+			expectedConfig: `job_name: xa5ly
+scheme: https
+static_configs:
+- targets:
+  - apiserver.xa5ly
+tls_config:
+  ca_file: /certs/xa5ly-ca.pem
+  cert_file: /certs/xa5ly-crt.pem
+  key_file: /certs/xa5ly-key.pem
+  insecure_skip_verify: false
+`,
+		},
+	}
+
+	for index, test := range tests {
+		data, err := yaml.Marshal(test.scrapeConfig)
+		if err != nil {
+			t.Fatalf("%d: error occurred marshaling yaml: %s\n", index, err)
+		}
+
+		if test.expectedConfig != string(data) {
+			t.Fatalf(
+				"%d: expected scrape configs do not match returned scrape configs.\nexpected: %s\nreturned: %s\n",
+				index,
+				test.expectedConfig,
+				string(data),
 			)
 		}
 	}
