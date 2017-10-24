@@ -2,6 +2,7 @@ package prometheus
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/config"
@@ -38,8 +39,9 @@ func GetScrapeConfigs(services []v1.Service, certificateDirectory string) ([]con
 		}
 
 		scrapeConfig := config.ScrapeConfig{
-			JobName: clusterID,
-			Scheme:  httpsScheme,
+			JobName:       clusterID,
+			Scheme:        httpsScheme,
+			ScrapeTimeout: model.Duration(30 * time.Second),
 			HTTPClientConfig: config.HTTPClientConfig{
 				TLSConfig: config.TLSConfig{
 					CAFile:   key.CAPath(certificateDirectory, clusterID),
