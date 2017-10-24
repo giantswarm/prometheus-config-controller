@@ -27,5 +27,8 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	}
 
 	r.logger.Log("debug", "found configmap")
+
+	configmapSize.Set(float64(configMap.Size()))
+
 	return configMap, nil
 }
