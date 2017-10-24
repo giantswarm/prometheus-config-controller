@@ -32,5 +32,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		})
 	}
 
+	certificateCount.Set(float64(len(certificateFiles)))
+
 	return certificateFiles, nil
 }
