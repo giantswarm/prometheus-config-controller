@@ -11,6 +11,7 @@ import (
 	"k8s.io/client-go/pkg/api/v1"
 
 	"github.com/giantswarm/micrologger/microloggertest"
+	"github.com/giantswarm/prometheus-config-controller/service/prometheus/prometheustest"
 )
 
 // Test_Resource_ConfigMap_GetCurrentState tests the GetCurrentState method.
@@ -64,6 +65,7 @@ func Test_Resource_ConfigMap_GetCurrentState(t *testing.T) {
 
 		resourceConfig.K8sClient = fakeK8sClient
 		resourceConfig.Logger = microloggertest.New()
+		resourceConfig.PrometheusReloader = prometheustest.New()
 
 		resourceConfig.CertificateDirectory = "/certs"
 		resourceConfig.ConfigMapKey = "prometheus.yml"

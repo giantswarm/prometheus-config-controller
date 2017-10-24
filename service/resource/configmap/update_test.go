@@ -2,6 +2,8 @@ package configmap
 
 import (
 	"context"
+	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"testing"
 
@@ -12,6 +14,9 @@ import (
 	"k8s.io/client-go/pkg/api/v1"
 
 	"github.com/giantswarm/micrologger/microloggertest"
+
+	"github.com/giantswarm/prometheus-config-controller/service/prometheus"
+	"github.com/giantswarm/prometheus-config-controller/service/prometheus/prometheustest"
 )
 
 // Test_Resource_ConfigMap_GetUpdateState tests the GetUpdateState method.
@@ -180,6 +185,7 @@ func Test_Resource_ConfigMap_GetUpdateState(t *testing.T) {
 
 		resourceConfig.K8sClient = fakeK8sClient
 		resourceConfig.Logger = microloggertest.New()
+		resourceConfig.PrometheusReloader = prometheustest.New()
 
 		resourceConfig.CertificateDirectory = "/certs"
 		resourceConfig.ConfigMapKey = configMapKey
@@ -369,6 +375,7 @@ func Test_Resource_ConfigMap_ProcessUpdateState(t *testing.T) {
 
 		resourceConfig.K8sClient = fakeK8sClient
 		resourceConfig.Logger = microloggertest.New()
+		resourceConfig.PrometheusReloader = prometheustest.New()
 
 		resourceConfig.CertificateDirectory = "/certs"
 		resourceConfig.ConfigMapKey = configMapKey
@@ -424,5 +431,82 @@ func Test_Resource_ConfigMap_ProcessUpdateState(t *testing.T) {
 				)
 			}
 		}
+	}
+}
+
+// Test_Resource_ConfigMap_Reload tests that the configmap is reloaded correctly.
+func Test_Resource_ConfigMap_Reload(t *testing.T) {
+	configMapKey := "prometheus.yml"
+	configMapName := "prometheus"
+	configMapNamespace := "monitoring"
+
+	var receivedMessage *http.Request = nil
+
+	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		receivedMessage = r
+	}))
+	defer testServer.Close()
+
+	prometheusConfig := prometheus.DefaultConfig()
+	prometheusConfig.Logger = microloggertest.New()
+	prometheusConfig.Address = testServer.URL
+
+	prometheusReloader, err := prometheus.New(prometheusConfig)
+	if err != nil {
+		t.Fatalf("error returned creating prometheus service: %s\n", err)
+	}
+
+	fakeK8sClient := fake.NewSimpleClientset()
+
+	if _, err := fakeK8sClient.CoreV1().ConfigMaps(configMapNamespace).Create(&v1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      configMapName,
+			Namespace: configMapNamespace,
+		},
+		Data: map[string]string{
+			configMapKey: "foo",
+		},
+	}); err != nil {
+		t.Fatalf("error returned creating configmap: %s\n", err)
+	}
+
+	resourceConfig := DefaultConfig()
+
+	resourceConfig.K8sClient = fakeK8sClient
+	resourceConfig.Logger = microloggertest.New()
+	resourceConfig.PrometheusReloader = prometheusReloader
+
+	resourceConfig.CertificateDirectory = "/certs"
+	resourceConfig.ConfigMapKey = configMapKey
+	resourceConfig.ConfigMapName = configMapName
+	resourceConfig.ConfigMapNamespace = configMapNamespace
+
+	resource, err := New(resourceConfig)
+	if err != nil {
+		t.Fatalf("error returned creating resource: %s\n", err)
+	}
+
+	if err := resource.ProcessUpdateState(context.TODO(), v1.Service{}, &v1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      configMapName,
+			Namespace: configMapNamespace,
+		},
+		Data: map[string]string{
+			configMapKey: "bar",
+		},
+	}); err != nil {
+		t.Fatalf("error returned processing update state: %s\n", err)
+	}
+
+	if receivedMessage == nil {
+		t.Fatalf("handler did not receive message")
+	}
+
+	if receivedMessage.Method != "POST" {
+		t.Fatalf("incorrect method used: %s\n", receivedMessage.Method)
+	}
+
+	if receivedMessage.URL.Path != "/-/reload" {
+		t.Fatalf("incorrect path used: %s\n", receivedMessage.URL.Path)
 	}
 }

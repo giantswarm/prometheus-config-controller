@@ -22,6 +22,7 @@ import (
 	"github.com/giantswarm/prometheus-config-controller/flag"
 	"github.com/giantswarm/prometheus-config-controller/service/controller"
 	"github.com/giantswarm/prometheus-config-controller/service/healthz"
+	"github.com/giantswarm/prometheus-config-controller/service/prometheus"
 	"github.com/giantswarm/prometheus-config-controller/service/resource/certificate"
 	"github.com/giantswarm/prometheus-config-controller/service/resource/configmap"
 )
@@ -109,6 +110,20 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
+	var newPrometheusReloader prometheus.PrometheusReloader
+	{
+		prometheusConfig := prometheus.DefaultConfig()
+
+		prometheusConfig.Logger = config.Logger
+
+		prometheusConfig.Address = config.Viper.GetString(config.Flag.Service.Prometheus.Address)
+
+		newPrometheusReloader, err = prometheus.New(prometheusConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var newCertificateResource framework.Resource
 	{
 		certificateConfig := certificate.DefaultConfig()
@@ -134,6 +149,7 @@ func New(config Config) (*Service, error) {
 
 		configMapConfig.K8sClient = newK8sClient
 		configMapConfig.Logger = config.Logger
+		configMapConfig.PrometheusReloader = newPrometheusReloader
 
 		configMapConfig.CertificateDirectory = config.Viper.GetString(config.Flag.Service.Resource.Certificate.Directory)
 		configMapConfig.ConfigMapKey = config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Key)

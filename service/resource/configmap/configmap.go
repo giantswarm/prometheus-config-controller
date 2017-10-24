@@ -6,6 +6,8 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/framework"
+
+	"github.com/giantswarm/prometheus-config-controller/service/prometheus"
 )
 
 const (
@@ -13,8 +15,9 @@ const (
 )
 
 type Config struct {
-	K8sClient kubernetes.Interface
-	Logger    micrologger.Logger
+	K8sClient          kubernetes.Interface
+	Logger             micrologger.Logger
+	PrometheusReloader prometheus.PrometheusReloader
 
 	CertificateDirectory string
 	// ConfigMapKey is the key in the configmap under which the prometheus configuration is held.
@@ -25,8 +28,9 @@ type Config struct {
 
 func DefaultConfig() Config {
 	return Config{
-		K8sClient: nil,
-		Logger:    nil,
+		K8sClient:          nil,
+		Logger:             nil,
+		PrometheusReloader: nil,
 
 		CertificateDirectory: "",
 		ConfigMapKey:         "",
@@ -36,8 +40,9 @@ func DefaultConfig() Config {
 }
 
 type Resource struct {
-	k8sClient kubernetes.Interface
-	logger    micrologger.Logger
+	k8sClient          kubernetes.Interface
+	logger             micrologger.Logger
+	prometheusReloader prometheus.PrometheusReloader
 
 	certificateDirectory string
 	configMapKey         string
@@ -51,6 +56,9 @@ func New(config Config) (*Resource, error) {
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
+	}
+	if config.PrometheusReloader == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.PrometheusReloader must not be empty")
 	}
 
 	if config.CertificateDirectory == "" {
@@ -67,8 +75,9 @@ func New(config Config) (*Resource, error) {
 	}
 
 	resource := &Resource{
-		k8sClient: config.K8sClient,
-		logger:    config.Logger,
+		k8sClient:          config.K8sClient,
+		logger:             config.Logger,
+		prometheusReloader: config.PrometheusReloader,
 
 		certificateDirectory: config.CertificateDirectory,
 		configMapKey:         config.ConfigMapKey,
