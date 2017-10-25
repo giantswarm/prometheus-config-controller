@@ -66,6 +66,10 @@ func (r *Resource) ProcessUpdateState(ctx context.Context, obj, updateState inte
 		}
 	}
 
+	if err := r.prometheusReloader.Reload(); err != nil {
+		return microerror.Mask(err)
+	}
+
 	return nil
 }
 

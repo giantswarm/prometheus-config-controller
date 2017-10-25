@@ -16,6 +16,7 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 
 	"github.com/giantswarm/prometheus-config-controller/service/prometheus"
+	"github.com/giantswarm/prometheus-config-controller/service/prometheus/prometheustest"
 )
 
 // Test_Resource_ConfigMap_GetDesiredState tests the GetDesiredState method.
@@ -249,6 +250,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 
 		resourceConfig.K8sClient = fakeK8sClient
 		resourceConfig.Logger = microloggertest.New()
+		resourceConfig.PrometheusReloader = prometheustest.New()
 
 		resourceConfig.CertificateDirectory = "/certs"
 		resourceConfig.ConfigMapKey = configMapKey
