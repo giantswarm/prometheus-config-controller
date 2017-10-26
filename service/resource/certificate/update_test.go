@@ -2,6 +2,7 @@ package certificate
 
 import (
 	"context"
+	"path"
 	"reflect"
 	"testing"
 
@@ -213,32 +214,36 @@ func Test_Resource_Certificate_GetUpdateState(t *testing.T) {
 // Test_Resource_Certificate_ProcessUpdateState tests the ProcessUpdateState method.
 func Test_Resource_Certificate_ProcessUpdateState(t *testing.T) {
 	tests := []struct {
-		updateState []certificateFile
+		currentCertificateFiles []certificateFile
+		updateState             []certificateFile
 
 		expectedCertificateFiles []certificateFile
 		expectedErrorHandler     func(error) bool
 	}{
-		// Test that when the updateState is nil, no certificates are written,
-		// and no error is returned.
+		// Test that when the updateState is nil and no certificates are on disk,
+		// no certificates are written, and no error is returned.
 		{
-			updateState: nil,
+			currentCertificateFiles: []certificateFile{},
+			updateState:             nil,
 
 			expectedCertificateFiles: []certificateFile{},
 			expectedErrorHandler:     nil,
 		},
 
-		// Test that when the updateState is empty, no certificates are written,
-		// and no error is returned.
+		// Test that when the updateState is empty and no certificates are on disk,
+		//  no certificates are written, and no error is returned.
 		{
-			updateState: []certificateFile{},
+			currentCertificateFiles: []certificateFile{},
+			updateState:             []certificateFile{},
 
 			expectedCertificateFiles: []certificateFile{},
 			expectedErrorHandler:     nil,
 		},
 
-		// Test that when the updateState contains one certificate,
+		// Test that when the updateState contains one certificate and no certificates are on disk,
 		// one certificate is written, and no error is returned.
 		{
+			currentCertificateFiles: []certificateFile{},
 			updateState: []certificateFile{
 				{
 					path: "/certs/foo",
@@ -255,9 +260,113 @@ func Test_Resource_Certificate_ProcessUpdateState(t *testing.T) {
 			expectedErrorHandler: nil,
 		},
 
-		// Test that when the updateState contains two certificates,
+		// Test that when the updateState contains two certificates and no certificates are on disk,
 		// two certificates are written, and no error is returned.
 		{
+			currentCertificateFiles: []certificateFile{},
+			updateState: []certificateFile{
+				{
+					path: "/certs/foo",
+					data: "foo",
+				},
+				{
+					path: "/certs/bar",
+					data: "bar",
+				},
+			},
+
+			expectedCertificateFiles: []certificateFile{
+				{
+					path: "/certs/foo",
+					data: "foo",
+				},
+				{
+					path: "/certs/bar",
+					data: "bar",
+				},
+			},
+			expectedErrorHandler: nil,
+		},
+
+		// Test that when the updateState contains one certificate,
+		// and the same certificate is on disk,
+		// the certificate is not updated, and no error is returned.
+		{
+			currentCertificateFiles: []certificateFile{
+				{
+					path: "/certs/foo",
+					data: "foo",
+				},
+			},
+			updateState: []certificateFile{
+				{
+					path: "/certs/foo",
+					data: "foo",
+				},
+			},
+
+			expectedCertificateFiles: []certificateFile{
+				{
+					path: "/certs/foo",
+					data: "foo",
+				},
+			},
+			expectedErrorHandler: nil,
+		},
+
+		// Test that when the updateState contains no certificates,
+		// and there is one certificate on disk,
+		// the certificate is removed, and no error is returned.
+		{
+			currentCertificateFiles: []certificateFile{
+				{
+					path: "/certs/foo",
+					data: "foo",
+				},
+			},
+			updateState: []certificateFile{},
+
+			expectedCertificateFiles: []certificateFile{},
+			expectedErrorHandler:     nil,
+		},
+
+		// Test that when the updateState contains one certificate,
+		// and there is one certificate on disk with different data,
+		// the certificate is updated, and no error is returned.
+		{
+			currentCertificateFiles: []certificateFile{
+				{
+					path: "/certs/foo",
+					data: "foo",
+				},
+			},
+			updateState: []certificateFile{
+				{
+					path: "/certs/foo",
+					data: "bar",
+				},
+			},
+
+			expectedCertificateFiles: []certificateFile{
+				{
+					path: "/certs/foo",
+					data: "bar",
+				},
+			},
+			expectedErrorHandler: nil,
+		},
+
+		// Test that when the updateState contains two certificates,
+		// and one of the certificates is on disk,
+		// the other certificate is added,
+		// and no error is returned.
+		{
+			currentCertificateFiles: []certificateFile{
+				{
+					path: "/certs/foo",
+					data: "foo",
+				},
+			},
 			updateState: []certificateFile{
 				{
 					path: "/certs/foo",
@@ -303,6 +412,16 @@ func Test_Resource_Certificate_ProcessUpdateState(t *testing.T) {
 			t.Fatalf("%d: error returned creating resource: %s\n", index, err)
 		}
 
+		if err := fs.Mkdir(resourceConfig.CertificateDirectory, 0600); err != nil {
+			t.Fatalf("%d: error returned creating certificate directory: %s\n", index, err)
+		}
+
+		for _, currentCertificateFile := range test.currentCertificateFiles {
+			if err := afero.WriteFile(fs, currentCertificateFile.path, []byte(currentCertificateFile.data), 0600); err != nil {
+				t.Fatalf("%d: error returned writing current certificate file: %s\n", index, err)
+			}
+		}
+
 		updateErr := resource.ProcessUpdateState(context.TODO(), v1.Service{}, test.updateState)
 
 		if updateErr != nil && test.expectedErrorHandler == nil {
@@ -315,19 +434,28 @@ func Test_Resource_Certificate_ProcessUpdateState(t *testing.T) {
 			t.Fatalf("%d: expected error not returned processing update state\n", index)
 		}
 
-		for _, expectedCertificateFile := range test.expectedCertificateFiles {
-			data, err := afero.ReadFile(fs, expectedCertificateFile.path)
+		fileInfos, err := afero.ReadDir(fs, resourceConfig.CertificateDirectory)
+		if err != nil {
+			t.Fatalf("%d: error returned reading directory: %s\n", index, err)
+		}
+
+		for _, fileInfo := range fileInfos {
+			foundFile := false
+
+			path := path.Join(resourceConfig.CertificateDirectory, fileInfo.Name())
+			data, err := afero.ReadFile(fs, path)
 			if err != nil {
 				t.Fatalf("%d: could not read expected certificate file: %s\n", index, err)
 			}
 
-			if string(data) != expectedCertificateFile.data {
-				t.Fatalf(
-					"%d: expected certificate does not match written certificate.\nexpected: %s\nreturned: %s\n",
-					index,
-					expectedCertificateFile.data,
-					string(data),
-				)
+			for _, expectedCertificateFile := range test.expectedCertificateFiles {
+				if path == expectedCertificateFile.path && string(data) == expectedCertificateFile.data {
+					foundFile = true
+				}
+			}
+
+			if !foundFile {
+				t.Fatalf("%d: unexpected certificate found: %s, %s", index, path, string(data))
 			}
 		}
 	}

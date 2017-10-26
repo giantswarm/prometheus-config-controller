@@ -3,6 +3,7 @@ package certificate
 import (
 	"context"
 	"fmt"
+	"path"
 	"reflect"
 
 	"github.com/spf13/afero"
@@ -41,10 +42,35 @@ func (r *Resource) ProcessUpdateState(ctx context.Context, obj, updateState inte
 		return microerror.Mask(err)
 	}
 
-	for _, certificateFile := range updateCertificateFiles {
-		r.logger.Log("debug", fmt.Sprintf("writing certificate: %s", certificateFile.path))
-		if err := afero.WriteFile(r.fs, certificateFile.path, []byte(certificateFile.data), r.certificatePermission); err != nil {
+	// Write the update state certificate files.
+	for _, fileToWrite := range updateCertificateFiles {
+		r.logger.Log("debug", fmt.Sprintf("writing certificate: %s", fileToWrite.path))
+		if err := afero.WriteFile(r.fs, fileToWrite.path, []byte(fileToWrite.data), r.certificatePermission); err != nil {
 			return microerror.Mask(err)
+		}
+	}
+
+	// Remove any unwanted certificate files.
+	fileInfos, err := afero.ReadDir(r.fs, r.certificateDirectory)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	for _, fileInfo := range fileInfos {
+		fileDesired := false
+		filePath := path.Join(r.certificateDirectory, fileInfo.Name())
+
+		for _, updateCertificateFile := range updateCertificateFiles {
+			if filePath == updateCertificateFile.path {
+				fileDesired = true
+			}
+		}
+
+		if !fileDesired {
+			r.logger.Log("debug", fmt.Sprintf("removing certificate: %s", filePath))
+			if err := r.fs.Remove(filePath); err != nil {
+				return microerror.Mask(err)
+			}
 		}
 	}
 
