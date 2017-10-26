@@ -74,21 +74,21 @@ func Test_Resource_ConfigMap_GetCurrentState(t *testing.T) {
 
 		resource, err := New(resourceConfig)
 		if err != nil {
-			t.Fatalf("%v: error returned creating resource: %v\n", index, err)
+			t.Fatalf("%d: error returned creating resource: %s\n", index, err)
 		}
 
 		if err := test.setUp(fakeK8sClient); err != nil {
-			t.Fatalf("%v: error returned during setup: %v\n", index, err)
+			t.Fatalf("%d: error returned during setup: %s\n", index, err)
 		}
 
 		currentState, err := resource.GetCurrentState(context.TODO(), v1.Service{})
 		if err != nil {
-			t.Fatalf("%v: error returned getting current state: %v\n", index, err)
+			t.Fatalf("%d: error returned getting current state: %s\n", index, err)
 		}
 
 		if !(test.expectedConfigMap == nil && currentState == nil) && !reflect.DeepEqual(test.expectedConfigMap, currentState) {
 			t.Fatalf(
-				"%v: expected configmap does not match returned current state.\nexpected: %v\nreturned: %v\n",
+				"%d: expected configmap does not match returned current state.\nexpected: %s\nreturned: %s\n",
 				index,
 				test.expectedConfigMap,
 				currentState,
