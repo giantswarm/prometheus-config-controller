@@ -233,9 +233,77 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 									Targets: []model.LabelSet{
 										model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
 									},
+									Labels: model.LabelSet{prometheus.ClusterLabel: ""},
 								},
 							},
 						},
+					},
+				},
+			},
+			expectedErrorHandler: nil,
+		},
+
+		// Test that if the configmap exists, with a service already,
+		// and the service no longer exists,
+		// the configmap is returned without the service.
+		{
+			setUpPrometheusConfiguration: &config.Config{
+				GlobalConfig: config.GlobalConfig{
+					ScrapeInterval: model.Duration(1 * time.Minute),
+				},
+				ScrapeConfigs: []*config.ScrapeConfig{
+					{
+						JobName:        "kubernetes-nodes",
+						ScrapeInterval: model.Duration(1 * time.Minute),
+						ScrapeTimeout:  model.Duration(10 * time.Second),
+						MetricsPath:    "/metrics",
+						Scheme:         "http",
+					},
+					{
+						JobName: "xa5ly",
+						Scheme:  "https",
+						HTTPClientConfig: config.HTTPClientConfig{
+							TLSConfig: config.TLSConfig{
+								CAFile:             "/certs/xa5ly-ca.pem",
+								CertFile:           "/certs/xa5ly-crt.pem",
+								KeyFile:            "/certs/xa5ly-key.pem",
+								InsecureSkipVerify: false,
+							},
+						},
+						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
+							StaticConfigs: []*config.TargetGroup{
+								{
+									Targets: []model.LabelSet{
+										model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
+									},
+									Labels: model.LabelSet{prometheus.ClusterLabel: ""},
+								},
+							},
+						},
+					},
+				},
+			},
+			setUpConfigMap: &v1.ConfigMap{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      configMapName,
+					Namespace: configMapNamespace,
+				},
+			},
+			setUpServices: []*v1.Service{},
+
+			expectedPrometheusConfiguration: &config.Config{
+				GlobalConfig: config.GlobalConfig{
+					ScrapeInterval:     model.Duration(1 * time.Minute),
+					ScrapeTimeout:      model.Duration(10 * time.Second),
+					EvaluationInterval: model.Duration(1 * time.Minute),
+				},
+				ScrapeConfigs: []*config.ScrapeConfig{
+					{
+						JobName:        "kubernetes-nodes",
+						ScrapeInterval: model.Duration(1 * time.Minute),
+						ScrapeTimeout:  model.Duration(10 * time.Second),
+						MetricsPath:    "/metrics",
+						Scheme:         "http",
 					},
 				},
 			},
