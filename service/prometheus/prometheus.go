@@ -6,6 +6,10 @@ import (
 
 const (
 	ClusterAnnotation = "giantswarm.io/prometheus-cluster"
+
+	// ClusterLabel is the Prometheus label used to identify jobs
+	// managed by the prometheus-config-controller.
+	ClusterLabel = "prometheus_config_controller"
 )
 
 // GetClusterID returns the value of the cluster annotation.

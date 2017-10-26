@@ -108,6 +108,7 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 								Targets: []model.LabelSet{
 									model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
 								},
+								Labels: model.LabelSet{ClusterLabel: ""},
 							},
 						},
 					},
@@ -158,6 +159,7 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 									model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
 									model.LabelSet{model.AddressLabel: "kubelet.xa5ly"},
 								},
+								Labels: model.LabelSet{ClusterLabel: ""},
 							},
 						},
 					},
@@ -208,6 +210,7 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
 							Targets: []model.LabelSet{
 								model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
 							},
+							Labels: model.LabelSet{ClusterLabel: ""},
 						},
 					},
 				},
@@ -218,6 +221,8 @@ scheme: https
 static_configs:
 - targets:
   - apiserver.xa5ly
+  labels:
+    prometheus_config_controller: ""
 tls_config:
   ca_file: /certs/xa5ly-ca.pem
   cert_file: /certs/xa5ly-crt.pem
