@@ -119,7 +119,7 @@ func Test_Resource_Certificate_GetCurrentState(t *testing.T) {
 
 		currentState, err := resource.GetCurrentState(context.TODO(), v1.Service{})
 		if err != nil {
-			t.Fatalf("%d: error returned getting current state: %v\n", index, err)
+			t.Fatalf("%d: error returned getting current state: %s\n", index, err)
 		}
 
 		if test.expectedCertificateFiles == nil {
