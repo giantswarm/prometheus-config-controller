@@ -330,6 +330,27 @@ func Test_Resource_Certificate_ProcessUpdateState(t *testing.T) {
 			expectedErrorHandler:     nil,
 		},
 
+		// Test that when the updateState is nil,
+		// and there is one certificate on disk,
+		// the certificate is not removed, and no error is returned.
+		{
+			currentCertificateFiles: []certificateFile{
+				{
+					path: "/certs/foo",
+					data: "foo",
+				},
+			},
+			updateState: nil,
+
+			expectedCertificateFiles: []certificateFile{
+				{
+					path: "/certs/foo",
+					data: "foo",
+				},
+			},
+			expectedErrorHandler: nil,
+		},
+
 		// Test that when the updateState contains one certificate,
 		// and there is one certificate on disk with different data,
 		// the certificate is updated, and no error is returned.
@@ -437,6 +458,10 @@ func Test_Resource_Certificate_ProcessUpdateState(t *testing.T) {
 		fileInfos, err := afero.ReadDir(fs, resourceConfig.CertificateDirectory)
 		if err != nil {
 			t.Fatalf("%d: error returned reading directory: %s\n", index, err)
+		}
+
+		if len(fileInfos) == 0 && len(test.expectedCertificateFiles) > 0 {
+			t.Fatalf("%d: expected certificates not found: %#v\n", index, test.expectedCertificateFiles)
 		}
 
 		for _, fileInfo := range fileInfos {
