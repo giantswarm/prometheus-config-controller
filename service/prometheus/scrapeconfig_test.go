@@ -116,6 +116,78 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 			},
 		},
 
+		// Test that two services that specify different clusters create separate configs.
+		{
+			services: []v1.Service{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "apiserver",
+						Namespace: "xa5ly",
+						Annotations: map[string]string{
+							ClusterAnnotation: "xa5ly",
+						},
+					},
+				},
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "apiserver",
+						Namespace: "0ba9v",
+						Annotations: map[string]string{
+							ClusterAnnotation: "0ba9v",
+						},
+					},
+				},
+			},
+			certificateDirectory: "/certs",
+
+			expectedScrapeConfigs: []config.ScrapeConfig{
+				{
+					JobName: "xa5ly",
+					Scheme:  "https",
+					HTTPClientConfig: config.HTTPClientConfig{
+						TLSConfig: config.TLSConfig{
+							CAFile:             "/certs/xa5ly-ca.pem",
+							CertFile:           "/certs/xa5ly-crt.pem",
+							KeyFile:            "/certs/xa5ly-key.pem",
+							InsecureSkipVerify: false,
+						},
+					},
+					ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
+						StaticConfigs: []*config.TargetGroup{
+							{
+								Targets: []model.LabelSet{
+									model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
+								},
+								Labels: model.LabelSet{ClusterLabel: ""},
+							},
+						},
+					},
+				},
+				{
+					JobName: "0ba9v",
+					Scheme:  "https",
+					HTTPClientConfig: config.HTTPClientConfig{
+						TLSConfig: config.TLSConfig{
+							CAFile:             "/certs/0ba9v-ca.pem",
+							CertFile:           "/certs/0ba9v-crt.pem",
+							KeyFile:            "/certs/0ba9v-key.pem",
+							InsecureSkipVerify: false,
+						},
+					},
+					ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
+						StaticConfigs: []*config.TargetGroup{
+							{
+								Targets: []model.LabelSet{
+									model.LabelSet{model.AddressLabel: "apiserver.0ba9v"},
+								},
+								Labels: model.LabelSet{ClusterLabel: ""},
+							},
+						},
+					},
+				},
+			},
+		},
+
 		// Test that two services that specify the same cluster annotation create a scrape config together.
 		{
 			services: []v1.Service{

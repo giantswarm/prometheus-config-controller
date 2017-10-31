@@ -175,6 +175,88 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 		},
 
 		// Test a config containing one scrape config,
+		// and given two scrape configs - including the old one,
+		// returns a config containing both scrape configs.
+		{
+			config: config.Config{
+				ScrapeConfigs: []*config.ScrapeConfig{
+					{
+						JobName: "xa5ly",
+						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
+							StaticConfigs: []*config.TargetGroup{
+								{
+									Targets: []model.LabelSet{
+										model.LabelSet{"apiserver.xa5ly": ""},
+									},
+									Labels: model.LabelSet{ClusterLabel: ""},
+								},
+							},
+						},
+					},
+				},
+			},
+			scrapeConfigs: []config.ScrapeConfig{
+				{
+					JobName: "xa5ly",
+					ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
+						StaticConfigs: []*config.TargetGroup{
+							{
+								Targets: []model.LabelSet{
+									model.LabelSet{"apiserver.xa5ly": ""},
+								},
+								Labels: model.LabelSet{ClusterLabel: ""},
+							},
+						},
+					},
+				},
+				{
+					JobName: "jf02j",
+					ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
+						StaticConfigs: []*config.TargetGroup{
+							{
+								Targets: []model.LabelSet{
+									model.LabelSet{"apiserver.jf02j": ""},
+								},
+								Labels: model.LabelSet{ClusterLabel: ""},
+							},
+						},
+					},
+				},
+			},
+
+			expectedConfig: config.Config{
+				ScrapeConfigs: []*config.ScrapeConfig{
+					{
+						JobName: "xa5ly",
+						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
+							StaticConfigs: []*config.TargetGroup{
+								{
+									Targets: []model.LabelSet{
+										model.LabelSet{"apiserver.xa5ly": ""},
+									},
+									Labels: model.LabelSet{ClusterLabel: ""},
+								},
+							},
+						},
+					},
+					{
+						JobName: "jf02j",
+						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
+							StaticConfigs: []*config.TargetGroup{
+								{
+									Targets: []model.LabelSet{
+										model.LabelSet{"apiserver.jf02j": ""},
+									},
+									Labels: model.LabelSet{ClusterLabel: ""},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+
+		// Test a config containing one scrape config,
 		// and given a scrape config with the same name but different values,
 		// returns a config containing the new scrape config.
 		{

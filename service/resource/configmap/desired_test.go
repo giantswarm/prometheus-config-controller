@@ -309,6 +309,122 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 			},
 			expectedErrorHandler: nil,
 		},
+
+		// Test that if the configmap exists, with a service already,
+		// and a new service is added,
+		// the configmap is returned with both services.
+		{
+			setUpPrometheusConfiguration: &config.Config{
+				GlobalConfig: config.GlobalConfig{
+					ScrapeInterval: model.Duration(1 * time.Minute),
+				},
+				ScrapeConfigs: []*config.ScrapeConfig{
+					{
+						JobName: "xa5ly",
+						Scheme:  "https",
+						HTTPClientConfig: config.HTTPClientConfig{
+							TLSConfig: config.TLSConfig{
+								CAFile:             "/certs/xa5ly-ca.pem",
+								CertFile:           "/certs/xa5ly-crt.pem",
+								KeyFile:            "/certs/xa5ly-key.pem",
+								InsecureSkipVerify: false,
+							},
+						},
+						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
+							StaticConfigs: []*config.TargetGroup{
+								{
+									Targets: []model.LabelSet{
+										model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
+									},
+									Labels: model.LabelSet{prometheus.ClusterLabel: ""},
+								},
+							},
+						},
+					},
+				},
+			},
+			setUpConfigMap: &v1.ConfigMap{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      configMapName,
+					Namespace: configMapNamespace,
+				},
+			},
+			setUpServices: []*v1.Service{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "apiserver",
+						Namespace: "xa5ly",
+						Annotations: map[string]string{
+							prometheus.ClusterAnnotation: "xa5ly",
+						},
+					},
+				},
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "apiserver",
+						Namespace: "0ba9v",
+						Annotations: map[string]string{
+							prometheus.ClusterAnnotation: "0ba9v",
+						},
+					},
+				},
+			},
+
+			expectedPrometheusConfiguration: &config.Config{
+				GlobalConfig: config.GlobalConfig{
+					ScrapeInterval:     model.Duration(1 * time.Minute),
+					ScrapeTimeout:      model.Duration(10 * time.Second),
+					EvaluationInterval: model.Duration(1 * time.Minute),
+				},
+				ScrapeConfigs: []*config.ScrapeConfig{
+					{
+						JobName: "xa5ly",
+						Scheme:  "https",
+						HTTPClientConfig: config.HTTPClientConfig{
+							TLSConfig: config.TLSConfig{
+								CAFile:             "/certs/xa5ly-ca.pem",
+								CertFile:           "/certs/xa5ly-crt.pem",
+								KeyFile:            "/certs/xa5ly-key.pem",
+								InsecureSkipVerify: false,
+							},
+						},
+						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
+							StaticConfigs: []*config.TargetGroup{
+								{
+									Targets: []model.LabelSet{
+										model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
+									},
+									Labels: model.LabelSet{prometheus.ClusterLabel: ""},
+								},
+							},
+						},
+					},
+					{
+						JobName: "0ba9v",
+						Scheme:  "https",
+						HTTPClientConfig: config.HTTPClientConfig{
+							TLSConfig: config.TLSConfig{
+								CAFile:             "/certs/0ba9v-ca.pem",
+								CertFile:           "/certs/0ba9v-crt.pem",
+								KeyFile:            "/certs/0ba9v-key.pem",
+								InsecureSkipVerify: false,
+							},
+						},
+						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
+							StaticConfigs: []*config.TargetGroup{
+								{
+									Targets: []model.LabelSet{
+										model.LabelSet{model.AddressLabel: "apiserver.0ba9v"},
+									},
+									Labels: model.LabelSet{prometheus.ClusterLabel: ""},
+								},
+							},
+						},
+					},
+				},
+			},
+			expectedErrorHandler: nil,
+		},
 	}
 
 	for index, test := range tests {
