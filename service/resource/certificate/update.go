@@ -31,7 +31,7 @@ func (r *Resource) GetUpdateState(ctx context.Context, obj, currentState, desire
 		return nil, nil, desiredCertificateFiles, nil
 	}
 
-	r.logger.Log("debug", "current certificates matches desired certificates, no update needed")
+	r.logger.Log("debug", "current certificates match desired certificates, no update needed")
 
 	return nil, nil, nil, nil
 }
@@ -40,6 +40,11 @@ func (r *Resource) ProcessUpdateState(ctx context.Context, obj, updateState inte
 	updateCertificateFiles, err := toCertificateFiles(updateState)
 	if err != nil {
 		return microerror.Mask(err)
+	}
+
+	// In case the update state is nil, don't process at all.
+	if updateCertificateFiles == nil {
+		return nil
 	}
 
 	// Write the update state certificate files.
