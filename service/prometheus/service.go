@@ -66,5 +66,7 @@ func (s *Service) Reload() error {
 		return microerror.Maskf(reloadError, "a non-200 status code was returned: %s", res.StatusCode)
 	}
 
+	configurationReloadCount.Inc()
+
 	return nil
 }
