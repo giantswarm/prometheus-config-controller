@@ -2,6 +2,7 @@ package configmap
 
 import (
 	"context"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -440,22 +441,6 @@ func Test_Resource_ConfigMap_Reload(t *testing.T) {
 	configMapName := "prometheus"
 	configMapNamespace := "monitoring"
 
-	var receivedMessage *http.Request = nil
-
-	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		receivedMessage = r
-	}))
-	defer testServer.Close()
-
-	prometheusConfig := prometheus.DefaultConfig()
-	prometheusConfig.Logger = microloggertest.New()
-	prometheusConfig.Address = testServer.URL
-
-	prometheusReloader, err := prometheus.New(prometheusConfig)
-	if err != nil {
-		t.Fatalf("error returned creating prometheus service: %s\n", err)
-	}
-
 	fakeK8sClient := fake.NewSimpleClientset()
 
 	if _, err := fakeK8sClient.CoreV1().ConfigMaps(configMapNamespace).Create(&v1.ConfigMap{
@@ -464,10 +449,46 @@ func Test_Resource_ConfigMap_Reload(t *testing.T) {
 			Namespace: configMapNamespace,
 		},
 		Data: map[string]string{
-			configMapKey: "foo",
+			configMapKey: "bar",
 		},
 	}); err != nil {
 		t.Fatalf("error returned creating configmap: %s\n", err)
+	}
+
+	var receivedReloadMessage *http.Request = nil
+	configRequestCount := 0
+	reloadRequestCount := 0
+
+	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/config" {
+			configRequestCount++
+
+			io.WriteString(w, "<html><pre>foo</pre></html>")
+			return
+		}
+		if r.URL.Path == "/-/reload" {
+			receivedReloadMessage = r
+			reloadRequestCount++
+
+			io.WriteString(w, "")
+			return
+		}
+	}))
+	defer testServer.Close()
+
+	prometheusConfig := prometheus.DefaultConfig()
+
+	prometheusConfig.K8sClient = fakeK8sClient
+	prometheusConfig.Logger = microloggertest.New()
+
+	prometheusConfig.Address = testServer.URL
+	prometheusConfig.ConfigMapKey = configMapKey
+	prometheusConfig.ConfigMapName = configMapName
+	prometheusConfig.ConfigMapNamespace = configMapNamespace
+
+	prometheusReloader, err := prometheus.New(prometheusConfig)
+	if err != nil {
+		t.Fatalf("error returned creating prometheus service: %s\n", err)
 	}
 
 	resourceConfig := DefaultConfig()
@@ -486,6 +507,13 @@ func Test_Resource_ConfigMap_Reload(t *testing.T) {
 		t.Fatalf("error returned creating resource: %s\n", err)
 	}
 
+	if configRequestCount != 0 {
+		t.Fatalf("incorrect config request count before update - should be 0, was: %d", configRequestCount)
+	}
+	if reloadRequestCount != 0 {
+		t.Fatalf("incorrect reload request count before update - should be 0, was: %d", reloadRequestCount)
+	}
+
 	if err := resource.ProcessUpdateState(context.TODO(), v1.Service{}, &v1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      configMapName,
@@ -498,44 +526,27 @@ func Test_Resource_ConfigMap_Reload(t *testing.T) {
 		t.Fatalf("error returned processing update state: %s\n", err)
 	}
 
-	if receivedMessage == nil {
-		t.Fatalf("handler did not receive message")
+	if receivedReloadMessage == nil {
+		t.Fatalf("handler did not receive reload message")
 	}
 
-	if receivedMessage.Method != "POST" {
-		t.Fatalf("incorrect method used: %s\n", receivedMessage.Method)
+	if receivedReloadMessage.Method != "POST" {
+		t.Fatalf("incorrect method used for reload: %s\n", receivedReloadMessage.Method)
 	}
 
-	if receivedMessage.URL.Path != "/-/reload" {
-		t.Fatalf("incorrect path used: %s\n", receivedMessage.URL.Path)
-	}
-}
-
-// Test_Resource_ConfigMap_Reload_Count tests that the configmap is reloaded the correct number of times.
-func Test_Resource_ConfigMap_Reload_Count(t *testing.T) {
-	configMapKey := "prometheus.yml"
-	configMapName := "prometheus"
-	configMapNamespace := "monitoring"
-
-	var reloadCount int = 0
-
-	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		reloadCount++
-	}))
-	defer testServer.Close()
-
-	prometheusConfig := prometheus.DefaultConfig()
-	prometheusConfig.Logger = microloggertest.New()
-	prometheusConfig.Address = testServer.URL
-
-	prometheusReloader, err := prometheus.New(prometheusConfig)
-	if err != nil {
-		t.Fatalf("error returned creating prometheus service: %s\n", err)
+	if receivedReloadMessage.URL.Path != "/-/reload" {
+		t.Fatalf("incorrect path used for reload: %s\n", receivedReloadMessage.URL.Path)
 	}
 
-	fakeK8sClient := fake.NewSimpleClientset()
+	if configRequestCount != 1 {
+		t.Fatalf("incorrect config request count after update - should be 1, was: %d", configRequestCount)
+	}
+	if reloadRequestCount != 1 {
+		t.Fatalf("incorrect reload request count after update - should be 1, was: %d", reloadRequestCount)
+	}
 
-	if _, err := fakeK8sClient.CoreV1().ConfigMaps(configMapNamespace).Create(&v1.ConfigMap{
+	// Update the configmap to match the prometheus config.
+	if _, err := fakeK8sClient.CoreV1().ConfigMaps(configMapNamespace).Update(&v1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      configMapName,
 			Namespace: configMapNamespace,
@@ -544,43 +555,7 @@ func Test_Resource_ConfigMap_Reload_Count(t *testing.T) {
 			configMapKey: "foo",
 		},
 	}); err != nil {
-		t.Fatalf("error returned creating configmap: %s\n", err)
-	}
-
-	resourceConfig := DefaultConfig()
-
-	resourceConfig.K8sClient = fakeK8sClient
-	resourceConfig.Logger = microloggertest.New()
-	resourceConfig.PrometheusReloader = prometheusReloader
-
-	resourceConfig.CertificateDirectory = "/certs"
-	resourceConfig.ConfigMapKey = configMapKey
-	resourceConfig.ConfigMapName = configMapName
-	resourceConfig.ConfigMapNamespace = configMapNamespace
-
-	resource, err := New(resourceConfig)
-	if err != nil {
-		t.Fatalf("error returned creating resource: %s\n", err)
-	}
-
-	if reloadCount != 0 {
-		t.Fatalf("incorrect reload count - should be 0, was: %d", reloadCount)
-	}
-
-	if err := resource.ProcessUpdateState(context.TODO(), v1.Service{}, &v1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      configMapName,
-			Namespace: configMapNamespace,
-		},
-		Data: map[string]string{
-			configMapKey: "bar",
-		},
-	}); err != nil {
-		t.Fatalf("error returned processing update state: %s\n", err)
-	}
-
-	if reloadCount != 1 {
-		t.Fatalf("incorrect reload count - should be 1, was: %d", reloadCount)
+		t.Fatalf("error returned updating configmap: %s\n", err)
 	}
 
 	// Check that a nil processing does not cause a reload.
@@ -588,7 +563,10 @@ func Test_Resource_ConfigMap_Reload_Count(t *testing.T) {
 		t.Fatalf("error returned processing update state: %s\n", err)
 	}
 
-	if reloadCount != 1 {
-		t.Fatalf("incorrect reload count - should be 1, was: %d", reloadCount)
+	if configRequestCount != 2 {
+		t.Fatalf("incorrect config request coun after nil update - should be 2, was: %d", configRequestCount)
+	}
+	if reloadRequestCount != 1 {
+		t.Fatalf("incorrect reload request count after nil update - should be 1, was: %d", reloadRequestCount)
 	}
 }

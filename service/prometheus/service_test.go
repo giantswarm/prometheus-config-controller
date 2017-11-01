@@ -2,9 +2,14 @@ package prometheus
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes/fake"
+	"k8s.io/client-go/pkg/api/v1"
 
 	"github.com/giantswarm/micrologger/microloggertest"
 )
@@ -23,12 +28,34 @@ func Test_Prometheus_New(t *testing.T) {
 			expectedErrorHandler: IsInvalidConfig,
 		},
 
-		// Test that a logger must not be empty.
+		// Test that the kubernetes client must not be empty.
 		{
 			config: func() Config {
 				return Config{
-					Logger:  nil,
-					Address: "http://127.0.0.1:8080",
+					K8sClient: nil,
+					Logger:    microloggertest.New(),
+
+					Address:            "http://127.0.0.1:8080",
+					ConfigMapKey:       "prometheus.yml",
+					ConfigMapName:      "prometheus",
+					ConfigMapNamespace: "monitoring",
+				}
+			},
+
+			expectedErrorHandler: IsInvalidConfig,
+		},
+
+		// Test that the logger must not be empty.
+		{
+			config: func() Config {
+				return Config{
+					K8sClient: fake.NewSimpleClientset(),
+					Logger:    nil,
+
+					Address:            "http://127.0.0.1:8080",
+					ConfigMapKey:       "prometheus.yml",
+					ConfigMapName:      "prometheus",
+					ConfigMapNamespace: "monitoring",
 				}
 			},
 
@@ -39,20 +66,64 @@ func Test_Prometheus_New(t *testing.T) {
 		{
 			config: func() Config {
 				return Config{
-					Logger:  microloggertest.New(),
-					Address: "",
+					K8sClient: fake.NewSimpleClientset(),
+					Logger:    microloggertest.New(),
+
+					Address:            "",
+					ConfigMapKey:       "prometheus.yml",
+					ConfigMapName:      "prometheus",
+					ConfigMapNamespace: "monitoring",
 				}
 			},
 
 			expectedErrorHandler: IsInvalidConfig,
 		},
 
-		// Test that the prometheus address must be valid.
+		// Test that the configmap key must not be empty.
 		{
 			config: func() Config {
 				return Config{
-					Logger:  microloggertest.New(),
-					Address: "jabberwocky",
+					K8sClient: fake.NewSimpleClientset(),
+					Logger:    microloggertest.New(),
+
+					Address:            "http://127.0.0.1:8080",
+					ConfigMapKey:       "",
+					ConfigMapName:      "prometheus",
+					ConfigMapNamespace: "monitoring",
+				}
+			},
+
+			expectedErrorHandler: IsInvalidConfig,
+		},
+
+		// Test that the configmap name must not be empty.
+		{
+			config: func() Config {
+				return Config{
+					K8sClient: fake.NewSimpleClientset(),
+					Logger:    microloggertest.New(),
+
+					Address:            "http://127.0.0.1:8080",
+					ConfigMapKey:       "prometheus.yml",
+					ConfigMapName:      "",
+					ConfigMapNamespace: "monitoring",
+				}
+			},
+
+			expectedErrorHandler: IsInvalidConfig,
+		},
+
+		// Test that the configmap namespace must not be empty.
+		{
+			config: func() Config {
+				return Config{
+					K8sClient: fake.NewSimpleClientset(),
+					Logger:    microloggertest.New(),
+
+					Address:            "http://127.0.0.1:8080",
+					ConfigMapKey:       "prometheus.yml",
+					ConfigMapName:      "prometheus",
+					ConfigMapNamespace: "",
 				}
 			},
 
@@ -63,8 +134,13 @@ func Test_Prometheus_New(t *testing.T) {
 		{
 			config: func() Config {
 				return Config{
-					Logger:  microloggertest.New(),
-					Address: "http://127.0.0.1:8080",
+					K8sClient: fake.NewSimpleClientset(),
+					Logger:    microloggertest.New(),
+
+					Address:            "http://127.0.0.1:8080",
+					ConfigMapKey:       "prometheus.yml",
+					ConfigMapName:      "prometheus",
+					ConfigMapNamespace: "monitoring",
 				}
 			},
 
@@ -94,67 +170,197 @@ func Test_Prometheus_New(t *testing.T) {
 
 // Test_Prometheus_Reload tests the Reload method.
 func Test_Prometheus_Reload(t *testing.T) {
-	var receivedMessage *http.Request = nil
+	configMapKey := "prometheus.yml"
+	configMapName := "prometheus"
+	configMapNamespace := "monitoring"
 
-	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		receivedMessage = r
-	}))
-	defer testServer.Close()
+	tests := []struct {
+		configMap *v1.ConfigMap
+		handler   func(w http.ResponseWriter, r *http.Request)
 
-	defaultConfig := DefaultConfig()
+		expectedErrorHandler func(error) bool
+	}{
+		// Test that an error is returned if the configmap does not exist.
+		{
+			configMap: nil,
+			handler: func(w http.ResponseWriter, r *http.Request) {
+				t.Fatalf("unexpected http request, configmap does not exist")
+			},
 
-	defaultConfig.Logger = microloggertest.New()
+			expectedErrorHandler: IsReloadError,
+		},
 
-	defaultConfig.Address = testServer.URL
+		// Test that an error is returned if the configmap does not contain
+		// the required key.
+		{
+			configMap: &v1.ConfigMap{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      configMapName,
+					Namespace: configMapNamespace,
+				},
+				Data: map[string]string{},
+			},
+			handler: func(w http.ResponseWriter, r *http.Request) {
+				t.Fatalf("unexpected http request, configmap key does not exist")
+			},
 
-	service, err := New(defaultConfig)
-	if err != nil {
-		t.Fatalf("error returned creating service: %s\n", err)
+			expectedErrorHandler: IsReloadError,
+		},
+
+		// Test that if the current Prometheus configuration matches the configmap,
+		// a reload is not executed.
+		{
+			configMap: &v1.ConfigMap{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      configMapName,
+					Namespace: configMapNamespace,
+				},
+				Data: map[string]string{
+					"prometheus.yml": `foobar`,
+				},
+			},
+			handler: func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path == prometheusConfigPath {
+					io.WriteString(w, "<html><pre>foobar</pre></html>")
+					return
+				}
+				t.Fatalf("unexpected http request, reload is not required")
+			},
+
+			expectedErrorHandler: nil,
+		},
+
+		// Test that if the current Prometheus configuration does not match the configmap,
+		// a reload is executed correctly.
+		{
+			configMap: &v1.ConfigMap{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      configMapName,
+					Namespace: configMapNamespace,
+				},
+				Data: map[string]string{
+					"prometheus.yml": `bar`,
+				},
+			},
+			handler: func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path == prometheusConfigPath {
+					io.WriteString(w, "<html><pre>foo</pre></html>")
+					return
+				}
+				if r.URL.Path != prometheusReloadPath {
+					t.Fatalf("unexpected http request, reload is required")
+				}
+			},
+
+			expectedErrorHandler: nil,
+		},
+
+		// Test that an error is returned if the config route returns an error.
+		{
+			configMap: &v1.ConfigMap{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      configMapName,
+					Namespace: configMapNamespace,
+				},
+				Data: map[string]string{
+					"prometheus.yml": `bar`,
+				},
+			},
+			handler: func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path == prometheusConfigPath {
+					http.Error(w, fmt.Sprintf("error getting prometheus config"), http.StatusInternalServerError)
+					return
+				}
+				t.Fatalf("unexpected http request, should only access erroring config route")
+			},
+
+			expectedErrorHandler: IsReloadError,
+		},
+
+		// Test that an error is returned if the config route returns garbage.
+		{
+			configMap: &v1.ConfigMap{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      configMapName,
+					Namespace: configMapNamespace,
+				},
+				Data: map[string]string{
+					"prometheus.yml": `bar`,
+				},
+			},
+			handler: func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path == prometheusConfigPath {
+					io.WriteString(w, "lwnefknfiefnpeijfpqofjqpwofjqpwofjqpwofjpofjwpofjwpeofj")
+					return
+				}
+			},
+
+			expectedErrorHandler: IsReloadError,
+		},
+
+		// Test that an error is returned if the reload route returns an error.
+		{
+			configMap: &v1.ConfigMap{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      configMapName,
+					Namespace: configMapNamespace,
+				},
+				Data: map[string]string{
+					"prometheus.yml": `bar`,
+				},
+			},
+			handler: func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path == prometheusConfigPath {
+					io.WriteString(w, "<html><pre>foo</pre></html>")
+					return
+				}
+				if r.URL.Path == prometheusReloadPath {
+					http.Error(w, fmt.Sprintf("error reloading prometheus"), http.StatusInternalServerError)
+					return
+				}
+			},
+
+			expectedErrorHandler: IsReloadError,
+		},
 	}
 
-	if err := service.Reload(); err != nil {
-		t.Fatalf("an error returned reloading prometheus: %s\n", err)
-	}
+	for index, test := range tests {
+		fakeK8sClient := fake.NewSimpleClientset()
 
-	if receivedMessage == nil {
-		t.Fatalf("handler did not receive message")
-	}
+		if test.configMap != nil {
+			if _, err := fakeK8sClient.CoreV1().ConfigMaps(configMapNamespace).Create(test.configMap); err != nil {
+				t.Fatalf("%d: error returned creating configmap: %s\n", index, err)
+			}
+		}
 
-	if receivedMessage.Method != "POST" {
-		t.Fatalf("incorrect method used: %s\n", receivedMessage.Method)
-	}
+		testServer := httptest.NewServer(http.HandlerFunc(test.handler))
+		defer testServer.Close()
 
-	if receivedMessage.URL.Path != "/-/reload" {
-		t.Fatalf("incorrect path used: %s\n", receivedMessage.URL.Path)
-	}
-}
+		prometheusReloaderConfig := DefaultConfig()
 
-// Test_Prometheus_Reload_Failure tests the Reload method if the reload fails.
-// See https://github.com/prometheus/prometheus/blob/099df0c5f00c45c007a9779a2e4ab51cf4d076bf/web/web.go#L598
-// Prometheus returns http.StatusInternalServerError on error.
-func Test_Prometheus_Reload_Failure(t *testing.T) {
-	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		http.Error(w, fmt.Sprintf("beep boop i failed! D:"), http.StatusInternalServerError)
-	}))
-	defer testServer.Close()
+		prometheusReloaderConfig.K8sClient = fakeK8sClient
+		prometheusReloaderConfig.Logger = microloggertest.New()
 
-	defaultConfig := DefaultConfig()
+		prometheusReloaderConfig.Address = testServer.URL
+		prometheusReloaderConfig.ConfigMapKey = configMapKey
+		prometheusReloaderConfig.ConfigMapName = configMapName
+		prometheusReloaderConfig.ConfigMapNamespace = configMapNamespace
 
-	defaultConfig.Logger = microloggertest.New()
+		service, err := New(prometheusReloaderConfig)
+		if err != nil {
+			t.Fatalf("error returned creating service: %s\n", err)
+		}
 
-	defaultConfig.Address = testServer.URL
+		reloadErr := service.Reload()
 
-	service, err := New(defaultConfig)
-	if err != nil {
-		t.Fatalf("error returned creating service: %s\n", err)
-	}
-
-	reloadErr := service.Reload()
-
-	if reloadErr == nil {
-		t.Fatalf("a nil error was returned\n")
-	}
-	if !IsReloadError(reloadErr) {
-		t.Fatalf("incorrect error returned: %s\n", reloadError)
+		if reloadErr != nil && test.expectedErrorHandler == nil {
+			t.Fatalf("%d: unexpected error returned reloading prometheus: %s\n", index, reloadErr)
+		}
+		if reloadErr != nil && !test.expectedErrorHandler(reloadErr) {
+			t.Fatalf("%d: incorrect error returned reloading prometheus: %s\n", index, reloadErr)
+		}
+		if reloadErr == nil && test.expectedErrorHandler != nil {
+			t.Fatalf("%d: expected error not returned reloading prometheus\n", index)
+		}
 	}
 }
