@@ -3,6 +3,7 @@ package configmap
 import (
 	"context"
 	"testing"
+	"time"
 
 	"k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/pkg/api/v1"
@@ -25,6 +26,7 @@ func Test_Resource_ConfigMap_GetDeleteState(t *testing.T) {
 	resourceConfig.ConfigMapKey = "prometheus.yml"
 	resourceConfig.ConfigMapName = "prometheus"
 	resourceConfig.ConfigMapNamespace = "monitoring"
+	resourceConfig.ReloadWaitTime = 1 * time.Second
 
 	resource, err := New(resourceConfig)
 	if err != nil {
@@ -55,6 +57,7 @@ func Test_Resource_ConfigMap_ProcessDeleteState(t *testing.T) {
 	resourceConfig.ConfigMapKey = "prometheus.yml"
 	resourceConfig.ConfigMapName = "prometheus"
 	resourceConfig.ConfigMapNamespace = "monitoring"
+	resourceConfig.ReloadWaitTime = 1 * time.Second
 
 	resource, err := New(resourceConfig)
 	if err != nil {
