@@ -19,8 +19,8 @@ func UpdateConfig(promcfg config.Config, scrapeConfigs []config.ScrapeConfig) (c
 	}
 
 	// And append the supplied, desired scrape configs.
-	for _, scrapeConfig := range scrapeConfigs {
-		desiredScrapeConfigs = append(desiredScrapeConfigs, &scrapeConfig)
+	for i, _ := range scrapeConfigs {
+		desiredScrapeConfigs = append(desiredScrapeConfigs, &scrapeConfigs[i])
 	}
 
 	promcfg.ScrapeConfigs = desiredScrapeConfigs
