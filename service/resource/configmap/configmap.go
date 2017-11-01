@@ -1,6 +1,8 @@
 package configmap
 
 import (
+	"time"
+
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/giantswarm/microerror"
@@ -24,6 +26,7 @@ type Config struct {
 	ConfigMapKey       string
 	ConfigMapName      string
 	ConfigMapNamespace string
+	ReloadWaitTime     time.Duration
 }
 
 func DefaultConfig() Config {
@@ -36,6 +39,7 @@ func DefaultConfig() Config {
 		ConfigMapKey:         "",
 		ConfigMapName:        "",
 		ConfigMapNamespace:   "",
+		ReloadWaitTime:       time.Duration(0),
 	}
 }
 
@@ -48,6 +52,7 @@ type Resource struct {
 	configMapKey         string
 	configMapName        string
 	configMapNamespace   string
+	reloadWaitTime       time.Duration
 }
 
 func New(config Config) (*Resource, error) {
@@ -73,6 +78,9 @@ func New(config Config) (*Resource, error) {
 	if config.ConfigMapNamespace == "" {
 		return nil, microerror.Maskf(invalidConfigError, "config.ConfigMapNamespace must not be empty")
 	}
+	if config.ReloadWaitTime == 0 {
+		return nil, microerror.Maskf(invalidConfigError, "config.ReloadWaitTime must not be zero")
+	}
 
 	resource := &Resource{
 		k8sClient:          config.K8sClient,
@@ -83,6 +91,7 @@ func New(config Config) (*Resource, error) {
 		configMapKey:         config.ConfigMapKey,
 		configMapName:        config.ConfigMapName,
 		configMapNamespace:   config.ConfigMapNamespace,
+		reloadWaitTime:       config.ReloadWaitTime,
 	}
 
 	return resource, nil

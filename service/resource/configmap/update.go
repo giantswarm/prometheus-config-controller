@@ -2,6 +2,8 @@ package configmap
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/pkg/api/v1"
@@ -64,6 +66,10 @@ func (r *Resource) ProcessUpdateState(ctx context.Context, obj, updateState inte
 		} else if err != nil {
 			return microerror.Mask(err)
 		}
+
+		// HACK(joe): Wait for the updated configmap to be present in the prometheus container.
+		r.logger.Log("debug", fmt.Sprintf("waiting %v before reloading", r.reloadWaitTime))
+		time.Sleep(r.reloadWaitTime)
 
 		if err := r.prometheusReloader.Reload(); err != nil {
 			return microerror.Mask(err)
