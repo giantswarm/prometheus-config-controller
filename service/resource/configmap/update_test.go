@@ -6,7 +6,6 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/davecgh/go-spew/spew"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -192,7 +191,6 @@ func Test_Resource_ConfigMap_GetUpdateState(t *testing.T) {
 		resourceConfig.ConfigMapKey = configMapKey
 		resourceConfig.ConfigMapName = configMapName
 		resourceConfig.ConfigMapNamespace = configMapNamespace
-		resourceConfig.ReloadWaitTime = 1 * time.Second
 
 		resource, err := New(resourceConfig)
 		if err != nil {
@@ -383,7 +381,6 @@ func Test_Resource_ConfigMap_ProcessUpdateState(t *testing.T) {
 		resourceConfig.ConfigMapKey = configMapKey
 		resourceConfig.ConfigMapName = configMapName
 		resourceConfig.ConfigMapNamespace = configMapNamespace
-		resourceConfig.ReloadWaitTime = 1 * time.Second
 
 		resource, err := New(resourceConfig)
 		if err != nil {
@@ -483,7 +480,6 @@ func Test_Resource_ConfigMap_Reload(t *testing.T) {
 	resourceConfig.ConfigMapKey = configMapKey
 	resourceConfig.ConfigMapName = configMapName
 	resourceConfig.ConfigMapNamespace = configMapNamespace
-	resourceConfig.ReloadWaitTime = 1 * time.Second
 
 	resource, err := New(resourceConfig)
 	if err != nil {
@@ -561,7 +557,6 @@ func Test_Resource_ConfigMap_Reload_Count(t *testing.T) {
 	resourceConfig.ConfigMapKey = configMapKey
 	resourceConfig.ConfigMapName = configMapName
 	resourceConfig.ConfigMapNamespace = configMapNamespace
-	resourceConfig.ReloadWaitTime = 1 * time.Second
 
 	resource, err := New(resourceConfig)
 	if err != nil {

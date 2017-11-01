@@ -440,7 +440,6 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 		resourceConfig.ConfigMapKey = configMapKey
 		resourceConfig.ConfigMapName = configMapName
 		resourceConfig.ConfigMapNamespace = configMapNamespace
-		resourceConfig.ReloadWaitTime = 1 * time.Second
 
 		resource, err := New(resourceConfig)
 		if err != nil {

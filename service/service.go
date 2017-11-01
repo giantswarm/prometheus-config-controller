@@ -155,7 +155,6 @@ func New(config Config) (*Service, error) {
 		configMapConfig.ConfigMapKey = config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Key)
 		configMapConfig.ConfigMapName = config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Name)
 		configMapConfig.ConfigMapNamespace = config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Namespace)
-		configMapConfig.ReloadWaitTime = config.Viper.GetDuration(config.Flag.Service.Resource.ConfigMap.ReloadWaitTime)
 
 		newConfigMapResource, err = configmap.New(configMapConfig)
 		if err != nil {

@@ -4,7 +4,6 @@ import (
 	"context"
 	"reflect"
 	"testing"
-	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -72,7 +71,6 @@ func Test_Resource_ConfigMap_GetCurrentState(t *testing.T) {
 		resourceConfig.ConfigMapKey = "prometheus.yml"
 		resourceConfig.ConfigMapName = configMapName
 		resourceConfig.ConfigMapNamespace = configMapNamespace
-		resourceConfig.ReloadWaitTime = 1 * time.Second
 
 		resource, err := New(resourceConfig)
 		if err != nil {
