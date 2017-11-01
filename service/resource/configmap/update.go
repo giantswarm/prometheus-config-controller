@@ -64,10 +64,12 @@ func (r *Resource) ProcessUpdateState(ctx context.Context, obj, updateState inte
 		} else if err != nil {
 			return microerror.Mask(err)
 		}
+	}
 
-		if err := r.prometheusReloader.Reload(); err != nil {
-			return microerror.Mask(err)
-		}
+	// We attempt to reload Prometheus even if the configmap hasn't updated,
+	// as the PrometheusReloader takes care that we don't reload too often.
+	if err := r.prometheusReloader.Reload(); err != nil {
+		return microerror.Mask(err)
 	}
 
 	return nil

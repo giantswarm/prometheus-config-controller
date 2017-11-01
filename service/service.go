@@ -114,9 +114,13 @@ func New(config Config) (*Service, error) {
 	{
 		prometheusConfig := prometheus.DefaultConfig()
 
+		prometheusConfig.K8sClient = newK8sClient
 		prometheusConfig.Logger = config.Logger
 
 		prometheusConfig.Address = config.Viper.GetString(config.Flag.Service.Prometheus.Address)
+		prometheusConfig.ConfigMapKey = config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Key)
+		prometheusConfig.ConfigMapName = config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Name)
+		prometheusConfig.ConfigMapNamespace = config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Namespace)
 
 		newPrometheusReloader, err = prometheus.New(prometheusConfig)
 		if err != nil {
