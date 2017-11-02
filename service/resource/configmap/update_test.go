@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/davecgh/go-spew/spew"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -485,6 +486,7 @@ func Test_Resource_ConfigMap_Reload(t *testing.T) {
 	prometheusConfig.ConfigMapKey = configMapKey
 	prometheusConfig.ConfigMapName = configMapName
 	prometheusConfig.ConfigMapNamespace = configMapNamespace
+	prometheusConfig.MinimumReloadTime = 1 * time.Second
 
 	prometheusReloader, err := prometheus.New(prometheusConfig)
 	if err != nil {
@@ -558,13 +560,16 @@ func Test_Resource_ConfigMap_Reload(t *testing.T) {
 		t.Fatalf("error returned updating configmap: %s\n", err)
 	}
 
+	// Wait out the rate limit
+	time.Sleep(2 * time.Second)
+
 	// Check that a nil processing does not cause a reload.
 	if err := resource.ProcessUpdateState(context.TODO(), v1.Service{}, nil); err != nil {
 		t.Fatalf("error returned processing update state: %s\n", err)
 	}
 
 	if configRequestCount != 2 {
-		t.Fatalf("incorrect config request coun after nil update - should be 2, was: %d", configRequestCount)
+		t.Fatalf("incorrect config request count after nil update - should be 2, was: %d", configRequestCount)
 	}
 	if reloadRequestCount != 1 {
 		t.Fatalf("incorrect reload request count after nil update - should be 1, was: %d", reloadRequestCount)

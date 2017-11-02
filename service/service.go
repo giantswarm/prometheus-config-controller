@@ -121,6 +121,7 @@ func New(config Config) (*Service, error) {
 		prometheusConfig.ConfigMapKey = config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Key)
 		prometheusConfig.ConfigMapName = config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Name)
 		prometheusConfig.ConfigMapNamespace = config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Namespace)
+		prometheusConfig.MinimumReloadTime = config.Viper.GetDuration(config.Flag.Service.Resource.ConfigMap.MinimumReloadTime)
 
 		newPrometheusReloader, err = prometheus.New(prometheusConfig)
 		if err != nil {

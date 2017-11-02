@@ -19,6 +19,15 @@ var (
 		},
 	)
 
+	configurationReloadIgnoredCount = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Namespace: prometheusNamespace,
+			Subsystem: prometheusSubsystem,
+			Name:      "configuration_reload_ignored_count",
+			Help:      "Count of the times we have ignored a reload request due to rate limiting.",
+		},
+	)
+
 	configurationReloadRequiredCount = prometheus.NewCounter(
 		prometheus.CounterOpts{
 			Namespace: prometheusNamespace,
@@ -40,6 +49,7 @@ var (
 
 func init() {
 	prometheus.MustRegister(configurationReloadCheckCount)
+	prometheus.MustRegister(configurationReloadIgnoredCount)
 	prometheus.MustRegister(configurationReloadRequiredCount)
 	prometheus.MustRegister(configurationReloadCount)
 }

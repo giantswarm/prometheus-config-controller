@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
@@ -39,6 +40,7 @@ func Test_Prometheus_New(t *testing.T) {
 					ConfigMapKey:       "prometheus.yml",
 					ConfigMapName:      "prometheus",
 					ConfigMapNamespace: "monitoring",
+					MinimumReloadTime:  2 * time.Minute,
 				}
 			},
 
@@ -56,6 +58,7 @@ func Test_Prometheus_New(t *testing.T) {
 					ConfigMapKey:       "prometheus.yml",
 					ConfigMapName:      "prometheus",
 					ConfigMapNamespace: "monitoring",
+					MinimumReloadTime:  2 * time.Minute,
 				}
 			},
 
@@ -73,6 +76,7 @@ func Test_Prometheus_New(t *testing.T) {
 					ConfigMapKey:       "prometheus.yml",
 					ConfigMapName:      "prometheus",
 					ConfigMapNamespace: "monitoring",
+					MinimumReloadTime:  2 * time.Minute,
 				}
 			},
 
@@ -90,6 +94,7 @@ func Test_Prometheus_New(t *testing.T) {
 					ConfigMapKey:       "",
 					ConfigMapName:      "prometheus",
 					ConfigMapNamespace: "monitoring",
+					MinimumReloadTime:  2 * time.Minute,
 				}
 			},
 
@@ -107,6 +112,7 @@ func Test_Prometheus_New(t *testing.T) {
 					ConfigMapKey:       "prometheus.yml",
 					ConfigMapName:      "",
 					ConfigMapNamespace: "monitoring",
+					MinimumReloadTime:  2 * time.Minute,
 				}
 			},
 
@@ -124,6 +130,25 @@ func Test_Prometheus_New(t *testing.T) {
 					ConfigMapKey:       "prometheus.yml",
 					ConfigMapName:      "prometheus",
 					ConfigMapNamespace: "",
+					MinimumReloadTime:  2 * time.Minute,
+				}
+			},
+
+			expectedErrorHandler: IsInvalidConfig,
+		},
+
+		// Test that the minimum reload time must not be zero.
+		{
+			config: func() Config {
+				return Config{
+					K8sClient: fake.NewSimpleClientset(),
+					Logger:    microloggertest.New(),
+
+					Address:            "http://127.0.0.1:8080",
+					ConfigMapKey:       "prometheus.yml",
+					ConfigMapName:      "prometheus",
+					ConfigMapNamespace: "",
+					MinimumReloadTime:  time.Duration(0),
 				}
 			},
 
@@ -141,6 +166,7 @@ func Test_Prometheus_New(t *testing.T) {
 					ConfigMapKey:       "prometheus.yml",
 					ConfigMapName:      "prometheus",
 					ConfigMapNamespace: "monitoring",
+					MinimumReloadTime:  2 * time.Minute,
 				}
 			},
 
@@ -366,6 +392,7 @@ func Test_Prometheus_Reload(t *testing.T) {
 		prometheusReloaderConfig.ConfigMapKey = configMapKey
 		prometheusReloaderConfig.ConfigMapName = configMapName
 		prometheusReloaderConfig.ConfigMapNamespace = configMapNamespace
+		prometheusReloaderConfig.MinimumReloadTime = 1 * time.Second
 
 		service, err := New(prometheusReloaderConfig)
 		if err != nil {
