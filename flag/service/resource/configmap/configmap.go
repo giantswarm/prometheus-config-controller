@@ -1,7 +1,8 @@
 package configmap
 
 type ConfigMap struct {
-	Key       string
-	Name      string
-	Namespace string
+	Key               string
+	Name              string
+	Namespace         string
+	MinimumReloadTime string
 }

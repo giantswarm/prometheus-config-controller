@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"path"
 	"strings"
+	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -25,6 +26,7 @@ type Config struct {
 	ConfigMapKey       string
 	ConfigMapName      string
 	ConfigMapNamespace string
+	MinimumReloadTime  time.Duration
 }
 
 func DefaultConfig() Config {
@@ -36,6 +38,7 @@ func DefaultConfig() Config {
 		ConfigMapKey:       "",
 		ConfigMapName:      "",
 		ConfigMapNamespace: "",
+		MinimumReloadTime:  0,
 	}
 }
 
@@ -48,6 +51,9 @@ type Service struct {
 	configMapKey       string
 	configMapName      string
 	configMapNamespace string
+	minimumReloadTime  time.Duration
+
+	lastReloadTime time.Time
 }
 
 func New(config Config) (*Service, error) {
@@ -70,6 +76,9 @@ func New(config Config) (*Service, error) {
 	if config.ConfigMapNamespace == "" {
 		return nil, microerror.Maskf(invalidConfigError, "config.ConfigMapNamespace must not be empty")
 	}
+	if config.MinimumReloadTime == 0 {
+		return nil, microerror.Maskf(invalidConfigError, "config.MinimumReloadTime must not be zero")
+	}
 
 	service := &Service{
 		k8sClient: config.K8sClient,
@@ -79,6 +88,9 @@ func New(config Config) (*Service, error) {
 		configMapKey:       config.ConfigMapKey,
 		configMapName:      config.ConfigMapName,
 		configMapNamespace: config.ConfigMapNamespace,
+		minimumReloadTime:  config.MinimumReloadTime,
+
+		lastReloadTime: time.Time{},
 	}
 
 	return service, nil
@@ -99,10 +111,28 @@ func (s *Service) Reload() error {
 	return nil
 }
 
+func (s *Service) isReloadRateLimited() bool {
+	timeSinceLastReload := time.Since(s.lastReloadTime)
+
+	if timeSinceLastReload < s.minimumReloadTime {
+		s.logger.Log("debug", "ignoring reload request, only %t since last reload, minimum time between is %t", timeSinceLastReload, s.minimumReloadTime)
+		configurationReloadIgnoredCount.Inc()
+
+		return true
+	}
+	s.lastReloadTime = time.Now()
+
+	return false
+}
+
 func (s *Service) isReloadRequired() (bool, error) {
 	s.logger.Log("debug", "checking if reload is required")
 
 	configurationReloadCheckCount.Inc()
+
+	if s.isReloadRateLimited() {
+		return false, nil
+	}
 
 	kubernetesConfiguration, err := s.getConfigFromKubernetes()
 	if err != nil {
