@@ -14,6 +14,9 @@ import (
 const (
 	// httpsScheme is the scheme for https connections.
 	httpsScheme = "https"
+
+	// jobNamePrefix is the prefix for job names.
+	jobNamePrefix = "guest-cluster"
 )
 
 // GetTarget takes a Kubernetes Service, and returns a LabelSet,
@@ -39,7 +42,7 @@ func GetScrapeConfigs(services []v1.Service, certificateDirectory string) ([]con
 		}
 
 		scrapeConfig := config.ScrapeConfig{
-			JobName: clusterID,
+			JobName: fmt.Sprintf("%s-%s", jobNamePrefix, clusterID),
 			Scheme:  httpsScheme,
 			HTTPClientConfig: config.HTTPClientConfig{
 				TLSConfig: config.TLSConfig{
