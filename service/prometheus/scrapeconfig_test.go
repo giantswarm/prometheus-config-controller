@@ -92,7 +92,7 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 
 			expectedScrapeConfigs: []config.ScrapeConfig{
 				{
-					JobName: "xa5ly",
+					JobName: "guest-cluster-xa5ly",
 					Scheme:  "https",
 					HTTPClientConfig: config.HTTPClientConfig{
 						TLSConfig: config.TLSConfig{
@@ -142,7 +142,7 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 
 			expectedScrapeConfigs: []config.ScrapeConfig{
 				{
-					JobName: "0ba9v",
+					JobName: "guest-cluster-0ba9v",
 					Scheme:  "https",
 					HTTPClientConfig: config.HTTPClientConfig{
 						TLSConfig: config.TLSConfig{
@@ -164,7 +164,7 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 					},
 				},
 				{
-					JobName: "xa5ly",
+					JobName: "guest-cluster-xa5ly",
 					Scheme:  "https",
 					HTTPClientConfig: config.HTTPClientConfig{
 						TLSConfig: config.TLSConfig{
@@ -214,7 +214,7 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 
 			expectedScrapeConfigs: []config.ScrapeConfig{
 				{
-					JobName: "xa5ly",
+					JobName: "guest-cluster-xa5ly",
 					Scheme:  "https",
 					HTTPClientConfig: config.HTTPClientConfig{
 						TLSConfig: config.TLSConfig{
@@ -283,7 +283,7 @@ func Test_Prometheus_GetScrapeConfigs_Deterministic(t *testing.T) {
 
 	expectedScrapeConfigs := []config.ScrapeConfig{
 		{
-			JobName: "0ba9v",
+			JobName: "guest-cluster-0ba9v",
 			Scheme:  "https",
 			HTTPClientConfig: config.HTTPClientConfig{
 				TLSConfig: config.TLSConfig{
@@ -305,7 +305,7 @@ func Test_Prometheus_GetScrapeConfigs_Deterministic(t *testing.T) {
 			},
 		},
 		{
-			JobName: "xa5ly",
+			JobName: "guest-cluster-xa5ly",
 			Scheme:  "https",
 			HTTPClientConfig: config.HTTPClientConfig{
 				TLSConfig: config.TLSConfig{
@@ -354,7 +354,7 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
 	}{
 		{
 			scrapeConfig: config.ScrapeConfig{
-				JobName: "xa5ly",
+				JobName: "guest-cluster-xa5ly",
 				Scheme:  "https",
 				HTTPClientConfig: config.HTTPClientConfig{
 					TLSConfig: config.TLSConfig{
@@ -376,7 +376,7 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
 				},
 			},
 
-			expectedConfig: `job_name: xa5ly
+			expectedConfig: `job_name: guest-cluster-xa5ly
 scheme: https
 static_configs:
 - targets:

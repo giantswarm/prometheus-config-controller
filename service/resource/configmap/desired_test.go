@@ -217,7 +217,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 						Scheme:         "http",
 					},
 					{
-						JobName: "xa5ly",
+						JobName: "guest-cluster-xa5ly",
 						Scheme:  "https",
 						HTTPClientConfig: config.HTTPClientConfig{
 							TLSConfig: config.TLSConfig{
@@ -260,7 +260,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 						Scheme:         "http",
 					},
 					{
-						JobName: "xa5ly",
+						JobName: "guest-cluster-xa5ly",
 						Scheme:  "https",
 						HTTPClientConfig: config.HTTPClientConfig{
 							TLSConfig: config.TLSConfig{
@@ -320,7 +320,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 				},
 				ScrapeConfigs: []*config.ScrapeConfig{
 					{
-						JobName: "xa5ly",
+						JobName: "guest-cluster-xa5ly",
 						Scheme:  "https",
 						HTTPClientConfig: config.HTTPClientConfig{
 							TLSConfig: config.TLSConfig{
@@ -378,7 +378,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 				},
 				ScrapeConfigs: []*config.ScrapeConfig{
 					{
-						JobName: "0ba9v",
+						JobName: "guest-cluster-0ba9v",
 						Scheme:  "https",
 						HTTPClientConfig: config.HTTPClientConfig{
 							TLSConfig: config.TLSConfig{
@@ -400,7 +400,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 						},
 					},
 					{
-						JobName: "xa5ly",
+						JobName: "guest-cluster-xa5ly",
 						Scheme:  "https",
 						HTTPClientConfig: config.HTTPClientConfig{
 							TLSConfig: config.TLSConfig{
