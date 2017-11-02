@@ -298,6 +298,27 @@ func Test_Prometheus_Reload(t *testing.T) {
 			expectedErrorHandler: IsReloadError,
 		},
 
+		// Test that an error is returned if the config route returns an empty string.
+		{
+			configMap: &v1.ConfigMap{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      configMapName,
+					Namespace: configMapNamespace,
+				},
+				Data: map[string]string{
+					"prometheus.yml": `bar`,
+				},
+			},
+			handler: func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path == prometheusConfigPath {
+					io.WriteString(w, "")
+					return
+				}
+			},
+
+			expectedErrorHandler: IsReloadError,
+		},
+
 		// Test that an error is returned if the reload route returns an error.
 		{
 			configMap: &v1.ConfigMap{
