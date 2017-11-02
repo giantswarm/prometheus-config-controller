@@ -486,7 +486,7 @@ func Test_Resource_ConfigMap_Reload(t *testing.T) {
 	prometheusConfig.ConfigMapKey = configMapKey
 	prometheusConfig.ConfigMapName = configMapName
 	prometheusConfig.ConfigMapNamespace = configMapNamespace
-	prometheusConfig.MinimumReloadTime = 1 * time.Second
+	prometheusConfig.MinimumReloadTime = 10 * time.Millisecond
 
 	prometheusReloader, err := prometheus.New(prometheusConfig)
 	if err != nil {
@@ -561,7 +561,7 @@ func Test_Resource_ConfigMap_Reload(t *testing.T) {
 	}
 
 	// Wait out the rate limit
-	time.Sleep(2 * time.Second)
+	time.Sleep(20 * time.Millisecond)
 
 	// Check that a nil processing does not cause a reload.
 	if err := resource.ProcessUpdateState(context.TODO(), v1.Service{}, nil); err != nil {
