@@ -108,7 +108,10 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 								Targets: []model.LabelSet{
 									model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
 								},
-								Labels: model.LabelSet{ClusterLabel: ""},
+								Labels: model.LabelSet{
+									ClusterLabel:   "",
+									ClusterIDLabel: "xa5ly",
+								},
 							},
 						},
 					},
@@ -158,7 +161,10 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 								Targets: []model.LabelSet{
 									model.LabelSet{model.AddressLabel: "apiserver.0ba9v"},
 								},
-								Labels: model.LabelSet{ClusterLabel: ""},
+								Labels: model.LabelSet{
+									ClusterLabel:   "",
+									ClusterIDLabel: "0ba9v",
+								},
 							},
 						},
 					},
@@ -180,7 +186,10 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 								Targets: []model.LabelSet{
 									model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
 								},
-								Labels: model.LabelSet{ClusterLabel: ""},
+								Labels: model.LabelSet{
+									ClusterLabel:   "",
+									ClusterIDLabel: "xa5ly",
+								},
 							},
 						},
 					},
@@ -231,7 +240,10 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 									model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
 									model.LabelSet{model.AddressLabel: "kubelet.xa5ly"},
 								},
-								Labels: model.LabelSet{ClusterLabel: ""},
+								Labels: model.LabelSet{
+									ClusterLabel:   "",
+									ClusterIDLabel: "xa5ly",
+								},
 							},
 						},
 					},
@@ -299,7 +311,10 @@ func Test_Prometheus_GetScrapeConfigs_Deterministic(t *testing.T) {
 						Targets: []model.LabelSet{
 							model.LabelSet{model.AddressLabel: "apiserver.0ba9v"},
 						},
-						Labels: model.LabelSet{ClusterLabel: ""},
+						Labels: model.LabelSet{
+							ClusterLabel:   "",
+							ClusterIDLabel: "0ba9v",
+						},
 					},
 				},
 			},
@@ -321,7 +336,10 @@ func Test_Prometheus_GetScrapeConfigs_Deterministic(t *testing.T) {
 						Targets: []model.LabelSet{
 							model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
 						},
-						Labels: model.LabelSet{ClusterLabel: ""},
+						Labels: model.LabelSet{
+							ClusterLabel:   "",
+							ClusterIDLabel: "xa5ly",
+						},
 					},
 				},
 			},
@@ -370,7 +388,10 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
 							Targets: []model.LabelSet{
 								model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
 							},
-							Labels: model.LabelSet{ClusterLabel: ""},
+							Labels: model.LabelSet{
+								ClusterLabel:   "",
+								ClusterIDLabel: "xa5ly",
+							},
 						},
 					},
 				},
@@ -382,6 +403,7 @@ static_configs:
 - targets:
   - apiserver.xa5ly
   labels:
+    cluster_id: xa5ly
     prometheus_config_controller: ""
 tls_config:
   ca_file: /certs/xa5ly-ca.pem

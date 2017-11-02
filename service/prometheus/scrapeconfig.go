@@ -55,7 +55,10 @@ func GetScrapeConfigs(services []v1.Service, certificateDirectory string) ([]con
 				StaticConfigs: []*config.TargetGroup{
 					{
 						Targets: targets,
-						Labels:  model.LabelSet{ClusterLabel: ""},
+						Labels: model.LabelSet{
+							ClusterLabel:   "",
+							ClusterIDLabel: model.LabelValue(clusterID),
+						},
 					},
 				},
 			},

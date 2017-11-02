@@ -233,7 +233,10 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 									Targets: []model.LabelSet{
 										model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
 									},
-									Labels: model.LabelSet{prometheus.ClusterLabel: ""},
+									Labels: model.LabelSet{
+										prometheus.ClusterLabel:   "",
+										prometheus.ClusterIDLabel: "xa5ly",
+									},
 								},
 							},
 						},
@@ -276,7 +279,10 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 									Targets: []model.LabelSet{
 										model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
 									},
-									Labels: model.LabelSet{prometheus.ClusterLabel: ""},
+									Labels: model.LabelSet{
+										prometheus.ClusterLabel:   "",
+										prometheus.ClusterIDLabel: "xa5ly",
+									},
 								},
 							},
 						},
@@ -336,7 +342,10 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 									Targets: []model.LabelSet{
 										model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
 									},
-									Labels: model.LabelSet{prometheus.ClusterLabel: ""},
+									Labels: model.LabelSet{
+										prometheus.ClusterLabel:   "",
+										prometheus.ClusterIDLabel: "xa5ly",
+									},
 								},
 							},
 						},
@@ -394,7 +403,10 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 									Targets: []model.LabelSet{
 										model.LabelSet{model.AddressLabel: "apiserver.0ba9v"},
 									},
-									Labels: model.LabelSet{prometheus.ClusterLabel: ""},
+									Labels: model.LabelSet{
+										prometheus.ClusterLabel:   "",
+										prometheus.ClusterIDLabel: "0ba9v",
+									},
 								},
 							},
 						},
@@ -416,7 +428,10 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 									Targets: []model.LabelSet{
 										model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
 									},
-									Labels: model.LabelSet{prometheus.ClusterLabel: ""},
+									Labels: model.LabelSet{
+										prometheus.ClusterLabel:   "",
+										prometheus.ClusterIDLabel: "xa5ly",
+									},
 								},
 							},
 						},

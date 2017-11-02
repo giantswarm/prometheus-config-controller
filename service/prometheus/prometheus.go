@@ -5,11 +5,17 @@ import (
 )
 
 const (
+	// ClusterAnnotation is the Kubernetes annotation that identifies Services
+	// that the prometheus-config-controller should scrape.
 	ClusterAnnotation = "giantswarm.io/prometheus-cluster"
 
 	// ClusterLabel is the Prometheus label used to identify jobs
 	// managed by the prometheus-config-controller.
 	ClusterLabel = "prometheus_config_controller"
+
+	// ClusterIDLabel is the Prometheus label used to identify guest cluster
+	// metrics by external clients.
+	ClusterIDLabel = "cluster_id"
 )
 
 // GetClusterID returns the value of the cluster annotation.
