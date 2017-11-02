@@ -378,28 +378,6 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 				},
 				ScrapeConfigs: []*config.ScrapeConfig{
 					{
-						JobName: "xa5ly",
-						Scheme:  "https",
-						HTTPClientConfig: config.HTTPClientConfig{
-							TLSConfig: config.TLSConfig{
-								CAFile:             "/certs/xa5ly-ca.pem",
-								CertFile:           "/certs/xa5ly-crt.pem",
-								KeyFile:            "/certs/xa5ly-key.pem",
-								InsecureSkipVerify: false,
-							},
-						},
-						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-							StaticConfigs: []*config.TargetGroup{
-								{
-									Targets: []model.LabelSet{
-										model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
-									},
-									Labels: model.LabelSet{prometheus.ClusterLabel: ""},
-								},
-							},
-						},
-					},
-					{
 						JobName: "0ba9v",
 						Scheme:  "https",
 						HTTPClientConfig: config.HTTPClientConfig{
@@ -415,6 +393,28 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 								{
 									Targets: []model.LabelSet{
 										model.LabelSet{model.AddressLabel: "apiserver.0ba9v"},
+									},
+									Labels: model.LabelSet{prometheus.ClusterLabel: ""},
+								},
+							},
+						},
+					},
+					{
+						JobName: "xa5ly",
+						Scheme:  "https",
+						HTTPClientConfig: config.HTTPClientConfig{
+							TLSConfig: config.TLSConfig{
+								CAFile:             "/certs/xa5ly-ca.pem",
+								CertFile:           "/certs/xa5ly-crt.pem",
+								KeyFile:            "/certs/xa5ly-key.pem",
+								InsecureSkipVerify: false,
+							},
+						},
+						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
+							StaticConfigs: []*config.TargetGroup{
+								{
+									Targets: []model.LabelSet{
+										model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
 									},
 									Labels: model.LabelSet{prometheus.ClusterLabel: ""},
 								},

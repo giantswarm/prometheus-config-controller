@@ -2,6 +2,7 @@ package prometheus
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/config"
@@ -59,6 +60,10 @@ func GetScrapeConfigs(services []v1.Service, certificateDirectory string) ([]con
 
 		scrapeConfigs = append(scrapeConfigs, scrapeConfig)
 	}
+
+	sort.Slice(scrapeConfigs, func(i, j int) bool {
+		return scrapeConfigs[i].JobName < scrapeConfigs[j].JobName
+	})
 
 	return scrapeConfigs, nil
 }
