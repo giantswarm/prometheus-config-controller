@@ -100,36 +100,33 @@ func (s *Service) Reload() error {
 }
 
 func (s *Service) isReloadRequired() (bool, error) {
-	s.logger.Log("debug", fmt.Sprintf("checking if reload is required"))
+	s.logger.Log("debug", "checking if reload is required")
 
 	configurationReloadCheckCount.Inc()
 
-	currentConfigMapData, err := s.getCurrentConfigMapData()
+	kubernetesConfiguration, err := s.getConfigFromKubernetes()
 	if err != nil {
 		return false, microerror.Mask(err)
 	}
 
-	currentConfiguration, err := s.getCurrentConfig()
+	prometheusConfiguration, err := s.getConfigFromPrometheus()
 	if err != nil {
 		return false, microerror.Mask(err)
 	}
 
-	fmt.Printf("currentConfigMapData:\n%s\n", currentConfigMapData)
-	fmt.Printf("currentConfiguration:\n%s\n", currentConfiguration)
-
-	if currentConfigMapData != currentConfiguration {
+	if kubernetesConfiguration != prometheusConfiguration {
 		configurationReloadRequiredCount.Inc()
 
-		s.logger.Log("debug", "configmap and current configuration do not match, reload required")
+		s.logger.Log("debug", "kubernetes and prometheus configuration do not match, reload required")
 		return true, nil
 	}
 
-	s.logger.Log("debug", "configmap and current configuration match, reload not required")
+	s.logger.Log("debug", "kubernetes and prometheus configuration match, reload not required")
 	return false, nil
 }
 
-// getCurrentConfigMapData returns the configuration that is in the configmap.
-func (s *Service) getCurrentConfigMapData() (string, error) {
+// getConfigFromKubernetes returns the configuration that is in the configmap.
+func (s *Service) getConfigFromKubernetes() (string, error) {
 	s.logger.Log("debug", fmt.Sprintf("fetching configmap: %s/%s", s.configMapNamespace, s.configMapName))
 
 	configMap, err := s.k8sClient.CoreV1().ConfigMaps(s.configMapNamespace).Get(
@@ -147,8 +144,8 @@ func (s *Service) getCurrentConfigMapData() (string, error) {
 	return val, nil
 }
 
-// getCurrentConfig returns the configuration that is currently loaded in Prometheus.
-func (s *Service) getCurrentConfig() (string, error) {
+// getConfigFromPrometheus returns the configuration that is currently loaded in Prometheus.
+func (s *Service) getConfigFromPrometheus() (string, error) {
 	s.logger.Log("debug", "fetching current prometheus config")
 
 	configUrl, err := s.configUrl()
