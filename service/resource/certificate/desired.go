@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	prometheusclient "github.com/prometheus/client_golang/prometheus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/microerror"
@@ -20,7 +21,11 @@ const (
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
 	r.logger.Log("debug", "fetching all services")
+
+	servicesTimer := prometheusclient.NewTimer(kubernetesResource.WithLabelValues("services", "list"))
 	services, err := r.k8sClient.CoreV1().Services("").List(metav1.ListOptions{})
+	servicesTimer.ObserveDuration()
+
 	if err != nil {
 		return nil, microerror.Maskf(err, "an error occurred listing all services")
 	}
@@ -34,6 +39,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	for _, service := range validServices {
 		clusterID := prometheus.GetClusterID(service)
 
+		certificatesTimer := prometheusclient.NewTimer(kubernetesResource.WithLabelValues("secrets", "list"))
 		certificates, err := r.k8sClient.CoreV1().Secrets(r.certificateNamespace).List(metav1.ListOptions{
 			LabelSelector: fmt.Sprintf(
 				"clusterComponent=%s, clusterID=%s",
@@ -41,6 +47,8 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 				clusterID,
 			),
 		})
+		certificatesTimer.ObserveDuration()
+
 		if err != nil {
 			return nil, microerror.Maskf(err, "an error occurred fetching certificate for cluster: %s", clusterID)
 		}

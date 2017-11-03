@@ -18,8 +18,18 @@ var (
 			Help:      "Size of the prometheus configmap.",
 		},
 	)
+
+	kubernetesResource = prometheus.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Namespace: prometheusNamespace,
+			Name:      "kubernetes_resource",
+			Help:      "Histogram for actions against Kubernetes resources.",
+		},
+		[]string{"resource", "action"},
+	)
 )
 
 func init() {
 	prometheus.MustRegister(configmapSize)
+	prometheus.MustRegister(kubernetesResource)
 }

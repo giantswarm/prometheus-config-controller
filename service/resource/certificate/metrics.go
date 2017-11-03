@@ -18,8 +18,18 @@ var (
 			Help:      "Number of certificates on disk.",
 		},
 	)
+
+	kubernetesResource = prometheus.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Namespace: prometheusNamespace,
+			Name:      "kubernetes_resource",
+			Help:      "Histogram for actions against Kubernetes resources.",
+		},
+		[]string{"resource", "action"},
+	)
 )
 
 func init() {
 	prometheus.MustRegister(certificateCount)
+	prometheus.MustRegister(kubernetesResource)
 }
