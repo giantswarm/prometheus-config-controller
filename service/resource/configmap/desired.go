@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	prometheusclient "github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/prometheus/config"
 	"gopkg.in/yaml.v2"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -16,9 +17,13 @@ import (
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
 	r.logger.Log("debug", fmt.Sprintf("fetching configmap: %s/%s", r.configMapNamespace, r.configMapName))
+
+	configMapTimer := prometheusclient.NewTimer(kubernetesResource.WithLabelValues("configmap", "get"))
 	configMap, err := r.k8sClient.CoreV1().ConfigMaps(r.configMapNamespace).Get(
 		r.configMapName, metav1.GetOptions{},
 	)
+	configMapTimer.ObserveDuration()
+
 	if errors.IsNotFound(err) {
 		return nil, microerror.Maskf(configMapNotFoundError, "%s/%s", r.configMapNamespace, r.configMapName)
 	} else if err != nil {
@@ -36,7 +41,11 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	}
 
 	r.logger.Log("debug", fmt.Sprintf("fetching all services"))
+
+	servicesTimer := prometheusclient.NewTimer(kubernetesResource.WithLabelValues("services", "list"))
 	services, err := r.k8sClient.CoreV1().Services("").List(metav1.ListOptions{})
+	servicesTimer.ObserveDuration()
+
 	if err != nil {
 		return nil, microerror.Maskf(err, "an error occurred listing all services")
 	}

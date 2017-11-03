@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	prometheusclient "github.com/prometheus/client_golang/prometheus"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -16,9 +17,12 @@ import (
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
 	r.logger.Log("debug", fmt.Sprintf("fetching configmap: %s/%s", r.configMapNamespace, r.configMapName))
 
+	timer := prometheusclient.NewTimer(kubernetesResource.WithLabelValues("configmap", "get"))
 	configMap, err := r.k8sClient.CoreV1().ConfigMaps(r.configMapNamespace).Get(
 		r.configMapName, metav1.GetOptions{},
 	)
+	timer.ObserveDuration()
+
 	if errors.IsNotFound(err) {
 		r.logger.Log("debug", "configmap does not exist")
 		return nil, nil

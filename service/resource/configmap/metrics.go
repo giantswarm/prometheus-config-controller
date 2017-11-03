@@ -19,6 +19,16 @@ var (
 		},
 	)
 
+	kubernetesResource = prometheus.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Namespace: prometheusNamespace,
+			Subsystem: prometheusSubsystem,
+			Name:      "kubernetes_resource",
+			Help:      "Histogram for actions against Kubernetes resources.",
+		},
+		[]string{"resource", "action"},
+	)
+
 	scrapeConfigCount = prometheus.NewGauge(
 		prometheus.GaugeOpts{
 			Namespace: prometheusNamespace,
@@ -31,5 +41,6 @@ var (
 
 func init() {
 	prometheus.MustRegister(configmapSize)
+	prometheus.MustRegister(kubernetesResource)
 	prometheus.MustRegister(scrapeConfigCount)
 }

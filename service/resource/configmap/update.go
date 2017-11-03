@@ -3,6 +3,7 @@ package configmap
 import (
 	"context"
 
+	prometheusclient "github.com/prometheus/client_golang/prometheus"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/pkg/api/v1"
 
@@ -58,7 +59,11 @@ func (r *Resource) ProcessUpdateState(ctx context.Context, obj, updateState inte
 
 	if configMapToUpdate != nil {
 		r.logger.Log("debug", "updating configmap")
+
+		timer := prometheusclient.NewTimer(kubernetesResource.WithLabelValues("configmap", "update"))
 		_, err := r.k8sClient.CoreV1().ConfigMaps(r.configMapNamespace).Update(configMapToUpdate)
+		timer.ObserveDuration()
+
 		if errors.IsNotFound(err) {
 			return microerror.Mask(configMapNotFoundError)
 		} else if err != nil {
