@@ -56,6 +56,8 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Maskf(err, "an error occurred creating scrape configs")
 	}
 
+	scrapeConfigCount.Set(float64(len(scrapeConfigs)))
+
 	newPrometheusConfig, err := prometheus.UpdateConfig(*prometheusConfig, scrapeConfigs)
 	if err != nil {
 		return nil, microerror.Maskf(err, "an error occurred merging prometheus config")
