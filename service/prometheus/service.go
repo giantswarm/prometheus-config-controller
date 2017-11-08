@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"path"
 	"strings"
+	"sync"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -53,7 +54,9 @@ type Service struct {
 	configMapNamespace string
 	minimumReloadTime  time.Duration
 
-	lastReloadTime time.Time
+	isReloadRequested      bool
+	isReloadRequestedMutex sync.Mutex
+	lastReloadTime         time.Time
 }
 
 func New(config Config) (*Service, error) {
@@ -90,7 +93,9 @@ func New(config Config) (*Service, error) {
 		configMapNamespace: config.ConfigMapNamespace,
 		minimumReloadTime:  config.MinimumReloadTime,
 
-		lastReloadTime: time.Time{},
+		isReloadRequested:      false,
+		isReloadRequestedMutex: sync.Mutex{},
+		lastReloadTime:         time.Time{},
 	}
 
 	return service, nil
@@ -115,14 +120,29 @@ func (s *Service) isReloadRateLimited() bool {
 	timeSinceLastReload := time.Since(s.lastReloadTime)
 
 	if timeSinceLastReload < s.minimumReloadTime {
-		s.logger.Log("debug", "ignoring reload request, only %t since last reload, minimum time between is %t", timeSinceLastReload, s.minimumReloadTime)
+		s.logger.Log("debug", fmt.Sprintf("ignoring reload request, only %s since last reload, minimum time between is %s", timeSinceLastReload, s.minimumReloadTime))
 		configurationReloadIgnoredCount.Inc()
 
 		return true
 	}
-	s.lastReloadTime = time.Now()
 
 	return false
+}
+
+func (s *Service) RequestReload() {
+	s.logger.Log("debug", "reload requested")
+
+	s.isReloadRequestedMutex.Lock()
+	defer s.isReloadRequestedMutex.Unlock()
+
+	s.isReloadRequested = true
+}
+
+func (s *Service) IsReloadRequested() bool {
+	s.isReloadRequestedMutex.Lock()
+	defer s.isReloadRequestedMutex.Unlock()
+
+	return s.isReloadRequested
 }
 
 func (s *Service) isReloadRequired() (bool, error) {
@@ -132,6 +152,18 @@ func (s *Service) isReloadRequired() (bool, error) {
 
 	if s.isReloadRateLimited() {
 		return false, nil
+	}
+
+	if s.IsReloadRequested() {
+		s.logger.Log("debug", "reload was requested previously")
+
+		configurationReloadRequiredCount.Inc()
+
+		s.isReloadRequestedMutex.Lock()
+		s.isReloadRequested = false
+		s.isReloadRequestedMutex.Unlock()
+
+		return true, nil
 	}
 
 	kubernetesConfiguration, err := s.getConfigFromKubernetes()
@@ -232,6 +264,8 @@ func (s *Service) reload() error {
 	}
 
 	configurationReloadCount.Inc()
+
+	s.lastReloadTime = time.Now()
 
 	return nil
 }

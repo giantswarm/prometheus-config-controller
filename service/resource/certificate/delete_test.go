@@ -9,6 +9,8 @@ import (
 	"k8s.io/client-go/pkg/api/v1"
 
 	"github.com/giantswarm/micrologger/microloggertest"
+
+	"github.com/giantswarm/prometheus-config-controller/service/prometheus/prometheustest"
 )
 
 // Test_Resource_Certificate_GetDeleteState tests the GetDeleteState method.
@@ -21,6 +23,7 @@ func Test_Resource_Certificate_GetDeleteState(t *testing.T) {
 	resourceConfig.Fs = fs
 	resourceConfig.K8sClient = fakeK8sClient
 	resourceConfig.Logger = microloggertest.New()
+	resourceConfig.PrometheusReloader = prometheustest.New()
 
 	resourceConfig.CertificateComponentName = "prometheus"
 	resourceConfig.CertificateDirectory = "/certs"
@@ -52,6 +55,7 @@ func Test_Resource_Certificate_ProcessDeleteState(t *testing.T) {
 	resourceConfig.Fs = fs
 	resourceConfig.K8sClient = fakeK8sClient
 	resourceConfig.Logger = microloggertest.New()
+	resourceConfig.PrometheusReloader = prometheustest.New()
 
 	resourceConfig.CertificateComponentName = "prometheus"
 	resourceConfig.CertificateDirectory = "/certs"

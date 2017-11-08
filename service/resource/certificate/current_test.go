@@ -13,6 +13,8 @@ import (
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger/microloggertest"
+
+	"github.com/giantswarm/prometheus-config-controller/service/prometheus/prometheustest"
 )
 
 // Test_Resource_Certificate_GetCurrentState tests the GetCurrentState method.
@@ -98,6 +100,7 @@ func Test_Resource_Certificate_GetCurrentState(t *testing.T) {
 		resourceConfig.Fs = fs
 		resourceConfig.K8sClient = fakeK8sClient
 		resourceConfig.Logger = microloggertest.New()
+		resourceConfig.PrometheusReloader = prometheustest.New()
 
 		resourceConfig.CertificateComponentName = "prometheus"
 		resourceConfig.CertificateDirectory = test.certificateDirectory
