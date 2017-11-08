@@ -46,9 +46,10 @@ func GetScrapeConfigs(services []v1.Service, certificateDirectory string) ([]con
 			Scheme:  httpsScheme,
 			HTTPClientConfig: config.HTTPClientConfig{
 				TLSConfig: config.TLSConfig{
-					CAFile:   key.CAPath(certificateDirectory, clusterID),
-					CertFile: key.CrtPath(certificateDirectory, clusterID),
-					KeyFile:  key.KeyPath(certificateDirectory, clusterID),
+					CAFile:             key.CAPath(certificateDirectory, clusterID),
+					CertFile:           key.CrtPath(certificateDirectory, clusterID),
+					KeyFile:            key.KeyPath(certificateDirectory, clusterID),
+					InsecureSkipVerify: true,
 				},
 			},
 			ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
