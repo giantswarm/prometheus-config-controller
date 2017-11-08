@@ -99,7 +99,7 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 							CAFile:             "/certs/xa5ly-ca.pem",
 							CertFile:           "/certs/xa5ly-crt.pem",
 							KeyFile:            "/certs/xa5ly-key.pem",
-							InsecureSkipVerify: false,
+							InsecureSkipVerify: true,
 						},
 					},
 					ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
@@ -152,7 +152,7 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 							CAFile:             "/certs/0ba9v-ca.pem",
 							CertFile:           "/certs/0ba9v-crt.pem",
 							KeyFile:            "/certs/0ba9v-key.pem",
-							InsecureSkipVerify: false,
+							InsecureSkipVerify: true,
 						},
 					},
 					ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
@@ -177,7 +177,7 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 							CAFile:             "/certs/xa5ly-ca.pem",
 							CertFile:           "/certs/xa5ly-crt.pem",
 							KeyFile:            "/certs/xa5ly-key.pem",
-							InsecureSkipVerify: false,
+							InsecureSkipVerify: true,
 						},
 					},
 					ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
@@ -230,7 +230,7 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 							CAFile:             "/certs/xa5ly-ca.pem",
 							CertFile:           "/certs/xa5ly-crt.pem",
 							KeyFile:            "/certs/xa5ly-key.pem",
-							InsecureSkipVerify: false,
+							InsecureSkipVerify: true,
 						},
 					},
 					ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
@@ -302,7 +302,7 @@ func Test_Prometheus_GetScrapeConfigs_Deterministic(t *testing.T) {
 					CAFile:             "/certs/0ba9v-ca.pem",
 					CertFile:           "/certs/0ba9v-crt.pem",
 					KeyFile:            "/certs/0ba9v-key.pem",
-					InsecureSkipVerify: false,
+					InsecureSkipVerify: true,
 				},
 			},
 			ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
@@ -327,7 +327,7 @@ func Test_Prometheus_GetScrapeConfigs_Deterministic(t *testing.T) {
 					CAFile:             "/certs/xa5ly-ca.pem",
 					CertFile:           "/certs/xa5ly-crt.pem",
 					KeyFile:            "/certs/xa5ly-key.pem",
-					InsecureSkipVerify: false,
+					InsecureSkipVerify: true,
 				},
 			},
 			ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
@@ -379,7 +379,7 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
 						CAFile:             "/certs/xa5ly-ca.pem",
 						CertFile:           "/certs/xa5ly-crt.pem",
 						KeyFile:            "/certs/xa5ly-key.pem",
-						InsecureSkipVerify: false,
+						InsecureSkipVerify: true,
 					},
 				},
 				ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
@@ -409,7 +409,7 @@ tls_config:
   ca_file: /certs/xa5ly-ca.pem
   cert_file: /certs/xa5ly-crt.pem
   key_file: /certs/xa5ly-key.pem
-  insecure_skip_verify: false
+  insecure_skip_verify: true
 `,
 		},
 	}

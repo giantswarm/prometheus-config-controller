@@ -224,7 +224,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 								CAFile:             "/certs/xa5ly-ca.pem",
 								CertFile:           "/certs/xa5ly-crt.pem",
 								KeyFile:            "/certs/xa5ly-key.pem",
-								InsecureSkipVerify: false,
+								InsecureSkipVerify: true,
 							},
 						},
 						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
@@ -270,7 +270,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 								CAFile:             "/certs/xa5ly-ca.pem",
 								CertFile:           "/certs/xa5ly-crt.pem",
 								KeyFile:            "/certs/xa5ly-key.pem",
-								InsecureSkipVerify: false,
+								InsecureSkipVerify: true,
 							},
 						},
 						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
@@ -333,7 +333,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 								CAFile:             "/certs/xa5ly-ca.pem",
 								CertFile:           "/certs/xa5ly-crt.pem",
 								KeyFile:            "/certs/xa5ly-key.pem",
-								InsecureSkipVerify: false,
+								InsecureSkipVerify: true,
 							},
 						},
 						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
@@ -394,7 +394,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 								CAFile:             "/certs/0ba9v-ca.pem",
 								CertFile:           "/certs/0ba9v-crt.pem",
 								KeyFile:            "/certs/0ba9v-key.pem",
-								InsecureSkipVerify: false,
+								InsecureSkipVerify: true,
 							},
 						},
 						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
@@ -419,7 +419,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 								CAFile:             "/certs/xa5ly-ca.pem",
 								CertFile:           "/certs/xa5ly-crt.pem",
 								KeyFile:            "/certs/xa5ly-key.pem",
-								InsecureSkipVerify: false,
+								InsecureSkipVerify: true,
 							},
 						},
 						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
