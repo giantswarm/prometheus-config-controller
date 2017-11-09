@@ -79,6 +79,9 @@ func (r *Resource) ProcessUpdateState(ctx context.Context, obj, updateState inte
 		}
 	}
 
+	r.logger.Log("debug", "certificates have been updated, requesting reload")
+	r.prometheusReloader.RequestReload()
+
 	return nil
 }
 

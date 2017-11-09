@@ -6,6 +6,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/framework"
+	"github.com/giantswarm/prometheus-config-controller/service/prometheus"
 	"github.com/spf13/afero"
 	"k8s.io/client-go/kubernetes"
 )
@@ -15,9 +16,10 @@ const (
 )
 
 type Config struct {
-	Fs        afero.Fs
-	K8sClient kubernetes.Interface
-	Logger    micrologger.Logger
+	Fs                 afero.Fs
+	K8sClient          kubernetes.Interface
+	Logger             micrologger.Logger
+	PrometheusReloader prometheus.PrometheusReloader
 
 	CertificateComponentName string
 	CertificateDirectory     string
@@ -27,9 +29,10 @@ type Config struct {
 
 func DefaultConfig() Config {
 	return Config{
-		Fs:        nil,
-		K8sClient: nil,
-		Logger:    nil,
+		Fs:                 nil,
+		K8sClient:          nil,
+		Logger:             nil,
+		PrometheusReloader: nil,
 
 		CertificateComponentName: "",
 		CertificateDirectory:     "",
@@ -39,9 +42,10 @@ func DefaultConfig() Config {
 }
 
 type Resource struct {
-	fs        afero.Fs
-	k8sClient kubernetes.Interface
-	logger    micrologger.Logger
+	fs                 afero.Fs
+	k8sClient          kubernetes.Interface
+	logger             micrologger.Logger
+	prometheusReloader prometheus.PrometheusReloader
 
 	certificateComponentName string
 	certificateDirectory     string
@@ -59,6 +63,9 @@ func New(config Config) (*Resource, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
 	}
+	if config.PrometheusReloader == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.PrometheusReloader must not be empty")
+	}
 
 	if config.CertificateComponentName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "config.CertificateComponentName must not be empty")
@@ -74,9 +81,10 @@ func New(config Config) (*Resource, error) {
 	}
 
 	resource := &Resource{
-		fs:        config.Fs,
-		k8sClient: config.K8sClient,
-		logger:    config.Logger,
+		fs:                 config.Fs,
+		k8sClient:          config.K8sClient,
+		logger:             config.Logger,
+		prometheusReloader: config.PrometheusReloader,
 
 		certificateComponentName: config.CertificateComponentName,
 		certificateDirectory:     config.CertificateDirectory,

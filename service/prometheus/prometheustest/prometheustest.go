@@ -10,3 +10,5 @@ func New() *TestService {
 func (s *TestService) Reload() error {
 	return nil
 }
+
+func (s *TestService) RequestReload() {}

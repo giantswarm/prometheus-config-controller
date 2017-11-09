@@ -136,6 +136,7 @@ func New(config Config) (*Service, error) {
 		certificateConfig.Fs = newFs
 		certificateConfig.K8sClient = newK8sClient
 		certificateConfig.Logger = config.Logger
+		certificateConfig.PrometheusReloader = newPrometheusReloader
 
 		certificateConfig.CertificateComponentName = config.Viper.GetString(config.Flag.Service.Resource.Certificate.ComponentName)
 		certificateConfig.CertificateDirectory = config.Viper.GetString(config.Flag.Service.Resource.Certificate.Directory)
