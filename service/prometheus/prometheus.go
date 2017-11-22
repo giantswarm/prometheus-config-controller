@@ -9,6 +9,10 @@ const (
 	// that the prometheus-config-controller should scrape.
 	ClusterAnnotation = "giantswarm.io/prometheus-cluster"
 
+	// PortAnnotation is the Kubernetes annotation that specifies which ports
+	// to scrape for a service.
+	PortAnnotation = "giantswarm.io/scrape-port"
+
 	// ClusterLabel is the Prometheus label used to identify jobs
 	// managed by the prometheus-config-controller.
 	ClusterLabel = "prometheus_config_controller"
