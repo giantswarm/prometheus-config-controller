@@ -3,6 +3,7 @@ package prometheus
 import (
 	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/config"
@@ -21,11 +22,35 @@ const (
 
 // GetTarget takes a Kubernetes Service, and returns a LabelSet,
 // suitable for use as a target.
-func GetTarget(service v1.Service) model.LabelSet {
-	targetName := fmt.Sprintf("%s.%s", service.Name, service.Namespace)
-	target := model.LabelSet{model.AddressLabel: model.LabelValue(targetName)}
+func GetTargets(service v1.Service) []model.LabelSet {
+	baseTargetName := fmt.Sprintf("%s.%s", service.Name, service.Namespace)
 
-	return target
+	// Check if the service is annotated with any ports.
+	ports := []string{}
+	if val, ok := service.ObjectMeta.Annotations[PortAnnotation]; ok {
+		ports = strings.Split(val, ",")
+	}
+
+	targetNames := []string{}
+
+	// If we have ports specified, append them.
+	if len(ports) > 0 {
+		for _, port := range ports {
+			targetName := fmt.Sprintf("%s:%s", baseTargetName, port)
+			targetNames = append(targetNames, targetName)
+		}
+	} else {
+		targetNames = append(targetNames, baseTargetName)
+	}
+
+	// And then construct a proper set of labelsets.
+	targets := []model.LabelSet{}
+	for _, targetName := range targetNames {
+		target := model.LabelSet{model.AddressLabel: model.LabelValue(targetName)}
+		targets = append(targets, target)
+	}
+
+	return targets
 }
 
 // GetScrapeConfigs takes a list of Kubernetes Services,
@@ -38,7 +63,7 @@ func GetScrapeConfigs(services []v1.Service, certificateDirectory string) ([]con
 	for clusterID, services := range groupedServices {
 		targets := []model.LabelSet{}
 		for _, service := range services {
-			targets = append(targets, GetTarget(service))
+			targets = append(targets, GetTargets(service)...)
 		}
 
 		scrapeConfig := config.ScrapeConfig{

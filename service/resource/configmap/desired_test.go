@@ -440,6 +440,161 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 			},
 			expectedErrorHandler: nil,
 		},
+
+		// Test that if the configmap does exist, with a valid config,
+		// and an annotated service exists, specifying an alternate port,
+		// the configmap is returned with the new service with the correct port.
+		{
+			setUpPrometheusConfiguration: &config.Config{
+				GlobalConfig: config.GlobalConfig{
+					ScrapeInterval: model.Duration(1 * time.Minute),
+				},
+				ScrapeConfigs: []*config.ScrapeConfig{
+					{
+						JobName: "kubernetes-nodes",
+					},
+				},
+			},
+			setUpConfigMap: &v1.ConfigMap{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      configMapName,
+					Namespace: configMapNamespace,
+				},
+			},
+			setUpServices: []*v1.Service{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "apiserver",
+						Namespace: "xa5ly",
+						Annotations: map[string]string{
+							prometheus.ClusterAnnotation: "xa5ly",
+							prometheus.PortAnnotation:    "30101",
+						},
+					},
+				},
+			},
+
+			expectedPrometheusConfiguration: &config.Config{
+				GlobalConfig: config.GlobalConfig{
+					ScrapeInterval:     model.Duration(1 * time.Minute),
+					ScrapeTimeout:      model.Duration(10 * time.Second),
+					EvaluationInterval: model.Duration(1 * time.Minute),
+				},
+				ScrapeConfigs: []*config.ScrapeConfig{
+					{
+						JobName:        "kubernetes-nodes",
+						ScrapeInterval: model.Duration(1 * time.Minute),
+						ScrapeTimeout:  model.Duration(10 * time.Second),
+						MetricsPath:    "/metrics",
+						Scheme:         "http",
+					},
+					{
+						JobName: "guest-cluster-xa5ly",
+						Scheme:  "https",
+						HTTPClientConfig: config.HTTPClientConfig{
+							TLSConfig: config.TLSConfig{
+								CAFile:             "/certs/xa5ly-ca.pem",
+								CertFile:           "/certs/xa5ly-crt.pem",
+								KeyFile:            "/certs/xa5ly-key.pem",
+								InsecureSkipVerify: false,
+							},
+						},
+						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
+							StaticConfigs: []*config.TargetGroup{
+								{
+									Targets: []model.LabelSet{
+										model.LabelSet{model.AddressLabel: "apiserver.xa5ly:30101"},
+									},
+									Labels: model.LabelSet{
+										prometheus.ClusterLabel:   "",
+										prometheus.ClusterIDLabel: "xa5ly",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			expectedErrorHandler: nil,
+		},
+
+		// Test that if the configmap does exist, with a valid config,
+		// and an annotated service exists, specifying two ports,
+		// the configmap is returned with the new service with the correct ports.
+		{
+			setUpPrometheusConfiguration: &config.Config{
+				GlobalConfig: config.GlobalConfig{
+					ScrapeInterval: model.Duration(1 * time.Minute),
+				},
+				ScrapeConfigs: []*config.ScrapeConfig{
+					{
+						JobName: "kubernetes-nodes",
+					},
+				},
+			},
+			setUpConfigMap: &v1.ConfigMap{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      configMapName,
+					Namespace: configMapNamespace,
+				},
+			},
+			setUpServices: []*v1.Service{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "apiserver",
+						Namespace: "xa5ly",
+						Annotations: map[string]string{
+							prometheus.ClusterAnnotation: "xa5ly",
+							prometheus.PortAnnotation:    "30101,30102",
+						},
+					},
+				},
+			},
+
+			expectedPrometheusConfiguration: &config.Config{
+				GlobalConfig: config.GlobalConfig{
+					ScrapeInterval:     model.Duration(1 * time.Minute),
+					ScrapeTimeout:      model.Duration(10 * time.Second),
+					EvaluationInterval: model.Duration(1 * time.Minute),
+				},
+				ScrapeConfigs: []*config.ScrapeConfig{
+					{
+						JobName:        "kubernetes-nodes",
+						ScrapeInterval: model.Duration(1 * time.Minute),
+						ScrapeTimeout:  model.Duration(10 * time.Second),
+						MetricsPath:    "/metrics",
+						Scheme:         "http",
+					},
+					{
+						JobName: "guest-cluster-xa5ly",
+						Scheme:  "https",
+						HTTPClientConfig: config.HTTPClientConfig{
+							TLSConfig: config.TLSConfig{
+								CAFile:             "/certs/xa5ly-ca.pem",
+								CertFile:           "/certs/xa5ly-crt.pem",
+								KeyFile:            "/certs/xa5ly-key.pem",
+								InsecureSkipVerify: false,
+							},
+						},
+						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
+							StaticConfigs: []*config.TargetGroup{
+								{
+									Targets: []model.LabelSet{
+										model.LabelSet{model.AddressLabel: "apiserver.xa5ly:30101"},
+										model.LabelSet{model.AddressLabel: "apiserver.xa5ly:30102"},
+									},
+									Labels: model.LabelSet{
+										prometheus.ClusterLabel:   "",
+										prometheus.ClusterIDLabel: "xa5ly",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			expectedErrorHandler: nil,
+		},
 	}
 
 	for index, test := range tests {

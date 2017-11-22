@@ -12,11 +12,11 @@ import (
 	"k8s.io/client-go/pkg/api/v1"
 )
 
-// Test_Prometheus_GetTarget tests the GetTarget function.
-func Test_Prometheus_GetTarget(t *testing.T) {
+// Test_Prometheus_GetTargets tests the GetTargets function.
+func Test_Prometheus_GetTargets(t *testing.T) {
 	tests := []struct {
-		service        v1.Service
-		expectedTarget model.LabelSet
+		service         v1.Service
+		expectedTargets []model.LabelSet
 	}{
 		{
 			service: v1.Service{
@@ -25,19 +25,63 @@ func Test_Prometheus_GetTarget(t *testing.T) {
 					Namespace: "bar",
 				},
 			},
-			expectedTarget: model.LabelSet{model.AddressLabel: "foo.bar"},
+			expectedTargets: []model.LabelSet{
+				{
+					model.AddressLabel: "foo.bar",
+				},
+			},
+		},
+
+		// Test that if a single port is annotated, that port is part of the target.
+		{
+			service: v1.Service{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "foo",
+					Namespace: "bar",
+					Annotations: map[string]string{
+						PortAnnotation: "30101",
+					},
+				},
+			},
+			expectedTargets: []model.LabelSet{
+				{
+					model.AddressLabel: "foo.bar:30101",
+				},
+			},
+		},
+
+		// Test that if multiple ports are annotated,
+		// each port is a separate target.
+		{
+			service: v1.Service{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "foo",
+					Namespace: "bar",
+					Annotations: map[string]string{
+						PortAnnotation: "30101,30102",
+					},
+				},
+			},
+			expectedTargets: []model.LabelSet{
+				{
+					model.AddressLabel: "foo.bar:30101",
+				},
+				{
+					model.AddressLabel: "foo.bar:30102",
+				},
+			},
 		},
 	}
 
 	for index, test := range tests {
-		target := GetTarget(test.service)
+		targets := GetTargets(test.service)
 
-		if !reflect.DeepEqual(test.expectedTarget, target) {
+		if !reflect.DeepEqual(test.expectedTargets, targets) {
 			t.Fatalf(
-				"%d: expected target does not match returned target.\nexpected: %s\nreturned: %s\n",
+				"%d: expected targets do not match returned targets.\nexpected: %s\nreturned: %s\n",
 				index,
-				spew.Sdump(test.expectedTarget),
-				spew.Sdump(target),
+				spew.Sdump(test.expectedTargets),
+				spew.Sdump(targets),
 			)
 		}
 	}
