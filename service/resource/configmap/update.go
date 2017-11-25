@@ -64,7 +64,9 @@ func (r *Resource) ProcessUpdateState(ctx context.Context, obj, updateState inte
 		_, err := r.k8sClient.CoreV1().ConfigMaps(r.configMapNamespace).Update(configMapToUpdate)
 		timer.ObserveDuration()
 
-		if errors.IsNotFound(err) {
+		if errors.IsConflict(err) {
+			// fall through, we'll update it on the next reconciliation loop.
+		} else if errors.IsNotFound(err) {
 			return microerror.Mask(configMapNotFoundError)
 		} else if err != nil {
 			return microerror.Mask(err)
