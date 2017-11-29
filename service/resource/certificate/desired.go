@@ -54,7 +54,12 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		}
 
 		if len(certificates.Items) == 0 {
-			return nil, microerror.Maskf(missingError, "certificate for cluster: %s", clusterID)
+			// If the certificate can't be found, try to continue on.
+			// It's possible that the certificate just hasn't been created yet.
+			// If the certificate is consistently missing, we'll be notified
+			// about the cluster not being scrapeable.
+			r.logger.Log("error", "certificate for cluster '%s' is missing, continuing")
+			return nil, nil
 		}
 		certificate := certificates.Items[0]
 
