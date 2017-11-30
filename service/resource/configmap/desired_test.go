@@ -2,6 +2,7 @@ package configmap
 
 import (
 	"context"
+	"net/url"
 	"testing"
 	"time"
 
@@ -224,7 +225,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 								CAFile:             "/certs/xa5ly-ca.pem",
 								CertFile:           "/certs/xa5ly-crt.pem",
 								KeyFile:            "/certs/xa5ly-key.pem",
-								InsecureSkipVerify: false,
+								InsecureSkipVerify: true,
 							},
 						},
 						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
@@ -236,6 +237,21 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 									Labels: model.LabelSet{
 										prometheus.ClusterLabel:   "",
 										prometheus.ClusterIDLabel: "xa5ly",
+									},
+								},
+							},
+							KubernetesSDConfigs: []*config.KubernetesSDConfig{
+								{
+									APIServer: config.URL{&url.URL{
+										Scheme: "https",
+										Host:   "apiserver.xa5ly",
+									}},
+									Role: config.KubernetesRoleNode,
+									TLSConfig: config.TLSConfig{
+										CAFile:             "/certs/xa5ly-ca.pem",
+										CertFile:           "/certs/xa5ly-crt.pem",
+										KeyFile:            "/certs/xa5ly-key.pem",
+										InsecureSkipVerify: false,
 									},
 								},
 							},
@@ -270,7 +286,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 								CAFile:             "/certs/xa5ly-ca.pem",
 								CertFile:           "/certs/xa5ly-crt.pem",
 								KeyFile:            "/certs/xa5ly-key.pem",
-								InsecureSkipVerify: false,
+								InsecureSkipVerify: true,
 							},
 						},
 						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
@@ -282,6 +298,21 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 									Labels: model.LabelSet{
 										prometheus.ClusterLabel:   "",
 										prometheus.ClusterIDLabel: "xa5ly",
+									},
+								},
+							},
+							KubernetesSDConfigs: []*config.KubernetesSDConfig{
+								{
+									APIServer: config.URL{&url.URL{
+										Scheme: "https",
+										Host:   "apiserver.xa5ly",
+									}},
+									Role: config.KubernetesRoleNode,
+									TLSConfig: config.TLSConfig{
+										CAFile:             "/certs/xa5ly-ca.pem",
+										CertFile:           "/certs/xa5ly-crt.pem",
+										KeyFile:            "/certs/xa5ly-key.pem",
+										InsecureSkipVerify: false,
 									},
 								},
 							},
@@ -333,7 +364,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 								CAFile:             "/certs/xa5ly-ca.pem",
 								CertFile:           "/certs/xa5ly-crt.pem",
 								KeyFile:            "/certs/xa5ly-key.pem",
-								InsecureSkipVerify: false,
+								InsecureSkipVerify: true,
 							},
 						},
 						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
@@ -345,6 +376,21 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 									Labels: model.LabelSet{
 										prometheus.ClusterLabel:   "",
 										prometheus.ClusterIDLabel: "xa5ly",
+									},
+								},
+							},
+							KubernetesSDConfigs: []*config.KubernetesSDConfig{
+								{
+									APIServer: config.URL{&url.URL{
+										Scheme: "https",
+										Host:   "apiserver.xa5ly",
+									}},
+									Role: config.KubernetesRoleNode,
+									TLSConfig: config.TLSConfig{
+										CAFile:             "/certs/xa5ly-ca.pem",
+										CertFile:           "/certs/xa5ly-crt.pem",
+										KeyFile:            "/certs/xa5ly-key.pem",
+										InsecureSkipVerify: false,
 									},
 								},
 							},
@@ -394,7 +440,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 								CAFile:             "/certs/0ba9v-ca.pem",
 								CertFile:           "/certs/0ba9v-crt.pem",
 								KeyFile:            "/certs/0ba9v-key.pem",
-								InsecureSkipVerify: false,
+								InsecureSkipVerify: true,
 							},
 						},
 						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
@@ -409,6 +455,21 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 									},
 								},
 							},
+							KubernetesSDConfigs: []*config.KubernetesSDConfig{
+								{
+									APIServer: config.URL{&url.URL{
+										Scheme: "https",
+										Host:   "apiserver.0ba9v",
+									}},
+									Role: config.KubernetesRoleNode,
+									TLSConfig: config.TLSConfig{
+										CAFile:             "/certs/0ba9v-ca.pem",
+										CertFile:           "/certs/0ba9v-crt.pem",
+										KeyFile:            "/certs/0ba9v-key.pem",
+										InsecureSkipVerify: false,
+									},
+								},
+							},
 						},
 					},
 					{
@@ -419,7 +480,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 								CAFile:             "/certs/xa5ly-ca.pem",
 								CertFile:           "/certs/xa5ly-crt.pem",
 								KeyFile:            "/certs/xa5ly-key.pem",
-								InsecureSkipVerify: false,
+								InsecureSkipVerify: true,
 							},
 						},
 						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
@@ -431,6 +492,21 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 									Labels: model.LabelSet{
 										prometheus.ClusterLabel:   "",
 										prometheus.ClusterIDLabel: "xa5ly",
+									},
+								},
+							},
+							KubernetesSDConfigs: []*config.KubernetesSDConfig{
+								{
+									APIServer: config.URL{&url.URL{
+										Scheme: "https",
+										Host:   "apiserver.xa5ly",
+									}},
+									Role: config.KubernetesRoleNode,
+									TLSConfig: config.TLSConfig{
+										CAFile:             "/certs/xa5ly-ca.pem",
+										CertFile:           "/certs/xa5ly-crt.pem",
+										KeyFile:            "/certs/xa5ly-key.pem",
+										InsecureSkipVerify: false,
 									},
 								},
 							},
