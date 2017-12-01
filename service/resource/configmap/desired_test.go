@@ -256,6 +256,16 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 								},
 							},
 						},
+						RelabelConfigs: []*config.RelabelConfig{
+							{
+								TargetLabel: prometheus.ClusterLabel,
+								Replacement: prometheus.ClusterLabel,
+							},
+							{
+								TargetLabel: prometheus.ClusterIDLabel,
+								Replacement: "xa5ly",
+							},
+						},
 					},
 				},
 			},
@@ -315,6 +325,16 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 										InsecureSkipVerify: false,
 									},
 								},
+							},
+						},
+						RelabelConfigs: []*config.RelabelConfig{
+							{
+								TargetLabel: prometheus.ClusterLabel,
+								Replacement: prometheus.ClusterLabel,
+							},
+							{
+								TargetLabel: prometheus.ClusterIDLabel,
+								Replacement: "xa5ly",
 							},
 						},
 					},
@@ -395,6 +415,16 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 								},
 							},
 						},
+						RelabelConfigs: []*config.RelabelConfig{
+							{
+								TargetLabel: prometheus.ClusterLabel,
+								Replacement: prometheus.ClusterLabel,
+							},
+							{
+								TargetLabel: prometheus.ClusterIDLabel,
+								Replacement: "xa5ly",
+							},
+						},
 					},
 				},
 			},
@@ -471,6 +501,16 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 								},
 							},
 						},
+						RelabelConfigs: []*config.RelabelConfig{
+							{
+								TargetLabel: prometheus.ClusterLabel,
+								Replacement: prometheus.ClusterLabel,
+							},
+							{
+								TargetLabel: prometheus.ClusterIDLabel,
+								Replacement: "0ba9v",
+							},
+						},
 					},
 					{
 						JobName: "guest-cluster-xa5ly",
@@ -509,6 +549,16 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 										InsecureSkipVerify: false,
 									},
 								},
+							},
+						},
+						RelabelConfigs: []*config.RelabelConfig{
+							{
+								TargetLabel: prometheus.ClusterLabel,
+								Replacement: prometheus.ClusterLabel,
+							},
+							{
+								TargetLabel: prometheus.ClusterIDLabel,
+								Replacement: "xa5ly",
 							},
 						},
 					},

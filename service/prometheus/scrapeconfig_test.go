@@ -132,6 +132,16 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 							},
 						},
 					},
+					RelabelConfigs: []*config.RelabelConfig{
+						{
+							TargetLabel: ClusterLabel,
+							Replacement: ClusterLabel,
+						},
+						{
+							TargetLabel: ClusterIDLabel,
+							Replacement: "xa5ly",
+						},
+					},
 				},
 			},
 		},
@@ -200,6 +210,16 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 							},
 						},
 					},
+					RelabelConfigs: []*config.RelabelConfig{
+						{
+							TargetLabel: ClusterLabel,
+							Replacement: ClusterLabel,
+						},
+						{
+							TargetLabel: ClusterIDLabel,
+							Replacement: "0ba9v",
+						},
+					},
 				},
 				{
 					JobName: "guest-cluster-xa5ly",
@@ -238,6 +258,16 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 									InsecureSkipVerify: false,
 								},
 							},
+						},
+					},
+					RelabelConfigs: []*config.RelabelConfig{
+						{
+							TargetLabel: ClusterLabel,
+							Replacement: ClusterLabel,
+						},
+						{
+							TargetLabel: ClusterIDLabel,
+							Replacement: "xa5ly",
 						},
 					},
 				},
@@ -307,6 +337,16 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 									InsecureSkipVerify: false,
 								},
 							},
+						},
+					},
+					RelabelConfigs: []*config.RelabelConfig{
+						{
+							TargetLabel: ClusterLabel,
+							Replacement: ClusterLabel,
+						},
+						{
+							TargetLabel: ClusterIDLabel,
+							Replacement: "xa5ly",
 						},
 					},
 				},
@@ -395,6 +435,16 @@ func Test_Prometheus_GetScrapeConfigs_Deterministic(t *testing.T) {
 					},
 				},
 			},
+			RelabelConfigs: []*config.RelabelConfig{
+				{
+					TargetLabel: ClusterLabel,
+					Replacement: ClusterLabel,
+				},
+				{
+					TargetLabel: ClusterIDLabel,
+					Replacement: "0ba9v",
+				},
+			},
 		},
 		{
 			JobName: "guest-cluster-xa5ly",
@@ -433,6 +483,16 @@ func Test_Prometheus_GetScrapeConfigs_Deterministic(t *testing.T) {
 							InsecureSkipVerify: false,
 						},
 					},
+				},
+			},
+			RelabelConfigs: []*config.RelabelConfig{
+				{
+					TargetLabel: ClusterLabel,
+					Replacement: ClusterLabel,
+				},
+				{
+					TargetLabel: ClusterIDLabel,
+					Replacement: "xa5ly",
 				},
 			},
 		},
@@ -502,6 +562,16 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
 						},
 					},
 				},
+				RelabelConfigs: []*config.RelabelConfig{
+					{
+						TargetLabel: ClusterLabel,
+						Replacement: ClusterLabel,
+					},
+					{
+						TargetLabel: ClusterIDLabel,
+						Replacement: "xa5ly",
+					},
+				},
 			},
 
 			expectedConfig: `job_name: guest-cluster-xa5ly
@@ -525,6 +595,13 @@ tls_config:
   cert_file: /certs/xa5ly-crt.pem
   key_file: /certs/xa5ly-key.pem
   insecure_skip_verify: true
+relabel_configs:
+- source_labels: []
+  target_label: prometheus_config_controller
+  replacement: prometheus_config_controller
+- source_labels: []
+  target_label: cluster_id
+  replacement: xa5ly
 `,
 		},
 	}
@@ -538,9 +615,11 @@ tls_config:
 		expectedLines := strings.Split(test.expectedConfig, "\n")
 		returnedLines := strings.Split(string(data), "\n")
 
-		for i := 0; i < len(expectedLines); i++ {
-			if expectedLines[i] != returnedLines[i] {
-				t.Logf("\nexpected line:\n'%s'\nreturned line:\n'%s'\n", expectedLines[i], returnedLines[i])
+		if len(expectedLines) == len(returnedLines) {
+			for i := 0; i < len(expectedLines); i++ {
+				if expectedLines[i] != returnedLines[i] {
+					t.Logf("\nexpected line:\n'%s'\nreturned line:\n'%s'\n", expectedLines[i], returnedLines[i])
+				}
 			}
 		}
 

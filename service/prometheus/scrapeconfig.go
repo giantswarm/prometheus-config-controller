@@ -82,6 +82,16 @@ func GetScrapeConfigs(services []v1.Service, certificateDirectory string) ([]con
 					},
 				},
 			},
+			RelabelConfigs: []*config.RelabelConfig{
+				{
+					TargetLabel: ClusterLabel,
+					Replacement: ClusterLabel,
+				},
+				{
+					TargetLabel: ClusterIDLabel,
+					Replacement: clusterID,
+				},
+			},
 		}
 
 		scrapeConfigs = append(scrapeConfigs, scrapeConfig)
