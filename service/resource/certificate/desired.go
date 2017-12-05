@@ -58,8 +58,8 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			// It's possible that the certificate just hasn't been created yet.
 			// If the certificate is consistently missing, we'll be notified
 			// about the cluster not being scrapeable.
-			r.logger.Log("error", "certificate for cluster '%s' is missing, continuing")
-			return nil, nil
+			r.logger.Log("warning", fmt.Sprintf("certificate for cluster '%s' is missing, continuing", clusterID))
+			continue
 		}
 		certificate := certificates.Items[0]
 
