@@ -78,6 +78,66 @@ func Test_Resource_Certificate_GetDesiredState(t *testing.T) {
 			expectedErrorHandler:     nil,
 		},
 
+		// Test that a service with a cluster annotation and the certificate
+		// missing, and another service with a cluster annotation and the
+		// certificate present, the correct certificate is present.
+		{
+			certificateDirectory: defaultCertificateDirectory,
+			services: []*v1.Service{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "apiserver",
+						Namespace: "0ajf9",
+						Annotations: map[string]string{
+							prometheus.ClusterAnnotation: "0ajf9",
+						},
+					},
+				},
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "apiserver",
+						Namespace: "xa5ly",
+						Annotations: map[string]string{
+							prometheus.ClusterAnnotation: "xa5ly",
+						},
+					},
+				},
+			},
+			secrets: []*v1.Secret{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "xa5ly-prometheus",
+						Namespace: "default",
+						Labels: map[string]string{
+							"clusterComponent": "prometheus",
+							"clusterID":        "xa5ly",
+						},
+					},
+					Data: map[string][]byte{
+						"ca":  []byte("foo"),
+						"crt": []byte("bar"),
+						"key": []byte("baz"),
+					},
+				},
+			},
+
+			expectedCertificateFiles: []certificateFile{
+				{
+					path: key.CAPath(defaultCertificateDirectory, "xa5ly"),
+					data: "foo",
+				},
+				{
+					path: key.CrtPath(defaultCertificateDirectory, "xa5ly"),
+					data: "bar",
+				},
+				{
+					path: key.KeyPath(defaultCertificateDirectory, "xa5ly"),
+					data: "baz",
+				},
+			},
+			expectedErrorHandler: nil,
+		},
+
 		// Test that a service with a cluster annotation,
 		// and the certificate (containing just a ca) being present, returns the certificate.
 		{
