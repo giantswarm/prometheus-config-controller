@@ -58,7 +58,7 @@ func Test_Resource_Certificate_GetDesiredState(t *testing.T) {
 		},
 
 		// Test that a service with a cluster annotation,
-		// but the certificate is missing, produces an error.
+		// but the certificate is missing, does not produce an error.
 		{
 			certificateDirectory: defaultCertificateDirectory,
 			services: []*v1.Service{
@@ -75,7 +75,7 @@ func Test_Resource_Certificate_GetDesiredState(t *testing.T) {
 			secrets: nil,
 
 			expectedCertificateFiles: nil,
-			expectedErrorHandler:     IsMissing,
+			expectedErrorHandler:     nil,
 		},
 
 		// Test that a service with a cluster annotation,

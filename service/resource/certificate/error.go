@@ -11,13 +11,6 @@ func IsInvalidConfig(err error) bool {
 	return microerror.Cause(err) == invalidConfigError
 }
 
-var missingError = microerror.New("missing")
-
-// IsMissing asserts missingError.
-func IsMissing(err error) bool {
-	return microerror.Cause(err) == missingError
-}
-
 var wrongTypeError = microerror.New("wrong type")
 
 // IsWrongTypeError asserts wrongTypeError.
