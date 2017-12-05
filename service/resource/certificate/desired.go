@@ -59,7 +59,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			// If the certificate is consistently missing, we'll be notified
 			// about the cluster not being scrapeable.
 			r.logger.Log("error", fmt.Sprintf("certificate for cluster '%s' is missing, continuing", clusterID))
-			return nil, nil
+			continue
 		}
 		certificate := certificates.Items[0]
 
