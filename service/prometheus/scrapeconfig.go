@@ -2,6 +2,7 @@ package prometheus
 
 import (
 	"fmt"
+	"net/url"
 	"sort"
 
 	"github.com/prometheus/common/model"
@@ -19,13 +20,16 @@ const (
 	jobNamePrefix = "guest-cluster"
 )
 
+func getTargetName(service v1.Service) string {
+	return fmt.Sprintf("%s.%s", service.Name, service.Namespace)
+}
+
 // GetTarget takes a Kubernetes Service, and returns a LabelSet,
 // suitable for use as a target.
 func GetTarget(service v1.Service) model.LabelSet {
-	targetName := fmt.Sprintf("%s.%s", service.Name, service.Namespace)
-	target := model.LabelSet{model.AddressLabel: model.LabelValue(targetName)}
-
-	return target
+	return model.LabelSet{
+		model.AddressLabel: model.LabelValue(getTargetName(service)),
+	}
 }
 
 // GetScrapeConfigs takes a list of Kubernetes Services,
@@ -46,9 +50,10 @@ func GetScrapeConfigs(services []v1.Service, certificateDirectory string) ([]con
 			Scheme:  httpsScheme,
 			HTTPClientConfig: config.HTTPClientConfig{
 				TLSConfig: config.TLSConfig{
-					CAFile:   key.CAPath(certificateDirectory, clusterID),
-					CertFile: key.CrtPath(certificateDirectory, clusterID),
-					KeyFile:  key.KeyPath(certificateDirectory, clusterID),
+					CAFile:             key.CAPath(certificateDirectory, clusterID),
+					CertFile:           key.CrtPath(certificateDirectory, clusterID),
+					KeyFile:            key.KeyPath(certificateDirectory, clusterID),
+					InsecureSkipVerify: true,
 				},
 			},
 			ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
@@ -60,6 +65,31 @@ func GetScrapeConfigs(services []v1.Service, certificateDirectory string) ([]con
 							ClusterIDLabel: model.LabelValue(clusterID),
 						},
 					},
+				},
+				KubernetesSDConfigs: []*config.KubernetesSDConfig{
+					{
+						APIServer: config.URL{&url.URL{
+							Scheme: httpsScheme,
+							Host:   getTargetName(services[0]),
+						}},
+						Role: config.KubernetesRoleNode,
+						TLSConfig: config.TLSConfig{
+							CAFile:             key.CAPath(certificateDirectory, clusterID),
+							CertFile:           key.CrtPath(certificateDirectory, clusterID),
+							KeyFile:            key.KeyPath(certificateDirectory, clusterID),
+							InsecureSkipVerify: false,
+						},
+					},
+				},
+			},
+			RelabelConfigs: []*config.RelabelConfig{
+				{
+					TargetLabel: ClusterLabel,
+					Replacement: ClusterLabel,
+				},
+				{
+					TargetLabel: ClusterIDLabel,
+					Replacement: clusterID,
 				},
 			},
 		}
