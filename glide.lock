@@ -1,12 +1,10 @@
 hash: ccafdc1e3a36b33b5d9eb125212c8bc74e51e08014c17b9957b013f79f01c1b6
-updated: 2017-12-12T15:07:03.232253Z
+updated: 2017-12-12T17:04:06.771665Z
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
   subpackages:
   - quantile
-- name: github.com/cenk/backoff
-  version: 309aa717adbf351e92864cbedf9cca0b769a4b5a
 - name: github.com/cenkalti/backoff
   version: 309aa717adbf351e92864cbedf9cca0b769a4b5a
 - name: github.com/coreos/go-semver
@@ -64,7 +62,7 @@ imports:
   subpackages:
   - memory
 - name: github.com/giantswarm/operatorkit
-  version: 8d4bd73621115b77f3dc5e1257bdd5989b3a6031
+  version: 85f9a65e3903d8086ab4e7988463aad4af1fd466
   subpackages:
   - client/k8sclient
   - client/k8scrdclient
