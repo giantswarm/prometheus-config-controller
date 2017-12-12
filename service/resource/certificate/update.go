@@ -9,35 +9,48 @@ import (
 	"github.com/spf13/afero"
 
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/operatorkit/framework"
 )
 
-func (r *Resource) GetUpdateState(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, interface{}, interface{}, error) {
+func (r *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*framework.Patch, error) {
+	update, err := r.newUpdateChange(ctx, obj, currentState, desiredState)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	patch := framework.NewPatch()
+	patch.SetUpdateChange(update)
+
+	return patch, nil
+}
+
+func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
 	currentCertificateFiles, err := toCertificateFiles(currentState)
 	if err != nil {
-		return nil, nil, nil, microerror.Mask(err)
+		return nil, microerror.Mask(err)
 	}
 
 	desiredCertificateFiles, err := toCertificateFiles(desiredState)
 	if err != nil {
-		return nil, nil, nil, microerror.Mask(err)
+		return nil, microerror.Mask(err)
 	}
 
 	if currentCertificateFiles == nil || desiredCertificateFiles == nil {
-		return nil, nil, nil, nil
+		return nil, nil
 	}
 
 	if !reflect.DeepEqual(currentCertificateFiles, desiredCertificateFiles) {
 		r.logger.Log("debug", "current certificates do not match desired certificates, need to update")
-		return nil, nil, desiredCertificateFiles, nil
+		return desiredCertificateFiles, nil
 	}
 
 	r.logger.Log("debug", "current certificates match desired certificates, no update needed")
 
-	return nil, nil, nil, nil
+	return nil, nil
 }
 
-func (r *Resource) ProcessUpdateState(ctx context.Context, obj, updateState interface{}) error {
-	updateCertificateFiles, err := toCertificateFiles(updateState)
+func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {
+	updateCertificateFiles, err := toCertificateFiles(updateChange)
 	if err != nil {
 		return microerror.Mask(err)
 	}

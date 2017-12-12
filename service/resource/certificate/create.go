@@ -4,10 +4,6 @@ import (
 	"context"
 )
 
-func (r *Resource) GetCreateState(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
-	return nil, nil
-}
-
-func (r *Resource) ProcessCreateState(ctx context.Context, obj, createState interface{}) error {
+func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange interface{}) error {
 	return nil
 }
