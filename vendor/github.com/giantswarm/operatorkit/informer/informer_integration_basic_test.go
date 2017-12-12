@@ -15,6 +15,8 @@ func Test_Informer_Integration_Basic(t *testing.T) {
 	testSetup(t)
 	defer testTeardown(t)
 
+	const timeDelta = time.Millisecond * 100
+
 	objectIDOne := "al7qy"
 	objectIDTwo := "al8qy"
 
@@ -24,7 +26,7 @@ func Test_Informer_Integration_Basic(t *testing.T) {
 	// We create a custom object before starting the informer watch. This causes
 	// the informer to fill the cache and to initially sent cached events to the
 	// delete and update channels provided by the watch.
-	testCreateCRO(t, objectIDOne)
+	testCreateObj(t, objectIDOne)
 
 	// When there is a runtime object in the API we start the watch.
 	deleteChan, updateChan, errChan := newInformer.Watch(ctx)
@@ -62,7 +64,7 @@ func Test_Informer_Integration_Basic(t *testing.T) {
 
 	// We create another runtime object. This should be received immediately.
 	{
-		testCreateCRO(t, objectIDTwo)
+		testCreateObj(t, objectIDTwo)
 
 		start := time.Now()
 
@@ -73,9 +75,9 @@ func Test_Informer_Integration_Basic(t *testing.T) {
 			testAssertCROWithID(t, e, objectIDTwo)
 		}
 
-		d := time.Now().Sub(start)
-		if d.Seconds() > 0.1 {
-			t.Fatalf("expected %#v got %#v", "round about 0.1 second", d.Seconds())
+		d := time.Since(start)
+		if !durationEquals(0, d, timeDelta) {
+			t.Fatalf("expected %#v got %#v", "round about 0 seconds", d.Seconds())
 		}
 	}
 
@@ -93,8 +95,8 @@ func Test_Informer_Integration_Basic(t *testing.T) {
 			testAssertCROWithID(t, e, objectIDOne, objectIDTwo)
 		}
 
-		d := time.Now().Sub(start)
-		if d.Seconds() > 10.1 {
+		d := time.Since(start)
+		if !durationEquals(10*time.Second, d, timeDelta) {
 			t.Fatalf("expected %#v got %#v", "round about 10 seconds", d.Seconds())
 		}
 	}
@@ -113,8 +115,8 @@ func Test_Informer_Integration_Basic(t *testing.T) {
 			testAssertCROWithID(t, e, objectIDOne, objectIDTwo)
 		}
 
-		d := time.Now().Sub(start)
-		if d.Seconds() > 2.1 {
+		d := time.Since(start)
+		if !durationEquals(2*time.Second, d, timeDelta) {
 			t.Fatalf("expected %#v got %#v", "round about 2 seconds", d.Seconds())
 		}
 	}
@@ -122,7 +124,7 @@ func Test_Informer_Integration_Basic(t *testing.T) {
 	// Now we delete a runtime object. This event is expected to be received
 	// immediately.
 	{
-		testDeleteCRO(t, objectIDOne)
+		testDeleteObj(t, objectIDOne)
 
 		start := time.Now()
 
@@ -133,9 +135,9 @@ func Test_Informer_Integration_Basic(t *testing.T) {
 			t.Fatalf("expected delete event got update event")
 		}
 
-		d := time.Now().Sub(start)
-		if d.Seconds() > 0.1 {
-			t.Fatalf("expected %#v got %#v", "round about 0.1 second", d.Seconds())
+		d := time.Since(start)
+		if !durationEquals(0, d, timeDelta) {
+			t.Fatalf("expected %#v got %#v", "round about 0 seconds", d.Seconds())
 		}
 	}
 
@@ -151,11 +153,22 @@ func Test_Informer_Integration_Basic(t *testing.T) {
 			testAssertCROWithID(t, e, objectIDTwo)
 		}
 
-		d := time.Now().Sub(start)
-		if d.Seconds() > 10.1 {
+		d := time.Since(start)
+		if !durationEquals(10*time.Second, d, timeDelta) {
 			t.Fatalf("expected %#v got %#v", "round about 10 seconds", d.Seconds())
 		}
 	}
 
 	cancelFunc()
+}
+
+func durationEquals(expected, actual, delta time.Duration) bool {
+	var diff time.Duration
+	if expected > actual {
+		diff = expected - actual
+	} else {
+		diff = actual - expected
+	}
+
+	return diff < delta
 }
