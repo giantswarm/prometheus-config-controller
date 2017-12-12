@@ -21,8 +21,8 @@ import (
 	"github.com/giantswarm/prometheus-config-controller/service/prometheus/prometheustest"
 )
 
-// Test_Resource_ConfigMap_GetUpdateState tests the GetUpdateState method.
-func Test_Resource_ConfigMap_GetUpdateState(t *testing.T) {
+// Test_Resource_ConfigMap_newUpdateChange tests the newUpdateChange method.
+func Test_Resource_ConfigMap_newUpdateChange(t *testing.T) {
 	configMapKey := "prometheus.yml"
 	configMapName := "prometheus"
 	configMapNamespace := "monitoring"
@@ -31,22 +31,22 @@ func Test_Resource_ConfigMap_GetUpdateState(t *testing.T) {
 		currentState *v1.ConfigMap
 		desiredState *v1.ConfigMap
 
-		expectedUpdateStateConfigMap *v1.ConfigMap
-		expectedErrorHandler         func(error) bool
+		expectedUpdateChangeConfigMap *v1.ConfigMap
+		expectedErrorHandler          func(error) bool
 	}{
 		// Test that if current state and desired state are both nil,
-		// the update state is nil.
+		// the update change is nil.
 		{
 			currentState: nil,
 			desiredState: nil,
 
-			expectedUpdateStateConfigMap: nil,
-			expectedErrorHandler:         nil,
+			expectedUpdateChangeConfigMap: nil,
+			expectedErrorHandler:          nil,
 		},
 
 		// Test that if the current state and desired state are the same,
 		// and the configmap is empty,
-		// the update state is nil.
+		// the update change is nil.
 		{
 			currentState: &v1.ConfigMap{
 				ObjectMeta: metav1.ObjectMeta{
@@ -63,12 +63,12 @@ func Test_Resource_ConfigMap_GetUpdateState(t *testing.T) {
 				Data: map[string]string{},
 			},
 
-			expectedUpdateStateConfigMap: nil,
-			expectedErrorHandler:         nil,
+			expectedUpdateChangeConfigMap: nil,
+			expectedErrorHandler:          nil,
 		},
 
 		// Test that if the current state and desired state are the same,
-		// the update state is nil.
+		// the update change is nil.
 		{
 			currentState: &v1.ConfigMap{
 				ObjectMeta: metav1.ObjectMeta{
@@ -89,12 +89,12 @@ func Test_Resource_ConfigMap_GetUpdateState(t *testing.T) {
 				},
 			},
 
-			expectedUpdateStateConfigMap: nil,
-			expectedErrorHandler:         nil,
+			expectedUpdateChangeConfigMap: nil,
+			expectedErrorHandler:          nil,
 		},
 
 		// Test that if the current state and desired state are different,
-		// the update state matches the desired state.
+		// the update change matches the desired state.
 		{
 			currentState: &v1.ConfigMap{
 				ObjectMeta: metav1.ObjectMeta{
@@ -115,7 +115,7 @@ func Test_Resource_ConfigMap_GetUpdateState(t *testing.T) {
 				},
 			},
 
-			expectedUpdateStateConfigMap: &v1.ConfigMap{
+			expectedUpdateChangeConfigMap: &v1.ConfigMap{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      configMapName,
 					Namespace: configMapNamespace,
@@ -149,8 +149,8 @@ func Test_Resource_ConfigMap_GetUpdateState(t *testing.T) {
 				},
 			},
 
-			expectedUpdateStateConfigMap: nil,
-			expectedErrorHandler:         IsWrongName,
+			expectedUpdateChangeConfigMap: nil,
+			expectedErrorHandler:          IsWrongName,
 		},
 
 		// Test that if the current state and desired state configmaps are in
@@ -175,8 +175,8 @@ func Test_Resource_ConfigMap_GetUpdateState(t *testing.T) {
 				},
 			},
 
-			expectedUpdateStateConfigMap: nil,
-			expectedErrorHandler:         IsWrongNamespace,
+			expectedUpdateChangeConfigMap: nil,
+			expectedErrorHandler:          IsWrongNamespace,
 		},
 	}
 
@@ -199,69 +199,60 @@ func Test_Resource_ConfigMap_GetUpdateState(t *testing.T) {
 			t.Fatalf("%d: error returned creating resource: %s\n", index, err)
 		}
 
-		createState, deleteState, updateState, err := resource.GetUpdateState(
+		updateChange, err := resource.newUpdateChange(
 			context.TODO(), v1.Service{}, test.currentState, test.desiredState,
 		)
 
 		if err != nil && test.expectedErrorHandler == nil {
-			t.Fatalf("%d: unexpected error returned getting update state: %s\n", index, err)
+			t.Fatalf("%d: unexpected error returned getting update change: %s\n", index, err)
 		}
 		if err != nil && !test.expectedErrorHandler(err) {
-			t.Fatalf("%d: incorrect error returned getting update state: %s\n", index, err)
+			t.Fatalf("%d: incorrect error returned getting update change: %s\n", index, err)
 		}
 		if err == nil && test.expectedErrorHandler != nil {
-			t.Fatalf("%d: expected error not returned getting update state\n", index)
+			t.Fatalf("%d: expected error not returned getting update change\n", index)
 		}
 
-		// We don't create or delete the configmap,
-		// so create and delete state should always be nil.
-		if createState != nil {
-			t.Fatalf("%d: createState should be nil, returned: %#v\n", index, createState)
-		}
-		if deleteState != nil {
-			t.Fatalf("%d: deleteState should be nil, returned: %#v\n", index, deleteState)
+		if updateChange == nil && test.expectedUpdateChangeConfigMap != nil {
+			t.Fatalf("%d: updateChange was nil, should be: %s\n", index, spew.Sdump(test.expectedUpdateChangeConfigMap))
 		}
 
-		if updateState == nil && test.expectedUpdateStateConfigMap != nil {
-			t.Fatalf("%d: updateState was nil, should be: %s\n", index, spew.Sdump(test.expectedUpdateStateConfigMap))
-		}
-
-		if updateState != nil {
-			updateStateConfigMap, ok := updateState.(*v1.ConfigMap)
+		if updateChange != nil {
+			updateChangeConfigMap, ok := updateChange.(*v1.ConfigMap)
 			if !ok {
-				t.Fatalf("%d: could not cast update state to configmap: %s\n", index, spew.Sdump(updateState))
+				t.Fatalf("%d: could not cast update state to configmap: %s\n", index, spew.Sdump(updateChange))
 			}
 
-			if !reflect.DeepEqual(*updateStateConfigMap, *test.expectedUpdateStateConfigMap) {
+			if !reflect.DeepEqual(*updateChangeConfigMap, *test.expectedUpdateChangeConfigMap) {
 				t.Fatalf(
-					"%d: expected update state does not match returned update state.\nexpected: %s\nreturned: %s\n",
+					"%d: expected update change does not match returned update change.\nexpected: %s\nreturned: %s\n",
 					index,
-					spew.Sdump(test.expectedUpdateStateConfigMap),
-					spew.Sdump(updateStateConfigMap),
+					spew.Sdump(test.expectedUpdateChangeConfigMap),
+					spew.Sdump(updateChangeConfigMap),
 				)
 			}
 		}
 	}
 }
 
-// Test_Resource_ConfigMap_ProcessUpdateState tests the ProcessUpdateState method.
-func Test_Resource_ConfigMap_ProcessUpdateState(t *testing.T) {
+// Test_Resource_ConfigMap_ApplyUpdateChange tests the ApplyUpdateChange method.
+func Test_Resource_ConfigMap_ApplyUpdateChange(t *testing.T) {
 	configMapKey := "prometheus.yml"
 	configMapName := "prometheus"
 	configMapNamespace := "monitoring"
 
 	tests := []struct {
 		setUpConfigMap *v1.ConfigMap
-		updateState    *v1.ConfigMap
+		updateChange   *v1.ConfigMap
 
 		expectedConfigMap    *v1.ConfigMap
 		expectedErrorHandler func(error) bool
 	}{
-		// Test if the initial configmap is nil, and the update state is some
+		// Test if the initial configmap is nil, and the update change is some
 		// configmap, an error occurs.
 		{
 			setUpConfigMap: nil,
-			updateState: &v1.ConfigMap{
+			updateChange: &v1.ConfigMap{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      configMapName,
 					Namespace: configMapNamespace,
@@ -275,7 +266,7 @@ func Test_Resource_ConfigMap_ProcessUpdateState(t *testing.T) {
 			expectedErrorHandler: IsConfigMapNotFound,
 		},
 
-		// Test if the initial configmap exists, and the update state is nil,
+		// Test if the initial configmap exists, and the update change is nil,
 		// the expected configmap matches the initial configmap.
 		{
 			setUpConfigMap: &v1.ConfigMap{
@@ -287,7 +278,7 @@ func Test_Resource_ConfigMap_ProcessUpdateState(t *testing.T) {
 					configMapKey: "foo",
 				},
 			},
-			updateState: nil,
+			updateChange: nil,
 
 			expectedConfigMap: &v1.ConfigMap{
 				ObjectMeta: metav1.ObjectMeta{
@@ -301,7 +292,7 @@ func Test_Resource_ConfigMap_ProcessUpdateState(t *testing.T) {
 			expectedErrorHandler: nil,
 		},
 
-		// Test if the initial configmap exists, and the update state is the same,
+		// Test if the initial configmap exists, and the update change is the same,
 		// the expected configmap matches the initial configmap.
 		{
 			setUpConfigMap: &v1.ConfigMap{
@@ -313,7 +304,7 @@ func Test_Resource_ConfigMap_ProcessUpdateState(t *testing.T) {
 					configMapKey: "foo",
 				},
 			},
-			updateState: &v1.ConfigMap{
+			updateChange: &v1.ConfigMap{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      configMapName,
 					Namespace: configMapNamespace,
@@ -335,8 +326,8 @@ func Test_Resource_ConfigMap_ProcessUpdateState(t *testing.T) {
 			expectedErrorHandler: nil,
 		},
 
-		// Test if the initial configmap exists, and a different update state exists,
-		// the expected configmap matches the update state.
+		// Test if the initial configmap exists, and a different update change exists,
+		// the expected configmap matches the update change.
 		{
 			setUpConfigMap: &v1.ConfigMap{
 				ObjectMeta: metav1.ObjectMeta{
@@ -347,7 +338,7 @@ func Test_Resource_ConfigMap_ProcessUpdateState(t *testing.T) {
 					configMapKey: "foo",
 				},
 			},
-			updateState: &v1.ConfigMap{
+			updateChange: &v1.ConfigMap{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      configMapName,
 					Namespace: configMapNamespace,
@@ -395,16 +386,16 @@ func Test_Resource_ConfigMap_ProcessUpdateState(t *testing.T) {
 			}
 		}
 
-		updateErr := resource.ProcessUpdateState(context.TODO(), v1.Service{}, test.updateState)
+		updateErr := resource.ApplyUpdateChange(context.TODO(), v1.Service{}, test.updateChange)
 
 		if updateErr != nil && test.expectedErrorHandler == nil {
-			t.Fatalf("%d: unexpected error returned processing update state: %s\n", index, updateErr)
+			t.Fatalf("%d: unexpected error returned applying update change: %s\n", index, updateErr)
 		}
 		if updateErr != nil && !test.expectedErrorHandler(updateErr) {
-			t.Fatalf("%d: incorrect error returned processing update state: %s\n", index, updateErr)
+			t.Fatalf("%d: incorrect error returned applying update change: %s\n", index, updateErr)
 		}
 		if updateErr == nil && test.expectedErrorHandler != nil {
-			t.Fatalf("%d: expected error not returned processing update state\n", index)
+			t.Fatalf("%d: expected error not returned applying update change\n", index)
 		}
 
 		if test.expectedConfigMap == nil {
@@ -516,7 +507,7 @@ func Test_Resource_ConfigMap_Reload(t *testing.T) {
 		t.Fatalf("incorrect reload request count before update - should be 0, was: %d", reloadRequestCount)
 	}
 
-	if err := resource.ProcessUpdateState(context.TODO(), v1.Service{}, &v1.ConfigMap{
+	if err := resource.ApplyUpdateChange(context.TODO(), v1.Service{}, &v1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      configMapName,
 			Namespace: configMapNamespace,
@@ -525,7 +516,7 @@ func Test_Resource_ConfigMap_Reload(t *testing.T) {
 			configMapKey: "bar",
 		},
 	}); err != nil {
-		t.Fatalf("error returned processing update state: %s\n", err)
+		t.Fatalf("error returned applying update change: %s\n", err)
 	}
 
 	if receivedReloadMessage == nil {
@@ -564,8 +555,8 @@ func Test_Resource_ConfigMap_Reload(t *testing.T) {
 	time.Sleep(20 * time.Millisecond)
 
 	// Check that a nil processing does not cause a reload.
-	if err := resource.ProcessUpdateState(context.TODO(), v1.Service{}, nil); err != nil {
-		t.Fatalf("error returned processing update state: %s\n", err)
+	if err := resource.ApplyUpdateChange(context.TODO(), v1.Service{}, nil); err != nil {
+		t.Fatalf("error returned applying update change: %s\n", err)
 	}
 
 	if configRequestCount != 2 {
