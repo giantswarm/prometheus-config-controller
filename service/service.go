@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cenk/backoff"
+	"github.com/cenkalti/backoff"
 	"github.com/spf13/afero"
 	"github.com/spf13/viper"
 	"k8s.io/client-go/kubernetes"
@@ -199,9 +199,8 @@ func New(config Config) (*Service, error) {
 
 		frameworkConfig := framework.DefaultConfig()
 
-		frameworkConfig.BackOff = backOff
 		frameworkConfig.Logger = config.Logger
-		frameworkConfig.Resources = resources
+		frameworkConfig.ResourceRouter = framework.DefaultResourceRouter(resources)
 
 		newOperatorFramework, err = framework.New(frameworkConfig)
 		if err != nil {
