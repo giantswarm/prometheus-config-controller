@@ -17,6 +17,7 @@ import (
 	"github.com/giantswarm/operatorkit/framework"
 	"github.com/giantswarm/operatorkit/framework/resource/metricsresource"
 	"github.com/giantswarm/operatorkit/framework/resource/retryresource"
+	"github.com/giantswarm/operatorkit/informer"
 
 	"github.com/giantswarm/prometheus-config-controller/flag"
 	"github.com/giantswarm/prometheus-config-controller/service/controller"
@@ -192,6 +193,21 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
+	var newInformer *informer.Informer
+	{
+		informerConfig := informer.DefaultConfig()
+
+		informerConfig.Watcher = newK8sClient.CoreV1().Services("")
+
+		informerConfig.RateWait = config.Viper.GetDuration(config.Flag.Service.Controller.ResyncPeriod)
+		informerConfig.ResyncPeriod = config.Viper.GetDuration(config.Flag.Service.Controller.ResyncPeriod)
+
+		newInformer, err = informer.New(informerConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var newOperatorFramework *framework.Framework
 	{
 		backOff := backoff.NewExponentialBackOff()
@@ -199,6 +215,7 @@ func New(config Config) (*Service, error) {
 
 		frameworkConfig := framework.DefaultConfig()
 
+		frameworkConfig.Informer = newInformer
 		frameworkConfig.Logger = config.Logger
 		frameworkConfig.ResourceRouter = framework.DefaultResourceRouter(resources)
 
