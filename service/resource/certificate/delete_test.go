@@ -5,16 +5,16 @@ import (
 	"testing"
 
 	"github.com/spf13/afero"
+	"k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes/fake"
-	"k8s.io/client-go/pkg/api/v1"
 
 	"github.com/giantswarm/micrologger/microloggertest"
 
 	"github.com/giantswarm/prometheus-config-controller/service/prometheus/prometheustest"
 )
 
-// Test_Resource_Certificate_GetDeleteState tests the GetDeleteState method.
-func Test_Resource_Certificate_GetDeleteState(t *testing.T) {
+// Test_Resource_Certificate_NewDeletePatch tests the NewDeletePatch method.
+func Test_Resource_Certificate_NewDeletePatch(t *testing.T) {
 	fs := afero.NewMemMapFs()
 	fakeK8sClient := fake.NewSimpleClientset()
 
@@ -35,18 +35,18 @@ func Test_Resource_Certificate_GetDeleteState(t *testing.T) {
 		t.Fatalf("error returned creating resource: %s\n", err)
 	}
 
-	deleteState, err := resource.GetDeleteState(context.TODO(), v1.Service{}, []certificateFile{}, []certificateFile{})
+	deletePatch, err := resource.NewDeletePatch(context.TODO(), v1.Service{}, []certificateFile{}, []certificateFile{})
 	if err != nil {
-		t.Fatalf("error returned getting delete state: %s\n", err)
+		t.Fatalf("error returned getting delete patch: %s\n", err)
 	}
 
-	if deleteState != nil {
-		t.Fatalf("delete state should be nil, was: %#v", deleteState)
+	if deletePatch != nil {
+		t.Fatalf("delete patch should be nil, was: %#v", deletePatch)
 	}
 }
 
-// Test_Resource_Certificate_ProcessDeleteState tests the ProcessDeleteState method.
-func Test_Resource_Certificate_ProcessDeleteState(t *testing.T) {
+// Test_Resource_Certificate_ApplyDeleteChange tests the ApplyDeleteChange method.
+func Test_Resource_Certificate_ApplyDeleteChange(t *testing.T) {
 	fs := afero.NewMemMapFs()
 	fakeK8sClient := fake.NewSimpleClientset()
 
@@ -67,7 +67,7 @@ func Test_Resource_Certificate_ProcessDeleteState(t *testing.T) {
 		t.Fatalf("error returned creating resource: %s\n", err)
 	}
 
-	if err := resource.ProcessDeleteState(context.TODO(), v1.Service{}, []certificateFile{}); err != nil {
-		t.Fatalf("error returned processing delete state: %s\n", err)
+	if err := resource.ApplyDeleteChange(context.TODO(), v1.Service{}, []certificateFile{}); err != nil {
+		t.Fatalf("error returned applying delete change: %s\n", err)
 	}
 }

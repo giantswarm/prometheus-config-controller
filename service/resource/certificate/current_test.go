@@ -8,8 +8,8 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/spf13/afero"
+	"k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes/fake"
-	"k8s.io/client-go/pkg/api/v1"
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger/microloggertest"

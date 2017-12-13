@@ -8,66 +8,66 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/spf13/afero"
+	"k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes/fake"
-	"k8s.io/client-go/pkg/api/v1"
 
 	"github.com/giantswarm/micrologger/microloggertest"
 
 	"github.com/giantswarm/prometheus-config-controller/service/prometheus/prometheustest"
 )
 
-// Test_Resource_Certificate_GetUpdateState tests the GetUpdateState method.
-func Test_Resource_Certificate_GetUpdateState(t *testing.T) {
+// Test_Resource_Certificate_newUpdateChange tests the newUpdateChange method.
+func Test_Resource_Certificate_newUpdateChange(t *testing.T) {
 	tests := []struct {
 		currentState []certificateFile
 		desiredState []certificateFile
 
-		expectedUpdateStateCertificateFiles []certificateFile
-		expectedErrorHandler                func(error) bool
+		expectedUpdateChangeCertificateFiles []certificateFile
+		expectedErrorHandler                 func(error) bool
 	}{
 		// Test that when the current state and desired state are both nil,
-		// a nil update state is returned.
+		// a nil update change is returned.
 		{
 			currentState: nil,
 			desiredState: nil,
 
-			expectedUpdateStateCertificateFiles: nil,
-			expectedErrorHandler:                nil,
+			expectedUpdateChangeCertificateFiles: nil,
+			expectedErrorHandler:                 nil,
 		},
 
 		// Test that when the current state is nil, and desired state is empty,
-		// a nil update state is returned.
+		// a nil update change is returned.
 		{
 			currentState: nil,
 			desiredState: []certificateFile{},
 
-			expectedUpdateStateCertificateFiles: nil,
-			expectedErrorHandler:                nil,
+			expectedUpdateChangeCertificateFiles: nil,
+			expectedErrorHandler:                 nil,
 		},
 
 		// Test that when the current state is empty, and desired state is nil,
-		// a nil update state is returned.
+		// a nil update change is returned.
 		{
 			currentState: []certificateFile{},
 			desiredState: nil,
 
-			expectedUpdateStateCertificateFiles: nil,
-			expectedErrorHandler:                nil,
+			expectedUpdateChangeCertificateFiles: nil,
+			expectedErrorHandler:                 nil,
 		},
 
 		// Test that when the current and desired state are both empty,
-		// a nil update state is returned.
+		// a nil update change is returned.
 		{
 			currentState: []certificateFile{},
 			desiredState: []certificateFile{},
 
-			expectedUpdateStateCertificateFiles: nil,
-			expectedErrorHandler:                nil,
+			expectedUpdateChangeCertificateFiles: nil,
+			expectedErrorHandler:                 nil,
 		},
 
 		// Test that when the current state is empty,
 		// and the desired state contains a certificate file,
-		// the update state contains the certificate file.
+		// the update change contains the certificate file.
 		{
 			currentState: []certificateFile{},
 			desiredState: []certificateFile{
@@ -77,7 +77,7 @@ func Test_Resource_Certificate_GetUpdateState(t *testing.T) {
 				},
 			},
 
-			expectedUpdateStateCertificateFiles: []certificateFile{
+			expectedUpdateChangeCertificateFiles: []certificateFile{
 				{
 					path: "/certs/foo",
 					data: "bar",
@@ -88,7 +88,7 @@ func Test_Resource_Certificate_GetUpdateState(t *testing.T) {
 
 		// Test that when the current state contains a certificate,
 		// and the desired state contains the same certificate,
-		// the update state is nil.
+		// the update change is nil.
 		{
 			currentState: []certificateFile{
 				{
@@ -103,13 +103,13 @@ func Test_Resource_Certificate_GetUpdateState(t *testing.T) {
 				},
 			},
 
-			expectedUpdateStateCertificateFiles: nil,
-			expectedErrorHandler:                nil,
+			expectedUpdateChangeCertificateFiles: nil,
+			expectedErrorHandler:                 nil,
 		},
 
 		// Test that when the current state contains a certificate,
 		// and the desired state contains the same certificate, with different data,
-		// the update state is the new certificate.
+		// the update change is the new certificate.
 		{
 			currentState: []certificateFile{
 				{
@@ -124,7 +124,7 @@ func Test_Resource_Certificate_GetUpdateState(t *testing.T) {
 				},
 			},
 
-			expectedUpdateStateCertificateFiles: []certificateFile{
+			expectedUpdateChangeCertificateFiles: []certificateFile{
 				{
 					path: "/certs/foo",
 					data: "bar",
@@ -135,7 +135,7 @@ func Test_Resource_Certificate_GetUpdateState(t *testing.T) {
 
 		// Test that when the current state contains a certificate,
 		// and the desired state is empty,
-		// the update state is empty.
+		// the update change is empty.
 		{
 			currentState: []certificateFile{
 				{
@@ -145,8 +145,8 @@ func Test_Resource_Certificate_GetUpdateState(t *testing.T) {
 			},
 			desiredState: []certificateFile{},
 
-			expectedUpdateStateCertificateFiles: []certificateFile{},
-			expectedErrorHandler:                nil,
+			expectedUpdateChangeCertificateFiles: []certificateFile{},
+			expectedErrorHandler:                 nil,
 		},
 	}
 
@@ -171,83 +171,76 @@ func Test_Resource_Certificate_GetUpdateState(t *testing.T) {
 			t.Fatalf("%d: error returned creating resource: %s\n", index, err)
 		}
 
-		createState, deleteState, updateState, err := resource.GetUpdateState(
+		updateChange, err := resource.newUpdateChange(
 			context.TODO(), v1.Service{}, test.currentState, test.desiredState,
 		)
 
 		if err != nil && test.expectedErrorHandler == nil {
-			t.Fatalf("%d: unexpected error returned getting update state: %s\n", index, err)
+			t.Fatalf("%d: unexpected error returned getting update change: %s\n", index, err)
 		}
 		if err != nil && !test.expectedErrorHandler(err) {
-			t.Fatalf("%d: incorrect error returned getting update state: %s\n", index, err)
+			t.Fatalf("%d: incorrect error returned getting update change: %s\n", index, err)
 		}
 		if err == nil && test.expectedErrorHandler != nil {
-			t.Fatalf("%d: expected error not returned getting update state\n", index)
+			t.Fatalf("%d: expected error not returned getting update change\n", index)
 		}
 
-		if createState != nil {
-			t.Fatalf("%d: createState should be nil, returned: %#v\n", index, createState)
-		}
-		if deleteState != nil {
-			t.Fatalf("%d: deleteState should be nil, returned: %#v\n", index, deleteState)
+		if updateChange == nil && test.expectedUpdateChangeCertificateFiles != nil {
+			t.Fatalf("%d: updateChange was nil, should be: %s\n", index, spew.Sdump(test.expectedUpdateChangeCertificateFiles))
 		}
 
-		if updateState == nil && test.expectedUpdateStateCertificateFiles != nil {
-			t.Fatalf("%d: updateState was nil, should be: %s\n", index, spew.Sdump(test.expectedUpdateStateCertificateFiles))
-		}
-
-		if updateState != nil {
-			updateStateCertificateFiles, err := toCertificateFiles(updateState)
+		if updateChange != nil {
+			updateChangeCertificateFiles, err := toCertificateFiles(updateChange)
 			if err != nil {
-				t.Fatalf("%d: could not cast update state to certificate files: %s\n", index, spew.Sdump(updateState))
+				t.Fatalf("%d: could not cast update change to certificate files: %s\n", index, spew.Sdump(updateChange))
 			}
 
-			if !reflect.DeepEqual(test.expectedUpdateStateCertificateFiles, updateStateCertificateFiles) {
+			if !reflect.DeepEqual(test.expectedUpdateChangeCertificateFiles, updateChangeCertificateFiles) {
 				t.Fatalf(
-					"%d: expected update state does not match returned update state.\nexpected: %s\nreturned: %s\n",
+					"%d: expected update change does not match returned update change.\nexpected: %s\nreturned: %s\n",
 					index,
-					spew.Sdump(test.expectedUpdateStateCertificateFiles),
-					spew.Sdump(updateStateCertificateFiles),
+					spew.Sdump(test.expectedUpdateChangeCertificateFiles),
+					spew.Sdump(updateChangeCertificateFiles),
 				)
 			}
 		}
 	}
 }
 
-// Test_Resource_Certificate_ProcessUpdateState tests the ProcessUpdateState method.
-func Test_Resource_Certificate_ProcessUpdateState(t *testing.T) {
+// Test_Resource_Certificate_ApplyUpdateChange tests the ApplyUpdateChange method.
+func Test_Resource_Certificate_ApplyUpdateChange(t *testing.T) {
 	tests := []struct {
 		currentCertificateFiles []certificateFile
-		updateState             []certificateFile
+		updateChange            []certificateFile
 
 		expectedCertificateFiles []certificateFile
 		expectedErrorHandler     func(error) bool
 	}{
-		// Test that when the updateState is nil and no certificates are on disk,
+		// Test that when the updateChange is nil and no certificates are on disk,
 		// no certificates are written, and no error is returned.
 		{
 			currentCertificateFiles: []certificateFile{},
-			updateState:             nil,
+			updateChange:            nil,
 
 			expectedCertificateFiles: []certificateFile{},
 			expectedErrorHandler:     nil,
 		},
 
-		// Test that when the updateState is empty and no certificates are on disk,
+		// Test that when the updateChange is empty and no certificates are on disk,
 		//  no certificates are written, and no error is returned.
 		{
 			currentCertificateFiles: []certificateFile{},
-			updateState:             []certificateFile{},
+			updateChange:            []certificateFile{},
 
 			expectedCertificateFiles: []certificateFile{},
 			expectedErrorHandler:     nil,
 		},
 
-		// Test that when the updateState contains one certificate and no certificates are on disk,
+		// Test that when the updateChange contains one certificate and no certificates are on disk,
 		// one certificate is written, and no error is returned.
 		{
 			currentCertificateFiles: []certificateFile{},
-			updateState: []certificateFile{
+			updateChange: []certificateFile{
 				{
 					path: "/certs/foo",
 					data: "foo",
@@ -263,11 +256,11 @@ func Test_Resource_Certificate_ProcessUpdateState(t *testing.T) {
 			expectedErrorHandler: nil,
 		},
 
-		// Test that when the updateState contains two certificates and no certificates are on disk,
+		// Test that when the updateChange contains two certificates and no certificates are on disk,
 		// two certificates are written, and no error is returned.
 		{
 			currentCertificateFiles: []certificateFile{},
-			updateState: []certificateFile{
+			updateChange: []certificateFile{
 				{
 					path: "/certs/foo",
 					data: "foo",
@@ -291,7 +284,7 @@ func Test_Resource_Certificate_ProcessUpdateState(t *testing.T) {
 			expectedErrorHandler: nil,
 		},
 
-		// Test that when the updateState contains one certificate,
+		// Test that when the updateChange contains one certificate,
 		// and the same certificate is on disk,
 		// the certificate is not updated, and no error is returned.
 		{
@@ -301,7 +294,7 @@ func Test_Resource_Certificate_ProcessUpdateState(t *testing.T) {
 					data: "foo",
 				},
 			},
-			updateState: []certificateFile{
+			updateChange: []certificateFile{
 				{
 					path: "/certs/foo",
 					data: "foo",
@@ -317,7 +310,7 @@ func Test_Resource_Certificate_ProcessUpdateState(t *testing.T) {
 			expectedErrorHandler: nil,
 		},
 
-		// Test that when the updateState contains no certificates,
+		// Test that when the updateChange contains no certificates,
 		// and there is one certificate on disk,
 		// the certificate is removed, and no error is returned.
 		{
@@ -327,13 +320,13 @@ func Test_Resource_Certificate_ProcessUpdateState(t *testing.T) {
 					data: "foo",
 				},
 			},
-			updateState: []certificateFile{},
+			updateChange: []certificateFile{},
 
 			expectedCertificateFiles: []certificateFile{},
 			expectedErrorHandler:     nil,
 		},
 
-		// Test that when the updateState is nil,
+		// Test that when the updateChange is nil,
 		// and there is one certificate on disk,
 		// the certificate is not removed, and no error is returned.
 		{
@@ -343,7 +336,7 @@ func Test_Resource_Certificate_ProcessUpdateState(t *testing.T) {
 					data: "foo",
 				},
 			},
-			updateState: nil,
+			updateChange: nil,
 
 			expectedCertificateFiles: []certificateFile{
 				{
@@ -354,7 +347,7 @@ func Test_Resource_Certificate_ProcessUpdateState(t *testing.T) {
 			expectedErrorHandler: nil,
 		},
 
-		// Test that when the updateState contains one certificate,
+		// Test that when the updateChange contains one certificate,
 		// and there is one certificate on disk with different data,
 		// the certificate is updated, and no error is returned.
 		{
@@ -364,7 +357,7 @@ func Test_Resource_Certificate_ProcessUpdateState(t *testing.T) {
 					data: "foo",
 				},
 			},
-			updateState: []certificateFile{
+			updateChange: []certificateFile{
 				{
 					path: "/certs/foo",
 					data: "bar",
@@ -380,7 +373,7 @@ func Test_Resource_Certificate_ProcessUpdateState(t *testing.T) {
 			expectedErrorHandler: nil,
 		},
 
-		// Test that when the updateState contains two certificates,
+		// Test that when the updateChange contains two certificates,
 		// and one of the certificates is on disk,
 		// the other certificate is added,
 		// and no error is returned.
@@ -391,7 +384,7 @@ func Test_Resource_Certificate_ProcessUpdateState(t *testing.T) {
 					data: "foo",
 				},
 			},
-			updateState: []certificateFile{
+			updateChange: []certificateFile{
 				{
 					path: "/certs/foo",
 					data: "foo",
@@ -447,16 +440,16 @@ func Test_Resource_Certificate_ProcessUpdateState(t *testing.T) {
 			}
 		}
 
-		updateErr := resource.ProcessUpdateState(context.TODO(), v1.Service{}, test.updateState)
+		updateErr := resource.ApplyUpdateChange(context.TODO(), v1.Service{}, test.updateChange)
 
 		if updateErr != nil && test.expectedErrorHandler == nil {
-			t.Fatalf("%d: unexpected error returned processing update state: %s\n", index, updateErr)
+			t.Fatalf("%d: unexpected error returned applying update change: %s\n", index, updateErr)
 		}
 		if updateErr != nil && !test.expectedErrorHandler(updateErr) {
-			t.Fatalf("%d: incorrect error returned processing update state: %s\n", index, updateErr)
+			t.Fatalf("%d: incorrect error returned applying update change: %s\n", index, updateErr)
 		}
 		if updateErr == nil && test.expectedErrorHandler != nil {
-			t.Fatalf("%d: expected error not returned processing update state\n", index)
+			t.Fatalf("%d: expected error not returned applying update change\n", index)
 		}
 
 		fileInfos, err := afero.ReadDir(fs, resourceConfig.CertificateDirectory)

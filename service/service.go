@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cenk/backoff"
+	"github.com/cenkalti/backoff"
 	"github.com/spf13/afero"
 	"github.com/spf13/viper"
 	"k8s.io/client-go/kubernetes"
@@ -15,9 +15,9 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/client/k8sclient"
 	"github.com/giantswarm/operatorkit/framework"
-	"github.com/giantswarm/operatorkit/framework/resource/logresource"
 	"github.com/giantswarm/operatorkit/framework/resource/metricsresource"
 	"github.com/giantswarm/operatorkit/framework/resource/retryresource"
+	"github.com/giantswarm/operatorkit/informer"
 
 	"github.com/giantswarm/prometheus-config-controller/flag"
 	"github.com/giantswarm/prometheus-config-controller/service/controller"
@@ -175,13 +175,6 @@ func New(config Config) (*Service, error) {
 			newConfigMapResource,
 		}
 
-		logWrapConfig := logresource.DefaultWrapConfig()
-		logWrapConfig.Logger = config.Logger
-		resources, err = logresource.Wrap(resources, logWrapConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
 		retryWrapConfig := retryresource.DefaultWrapConfig()
 		retryWrapConfig.BackOffFactory = func() backoff.BackOff {
 			return backoff.WithMaxTries(backoff.NewExponentialBackOff(), uint64(config.ResourceRetries))
@@ -200,6 +193,21 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
+	var newInformer *informer.Informer
+	{
+		informerConfig := informer.DefaultConfig()
+
+		informerConfig.Watcher = newK8sClient.CoreV1().Services("")
+
+		informerConfig.RateWait = config.Viper.GetDuration(config.Flag.Service.Controller.ResyncPeriod)
+		informerConfig.ResyncPeriod = config.Viper.GetDuration(config.Flag.Service.Controller.ResyncPeriod)
+
+		newInformer, err = informer.New(informerConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var newOperatorFramework *framework.Framework
 	{
 		backOff := backoff.NewExponentialBackOff()
@@ -207,9 +215,9 @@ func New(config Config) (*Service, error) {
 
 		frameworkConfig := framework.DefaultConfig()
 
-		frameworkConfig.BackOff = backOff
+		frameworkConfig.Informer = newInformer
 		frameworkConfig.Logger = config.Logger
-		frameworkConfig.Resources = resources
+		frameworkConfig.ResourceRouter = framework.DefaultResourceRouter(resources)
 
 		newOperatorFramework, err = framework.New(frameworkConfig)
 		if err != nil {
