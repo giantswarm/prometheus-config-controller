@@ -1,6 +1,7 @@
 package prometheus
 
 import (
+	"github.com/prometheus/prometheus/config"
 	"k8s.io/api/core/v1"
 )
 
@@ -16,6 +17,30 @@ const (
 	// ClusterIDLabel is the Prometheus label used to identify guest cluster
 	// metrics by external clients.
 	ClusterIDLabel = "cluster_id"
+
+	// NamespaceLabel is the Prometheus label we use internally for an
+	// endpoints namespace.
+	NameLabel = "kubernetes_name"
+
+	// NamespaceLabel is the Prometheus label we use internally for
+	// an endpoints namespace.
+	NamespaceLabel = "kubernetes_namespace"
+
+	// PrometheusNamespaceLabel is the Prometheus label added by the Kubernetes
+	// service discovery to hold an endpoint targets namespace.
+	PrometheusNamespaceLabel = "__meta_kubernetes_namespace"
+
+	// PrometheusServiceNameLabel is the Prometheus label added by the Kubernetes
+	// service discovery to hold an endpoints service name.
+	PrometheusServiceNameLabel = "__meta_kubernetes_service_name"
+)
+
+var (
+	// EndpointRegexp is the regular expression against which endpoint service names
+	// must match to be scraped.
+	// The empty string is also matched, so that nodes (which have no service name),
+	// are also matched.
+	EndpointRegexp = config.MustNewRegexp(`((\s*|kubernetes))`)
 )
 
 // GetClusterID returns the value of the cluster annotation.

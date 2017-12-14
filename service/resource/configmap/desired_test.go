@@ -262,10 +262,27 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 							{
 								TargetLabel: prometheus.ClusterLabel,
 								Replacement: prometheus.ClusterLabel,
+								Action:      config.RelabelReplace,
 							},
 							{
 								TargetLabel: prometheus.ClusterIDLabel,
 								Replacement: "xa5ly",
+								Action:      config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusServiceNameLabel},
+								TargetLabel:  prometheus.NameLabel,
+								Action:       config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusNamespaceLabel},
+								TargetLabel:  prometheus.NamespaceLabel,
+								Action:       config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusServiceNameLabel},
+								Regex:        prometheus.EndpointRegexp,
+								Action:       config.RelabelKeep,
 							},
 						},
 					},
@@ -335,10 +352,27 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 							{
 								TargetLabel: prometheus.ClusterLabel,
 								Replacement: prometheus.ClusterLabel,
+								Action:      config.RelabelReplace,
 							},
 							{
 								TargetLabel: prometheus.ClusterIDLabel,
 								Replacement: "xa5ly",
+								Action:      config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusServiceNameLabel},
+								TargetLabel:  prometheus.NameLabel,
+								Action:       config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusNamespaceLabel},
+								TargetLabel:  prometheus.NamespaceLabel,
+								Action:       config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusServiceNameLabel},
+								Regex:        prometheus.EndpointRegexp,
+								Action:       config.RelabelKeep,
 							},
 						},
 					},
@@ -425,10 +459,27 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 							{
 								TargetLabel: prometheus.ClusterLabel,
 								Replacement: prometheus.ClusterLabel,
+								Action:      config.RelabelReplace,
 							},
 							{
 								TargetLabel: prometheus.ClusterIDLabel,
 								Replacement: "xa5ly",
+								Action:      config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusServiceNameLabel},
+								TargetLabel:  prometheus.NameLabel,
+								Action:       config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusNamespaceLabel},
+								TargetLabel:  prometheus.NamespaceLabel,
+								Action:       config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusServiceNameLabel},
+								Regex:        prometheus.EndpointRegexp,
+								Action:       config.RelabelKeep,
 							},
 						},
 					},
@@ -513,10 +564,27 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 							{
 								TargetLabel: prometheus.ClusterLabel,
 								Replacement: prometheus.ClusterLabel,
+								Action:      config.RelabelReplace,
 							},
 							{
 								TargetLabel: prometheus.ClusterIDLabel,
 								Replacement: "0ba9v",
+								Action:      config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusServiceNameLabel},
+								TargetLabel:  prometheus.NameLabel,
+								Action:       config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusNamespaceLabel},
+								TargetLabel:  prometheus.NamespaceLabel,
+								Action:       config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusServiceNameLabel},
+								Regex:        prometheus.EndpointRegexp,
+								Action:       config.RelabelKeep,
 							},
 						},
 					},
@@ -565,10 +633,27 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 							{
 								TargetLabel: prometheus.ClusterLabel,
 								Replacement: prometheus.ClusterLabel,
+								Action:      config.RelabelReplace,
 							},
 							{
 								TargetLabel: prometheus.ClusterIDLabel,
 								Replacement: "xa5ly",
+								Action:      config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusServiceNameLabel},
+								TargetLabel:  prometheus.NameLabel,
+								Action:       config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusNamespaceLabel},
+								TargetLabel:  prometheus.NamespaceLabel,
+								Action:       config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusServiceNameLabel},
+								Regex:        prometheus.EndpointRegexp,
+								Action:       config.RelabelKeep,
 							},
 						},
 					},
@@ -710,10 +795,27 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 							{
 								TargetLabel: prometheus.ClusterLabel,
 								Replacement: prometheus.ClusterLabel,
+								Action:      config.RelabelReplace,
 							},
 							{
 								TargetLabel: prometheus.ClusterIDLabel,
 								Replacement: "xa5ly",
+								Action:      config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusServiceNameLabel},
+								TargetLabel:  prometheus.NameLabel,
+								Action:       config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusNamespaceLabel},
+								TargetLabel:  prometheus.NamespaceLabel,
+								Action:       config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusServiceNameLabel},
+								Regex:        prometheus.EndpointRegexp,
+								Action:       config.RelabelKeep,
 							},
 						},
 					},

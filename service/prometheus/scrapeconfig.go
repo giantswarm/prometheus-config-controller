@@ -81,13 +81,37 @@ func getScrapeConfig(service v1.Service, certificateDirectory string) config.Scr
 			},
 		},
 		RelabelConfigs: []*config.RelabelConfig{
+			// Add the cluster label so we know this config is managed
+			// by the prometheus-config-controller.
 			{
 				TargetLabel: ClusterLabel,
 				Replacement: ClusterLabel,
+				Action:      config.RelabelReplace,
 			},
+			// Add the cluster id label, so we can identify the specific
+			// guest cluster.
 			{
 				TargetLabel: ClusterIDLabel,
 				Replacement: clusterID,
+				Action:      config.RelabelReplace,
+			},
+			// Copy the meta service name label to a named label.
+			{
+				SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
+				TargetLabel:  NameLabel,
+				Action:       config.RelabelReplace,
+			},
+			// Copy the meta namespace name label to a named label.
+			{
+				SourceLabels: model.LabelNames{PrometheusNamespaceLabel},
+				TargetLabel:  NamespaceLabel,
+				Action:       config.RelabelReplace,
+			},
+			// Drop any targets that don't match the regexp.
+			{
+				SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
+				Regex:        EndpointRegexp,
+				Action:       config.RelabelKeep,
 			},
 		},
 	}
