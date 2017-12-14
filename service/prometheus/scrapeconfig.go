@@ -41,42 +41,42 @@ func getTarget(service v1.Service) model.LabelSet {
 // getScrapeConfig takes a Service, and returns a ScrapeConfig.
 // It is assumed that filtering has already taken place, and the cluster annotation exists.
 func getScrapeConfig(service v1.Service, certificateDirectory string) config.ScrapeConfig {
-	clusterID := service.ObjectMeta.Annotations[ClusterAnnotation]
+	clusterID := GetClusterID(service)
+
+	apiServer := config.URL{&url.URL{
+		Scheme: httpsScheme,
+		Host:   getTargetHost(service),
+	}}
+
+	tlsConfig := config.TLSConfig{
+		CAFile:   key.CAPath(certificateDirectory, clusterID),
+		CertFile: key.CrtPath(certificateDirectory, clusterID),
+		KeyFile:  key.KeyPath(certificateDirectory, clusterID),
+	}
+
+	clientTlsConfig := tlsConfig
+	clientTlsConfig.InsecureSkipVerify = true
+
+	kubernetesTlsConfig := tlsConfig
+	kubernetesTlsConfig.InsecureSkipVerify = false
 
 	scrapeConfig := config.ScrapeConfig{
 		JobName: getJobName(service),
 		Scheme:  httpsScheme,
 		HTTPClientConfig: config.HTTPClientConfig{
-			TLSConfig: config.TLSConfig{
-				CAFile:             key.CAPath(certificateDirectory, clusterID),
-				CertFile:           key.CrtPath(certificateDirectory, clusterID),
-				KeyFile:            key.KeyPath(certificateDirectory, clusterID),
-				InsecureSkipVerify: true,
-			},
+			TLSConfig: clientTlsConfig,
 		},
 		ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-			StaticConfigs: []*config.TargetGroup{
-				{
-					Targets: []model.LabelSet{getTarget(service)},
-					Labels: model.LabelSet{
-						ClusterLabel:   "",
-						ClusterIDLabel: model.LabelValue(clusterID),
-					},
-				},
-			},
 			KubernetesSDConfigs: []*config.KubernetesSDConfig{
 				{
-					APIServer: config.URL{&url.URL{
-						Scheme: httpsScheme,
-						Host:   getTargetHost(service),
-					}},
-					Role: config.KubernetesRoleNode,
-					TLSConfig: config.TLSConfig{
-						CAFile:             key.CAPath(certificateDirectory, clusterID),
-						CertFile:           key.CrtPath(certificateDirectory, clusterID),
-						KeyFile:            key.KeyPath(certificateDirectory, clusterID),
-						InsecureSkipVerify: false,
-					},
+					APIServer: apiServer,
+					Role:      config.KubernetesRoleEndpoint,
+					TLSConfig: kubernetesTlsConfig,
+				},
+				{
+					APIServer: apiServer,
+					Role:      config.KubernetesRoleNode,
+					TLSConfig: kubernetesTlsConfig,
 				},
 			},
 		},
