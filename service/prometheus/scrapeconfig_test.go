@@ -14,8 +14,70 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// Test_Prometheus_GetTarget tests the GetTarget function.
-func Test_Prometheus_GetTarget(t *testing.T) {
+// Test_Prometheus_getJobName tests the getJobName function.
+func Test_Prometheus_getJobName(t *testing.T) {
+	tests := []struct {
+		service         v1.Service
+		expectedJobName string
+	}{
+		{
+			service: v1.Service{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "foo",
+					Namespace: "bar",
+				},
+			},
+			expectedJobName: "guest-cluster-bar",
+		},
+	}
+
+	for index, test := range tests {
+		jobName := getJobName(test.service)
+
+		if test.expectedJobName != jobName {
+			t.Fatalf(
+				"%d: expected job name does not match returned job name.\nexpected: %s\nreturned: %s\n",
+				index,
+				test.expectedJobName,
+				jobName,
+			)
+		}
+	}
+}
+
+// Test_Prometheus_getTargetHost tests the getTargetHost function.
+func Test_Prometheus_getTargetHost(t *testing.T) {
+	tests := []struct {
+		service            v1.Service
+		expectedTargetHost string
+	}{
+		{
+			service: v1.Service{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "foo",
+					Namespace: "bar",
+				},
+			},
+			expectedTargetHost: "foo.bar",
+		},
+	}
+
+	for index, test := range tests {
+		targetHost := getTargetHost(test.service)
+
+		if test.expectedTargetHost != targetHost {
+			t.Fatalf(
+				"%d: expected target host does not match returned target host.\nexpected: %s\nreturned: %s\n",
+				index,
+				test.expectedTargetHost,
+				targetHost,
+			)
+		}
+	}
+}
+
+// Test_Prometheus_getTarget tests the getTarget function.
+func Test_Prometheus_getTarget(t *testing.T) {
 	tests := []struct {
 		service        v1.Service
 		expectedTarget model.LabelSet
@@ -32,7 +94,7 @@ func Test_Prometheus_GetTarget(t *testing.T) {
 	}
 
 	for index, test := range tests {
-		target := GetTarget(test.service)
+		target := getTarget(test.service)
 
 		if !reflect.DeepEqual(test.expectedTarget, target) {
 			t.Fatalf(
@@ -237,85 +299,6 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 							{
 								Targets: []model.LabelSet{
 									model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
-								},
-								Labels: model.LabelSet{
-									ClusterLabel:   "",
-									ClusterIDLabel: "xa5ly",
-								},
-							},
-						},
-						KubernetesSDConfigs: []*config.KubernetesSDConfig{
-							{
-								APIServer: config.URL{&url.URL{
-									Scheme: "https",
-									Host:   "apiserver.xa5ly",
-								}},
-								Role: config.KubernetesRoleNode,
-								TLSConfig: config.TLSConfig{
-									CAFile:             "/certs/xa5ly-ca.pem",
-									CertFile:           "/certs/xa5ly-crt.pem",
-									KeyFile:            "/certs/xa5ly-key.pem",
-									InsecureSkipVerify: false,
-								},
-							},
-						},
-					},
-					RelabelConfigs: []*config.RelabelConfig{
-						{
-							TargetLabel: ClusterLabel,
-							Replacement: ClusterLabel,
-						},
-						{
-							TargetLabel: ClusterIDLabel,
-							Replacement: "xa5ly",
-						},
-					},
-				},
-			},
-		},
-
-		// Test that two services that specify the same cluster annotation create a scrape config together.
-		{
-			services: []v1.Service{
-				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "apiserver",
-						Namespace: "xa5ly",
-						Annotations: map[string]string{
-							ClusterAnnotation: "xa5ly",
-						},
-					},
-				},
-				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "kubelet",
-						Namespace: "xa5ly",
-						Annotations: map[string]string{
-							ClusterAnnotation: "xa5ly",
-						},
-					},
-				},
-			},
-			certificateDirectory: "/certs",
-
-			expectedScrapeConfigs: []config.ScrapeConfig{
-				{
-					JobName: "guest-cluster-xa5ly",
-					Scheme:  "https",
-					HTTPClientConfig: config.HTTPClientConfig{
-						TLSConfig: config.TLSConfig{
-							CAFile:             "/certs/xa5ly-ca.pem",
-							CertFile:           "/certs/xa5ly-crt.pem",
-							KeyFile:            "/certs/xa5ly-key.pem",
-							InsecureSkipVerify: true,
-						},
-					},
-					ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-						StaticConfigs: []*config.TargetGroup{
-							{
-								Targets: []model.LabelSet{
-									model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
-									model.LabelSet{model.AddressLabel: "kubelet.xa5ly"},
 								},
 								Labels: model.LabelSet{
 									ClusterLabel:   "",
