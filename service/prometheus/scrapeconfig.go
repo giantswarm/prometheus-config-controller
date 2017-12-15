@@ -81,13 +81,6 @@ func getScrapeConfig(service v1.Service, certificateDirectory string) config.Scr
 			},
 		},
 		RelabelConfigs: []*config.RelabelConfig{
-			// Add the cluster label so we know this config is managed
-			// by the prometheus-config-controller.
-			{
-				TargetLabel: ClusterLabel,
-				Replacement: ClusterLabel,
-				Action:      config.RelabelReplace,
-			},
 			// Add the cluster id label, so we can identify the specific
 			// guest cluster.
 			{

@@ -38,8 +38,15 @@ func isManaged(scrapeConfig config.ScrapeConfig) bool {
 		}
 	}
 
+	// TODO: the clusterlabel can be removed once all installations use clusteridlabels.
 	for _, relabelConfig := range scrapeConfig.RelabelConfigs {
 		if relabelConfig.TargetLabel == ClusterLabel {
+			return true
+		}
+	}
+
+	for _, relabelConfig := range scrapeConfig.RelabelConfigs {
+		if relabelConfig.TargetLabel == ClusterIDLabel {
 			return true
 		}
 	}
