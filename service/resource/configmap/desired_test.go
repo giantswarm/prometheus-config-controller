@@ -260,11 +260,6 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 						},
 						RelabelConfigs: []*config.RelabelConfig{
 							{
-								TargetLabel: prometheus.ClusterLabel,
-								Replacement: prometheus.ClusterLabel,
-								Action:      config.RelabelReplace,
-							},
-							{
 								TargetLabel: prometheus.ClusterIDLabel,
 								Replacement: "xa5ly",
 								Action:      config.RelabelReplace,
@@ -349,11 +344,6 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 							},
 						},
 						RelabelConfigs: []*config.RelabelConfig{
-							{
-								TargetLabel: prometheus.ClusterLabel,
-								Replacement: prometheus.ClusterLabel,
-								Action:      config.RelabelReplace,
-							},
 							{
 								TargetLabel: prometheus.ClusterIDLabel,
 								Replacement: "xa5ly",
@@ -457,11 +447,6 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 						},
 						RelabelConfigs: []*config.RelabelConfig{
 							{
-								TargetLabel: prometheus.ClusterLabel,
-								Replacement: prometheus.ClusterLabel,
-								Action:      config.RelabelReplace,
-							},
-							{
 								TargetLabel: prometheus.ClusterIDLabel,
 								Replacement: "xa5ly",
 								Action:      config.RelabelReplace,
@@ -562,11 +547,6 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 						},
 						RelabelConfigs: []*config.RelabelConfig{
 							{
-								TargetLabel: prometheus.ClusterLabel,
-								Replacement: prometheus.ClusterLabel,
-								Action:      config.RelabelReplace,
-							},
-							{
 								TargetLabel: prometheus.ClusterIDLabel,
 								Replacement: "0ba9v",
 								Action:      config.RelabelReplace,
@@ -630,11 +610,6 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 							},
 						},
 						RelabelConfigs: []*config.RelabelConfig{
-							{
-								TargetLabel: prometheus.ClusterLabel,
-								Replacement: prometheus.ClusterLabel,
-								Action:      config.RelabelReplace,
-							},
 							{
 								TargetLabel: prometheus.ClusterIDLabel,
 								Replacement: "xa5ly",
@@ -793,10 +768,179 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 						},
 						RelabelConfigs: []*config.RelabelConfig{
 							{
-								TargetLabel: prometheus.ClusterLabel,
-								Replacement: prometheus.ClusterLabel,
+								TargetLabel: prometheus.ClusterIDLabel,
+								Replacement: "xa5ly",
 								Action:      config.RelabelReplace,
 							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusServiceNameLabel},
+								TargetLabel:  prometheus.NameLabel,
+								Action:       config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusNamespaceLabel},
+								TargetLabel:  prometheus.NamespaceLabel,
+								Action:       config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusServiceNameLabel},
+								Regex:        prometheus.EndpointRegexp,
+								Action:       config.RelabelKeep,
+							},
+						},
+					},
+				},
+			},
+			expectedErrorHandler: nil,
+		},
+
+		// Test that if the configmap exists, with a prometheus_config_controller label,
+		// and the service exists,
+		// the configmap is updated without the prometheus_config_controller label.
+		// TODO: this test and support can be removed once the label
+		// style is removed everywhere.
+		{
+			setUpPrometheusConfiguration: &config.Config{
+				GlobalConfig: config.GlobalConfig{
+					ScrapeInterval: model.Duration(1 * time.Minute),
+				},
+				ScrapeConfigs: []*config.ScrapeConfig{
+					{
+						JobName: "guest-cluster-xa5ly",
+						Scheme:  "https",
+						HTTPClientConfig: config.HTTPClientConfig{
+							TLSConfig: config.TLSConfig{
+								CAFile:             "/certs/xa5ly-ca.pem",
+								CertFile:           "/certs/xa5ly-crt.pem",
+								KeyFile:            "/certs/xa5ly-key.pem",
+								InsecureSkipVerify: true,
+							},
+						},
+						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
+							KubernetesSDConfigs: []*config.KubernetesSDConfig{
+								{
+									APIServer: config.URL{&url.URL{
+										Scheme: "https",
+										Host:   "apiserver.xa5ly",
+									}},
+									Role: config.KubernetesRoleEndpoint,
+									TLSConfig: config.TLSConfig{
+										CAFile:             "/certs/xa5ly-ca.pem",
+										CertFile:           "/certs/xa5ly-crt.pem",
+										KeyFile:            "/certs/xa5ly-key.pem",
+										InsecureSkipVerify: false,
+									},
+								},
+								{
+									APIServer: config.URL{&url.URL{
+										Scheme: "https",
+										Host:   "apiserver.xa5ly",
+									}},
+									Role: config.KubernetesRoleNode,
+									TLSConfig: config.TLSConfig{
+										CAFile:             "/certs/xa5ly-ca.pem",
+										CertFile:           "/certs/xa5ly-crt.pem",
+										KeyFile:            "/certs/xa5ly-key.pem",
+										InsecureSkipVerify: false,
+									},
+								},
+							},
+						},
+						RelabelConfigs: []*config.RelabelConfig{
+							{
+								TargetLabel: prometheus.ClusterLabel,
+								Replacement: prometheus.ClusterLabel,
+							},
+							{
+								TargetLabel: prometheus.ClusterIDLabel,
+								Replacement: "xa5ly",
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusServiceNameLabel},
+								TargetLabel:  prometheus.NameLabel,
+								Action:       config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusNamespaceLabel},
+								TargetLabel:  prometheus.NamespaceLabel,
+								Action:       config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusServiceNameLabel},
+								Regex:        prometheus.EndpointRegexp,
+								Action:       config.RelabelKeep,
+							},
+						},
+					},
+				},
+			},
+			setUpConfigMap: &v1.ConfigMap{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      configMapName,
+					Namespace: configMapNamespace,
+				},
+			},
+			setUpServices: []*v1.Service{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "apiserver",
+						Namespace: "xa5ly",
+						Annotations: map[string]string{
+							prometheus.ClusterAnnotation: "xa5ly",
+						},
+					},
+				},
+			},
+
+			expectedPrometheusConfiguration: &config.Config{
+				GlobalConfig: config.GlobalConfig{
+					ScrapeInterval:     model.Duration(1 * time.Minute),
+					ScrapeTimeout:      model.Duration(10 * time.Second),
+					EvaluationInterval: model.Duration(1 * time.Minute),
+				},
+				ScrapeConfigs: []*config.ScrapeConfig{
+					{
+						JobName: "guest-cluster-xa5ly",
+						Scheme:  "https",
+						HTTPClientConfig: config.HTTPClientConfig{
+							TLSConfig: config.TLSConfig{
+								CAFile:             "/certs/xa5ly-ca.pem",
+								CertFile:           "/certs/xa5ly-crt.pem",
+								KeyFile:            "/certs/xa5ly-key.pem",
+								InsecureSkipVerify: true,
+							},
+						},
+						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
+							KubernetesSDConfigs: []*config.KubernetesSDConfig{
+								{
+									APIServer: config.URL{&url.URL{
+										Scheme: "https",
+										Host:   "apiserver.xa5ly",
+									}},
+									Role: config.KubernetesRoleEndpoint,
+									TLSConfig: config.TLSConfig{
+										CAFile:             "/certs/xa5ly-ca.pem",
+										CertFile:           "/certs/xa5ly-crt.pem",
+										KeyFile:            "/certs/xa5ly-key.pem",
+										InsecureSkipVerify: false,
+									},
+								},
+								{
+									APIServer: config.URL{&url.URL{
+										Scheme: "https",
+										Host:   "apiserver.xa5ly",
+									}},
+									Role: config.KubernetesRoleNode,
+									TLSConfig: config.TLSConfig{
+										CAFile:             "/certs/xa5ly-ca.pem",
+										CertFile:           "/certs/xa5ly-crt.pem",
+										KeyFile:            "/certs/xa5ly-key.pem",
+										InsecureSkipVerify: false,
+									},
+								},
+							},
+						},
+						RelabelConfigs: []*config.RelabelConfig{
 							{
 								TargetLabel: prometheus.ClusterIDLabel,
 								Replacement: "xa5ly",

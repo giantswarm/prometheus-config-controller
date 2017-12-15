@@ -109,6 +109,58 @@ func Test_Prometheus_isManaged(t *testing.T) {
 			},
 			isManaged: true,
 		},
+
+		{
+			scrapeConfig: config.ScrapeConfig{
+				JobName: "guest-cluster-xa5ly",
+				Scheme:  "https",
+				HTTPClientConfig: config.HTTPClientConfig{
+					TLSConfig: config.TLSConfig{
+						CAFile:             "/certs/xa5ly-ca.pem",
+						CertFile:           "/certs/xa5ly-crt.pem",
+						KeyFile:            "/certs/xa5ly-key.pem",
+						InsecureSkipVerify: true,
+					},
+				},
+				ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
+					KubernetesSDConfigs: []*config.KubernetesSDConfig{
+						{
+							APIServer: config.URL{&url.URL{
+								Scheme: "https",
+								Host:   "apiserver.xa5ly",
+							}},
+							Role: config.KubernetesRoleEndpoint,
+							TLSConfig: config.TLSConfig{
+								CAFile:             "/certs/xa5ly-ca.pem",
+								CertFile:           "/certs/xa5ly-crt.pem",
+								KeyFile:            "/certs/xa5ly-key.pem",
+								InsecureSkipVerify: false,
+							},
+						},
+						{
+							APIServer: config.URL{&url.URL{
+								Scheme: "https",
+								Host:   "apiserver.xa5ly",
+							}},
+							Role: config.KubernetesRoleNode,
+							TLSConfig: config.TLSConfig{
+								CAFile:             "/certs/xa5ly-ca.pem",
+								CertFile:           "/certs/xa5ly-crt.pem",
+								KeyFile:            "/certs/xa5ly-key.pem",
+								InsecureSkipVerify: false,
+							},
+						},
+					},
+				},
+				RelabelConfigs: []*config.RelabelConfig{
+					{
+						TargetLabel: ClusterIDLabel,
+						Replacement: "xa5ly",
+					},
+				},
+			},
+			isManaged: true,
+		},
 	}
 
 	for index, test := range tests {

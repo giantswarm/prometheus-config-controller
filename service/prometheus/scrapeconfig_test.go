@@ -198,11 +198,6 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 					},
 					RelabelConfigs: []*config.RelabelConfig{
 						{
-							TargetLabel: ClusterLabel,
-							Replacement: ClusterLabel,
-							Action:      config.RelabelReplace,
-						},
-						{
 							TargetLabel: ClusterIDLabel,
 							Replacement: "xa5ly",
 							Action:      config.RelabelReplace,
@@ -295,11 +290,6 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 					},
 					RelabelConfigs: []*config.RelabelConfig{
 						{
-							TargetLabel: ClusterLabel,
-							Replacement: ClusterLabel,
-							Action:      config.RelabelReplace,
-						},
-						{
 							TargetLabel: ClusterIDLabel,
 							Replacement: "0ba9v",
 							Action:      config.RelabelReplace,
@@ -363,11 +353,6 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 						},
 					},
 					RelabelConfigs: []*config.RelabelConfig{
-						{
-							TargetLabel: ClusterLabel,
-							Replacement: ClusterLabel,
-							Action:      config.RelabelReplace,
-						},
 						{
 							TargetLabel: ClusterIDLabel,
 							Replacement: "xa5ly",
@@ -479,11 +464,6 @@ func Test_Prometheus_GetScrapeConfigs_Deterministic(t *testing.T) {
 			},
 			RelabelConfigs: []*config.RelabelConfig{
 				{
-					TargetLabel: ClusterLabel,
-					Replacement: ClusterLabel,
-					Action:      config.RelabelReplace,
-				},
-				{
 					TargetLabel: ClusterIDLabel,
 					Replacement: "0ba9v",
 					Action:      config.RelabelReplace,
@@ -547,11 +527,6 @@ func Test_Prometheus_GetScrapeConfigs_Deterministic(t *testing.T) {
 				},
 			},
 			RelabelConfigs: []*config.RelabelConfig{
-				{
-					TargetLabel: ClusterLabel,
-					Replacement: ClusterLabel,
-					Action:      config.RelabelReplace,
-				},
 				{
 					TargetLabel: ClusterIDLabel,
 					Replacement: "xa5ly",
@@ -644,11 +619,6 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
 				},
 				RelabelConfigs: []*config.RelabelConfig{
 					{
-						TargetLabel: ClusterLabel,
-						Replacement: ClusterLabel,
-						Action:      config.RelabelReplace,
-					},
-					{
 						TargetLabel: ClusterIDLabel,
 						Replacement: "xa5ly",
 						Action:      config.RelabelReplace,
@@ -694,10 +664,6 @@ tls_config:
   key_file: /certs/xa5ly-key.pem
   insecure_skip_verify: true
 relabel_configs:
-- source_labels: []
-  target_label: prometheus_config_controller
-  replacement: prometheus_config_controller
-  action: replace
 - source_labels: []
   target_label: cluster_id
   replacement: xa5ly
