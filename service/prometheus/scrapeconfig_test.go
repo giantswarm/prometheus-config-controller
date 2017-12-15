@@ -167,18 +167,20 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 						},
 					},
 					ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-						StaticConfigs: []*config.TargetGroup{
+						KubernetesSDConfigs: []*config.KubernetesSDConfig{
 							{
-								Targets: []model.LabelSet{
-									model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
-								},
-								Labels: model.LabelSet{
-									ClusterLabel:   "",
-									ClusterIDLabel: "xa5ly",
+								APIServer: config.URL{&url.URL{
+									Scheme: "https",
+									Host:   "apiserver.xa5ly",
+								}},
+								Role: config.KubernetesRoleEndpoint,
+								TLSConfig: config.TLSConfig{
+									CAFile:             "/certs/xa5ly-ca.pem",
+									CertFile:           "/certs/xa5ly-crt.pem",
+									KeyFile:            "/certs/xa5ly-key.pem",
+									InsecureSkipVerify: false,
 								},
 							},
-						},
-						KubernetesSDConfigs: []*config.KubernetesSDConfig{
 							{
 								APIServer: config.URL{&url.URL{
 									Scheme: "https",
@@ -198,10 +200,27 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 						{
 							TargetLabel: ClusterLabel,
 							Replacement: ClusterLabel,
+							Action:      config.RelabelReplace,
 						},
 						{
 							TargetLabel: ClusterIDLabel,
 							Replacement: "xa5ly",
+							Action:      config.RelabelReplace,
+						},
+						{
+							SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
+							TargetLabel:  NameLabel,
+							Action:       config.RelabelReplace,
+						},
+						{
+							SourceLabels: model.LabelNames{PrometheusNamespaceLabel},
+							TargetLabel:  NamespaceLabel,
+							Action:       config.RelabelReplace,
+						},
+						{
+							SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
+							Regex:        EndpointRegexp,
+							Action:       config.RelabelKeep,
 						},
 					},
 				},
@@ -245,18 +264,20 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 						},
 					},
 					ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-						StaticConfigs: []*config.TargetGroup{
+						KubernetesSDConfigs: []*config.KubernetesSDConfig{
 							{
-								Targets: []model.LabelSet{
-									model.LabelSet{model.AddressLabel: "apiserver.0ba9v"},
-								},
-								Labels: model.LabelSet{
-									ClusterLabel:   "",
-									ClusterIDLabel: "0ba9v",
+								APIServer: config.URL{&url.URL{
+									Scheme: "https",
+									Host:   "apiserver.0ba9v",
+								}},
+								Role: config.KubernetesRoleEndpoint,
+								TLSConfig: config.TLSConfig{
+									CAFile:             "/certs/0ba9v-ca.pem",
+									CertFile:           "/certs/0ba9v-crt.pem",
+									KeyFile:            "/certs/0ba9v-key.pem",
+									InsecureSkipVerify: false,
 								},
 							},
-						},
-						KubernetesSDConfigs: []*config.KubernetesSDConfig{
 							{
 								APIServer: config.URL{&url.URL{
 									Scheme: "https",
@@ -276,10 +297,27 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 						{
 							TargetLabel: ClusterLabel,
 							Replacement: ClusterLabel,
+							Action:      config.RelabelReplace,
 						},
 						{
 							TargetLabel: ClusterIDLabel,
 							Replacement: "0ba9v",
+							Action:      config.RelabelReplace,
+						},
+						{
+							SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
+							TargetLabel:  NameLabel,
+							Action:       config.RelabelReplace,
+						},
+						{
+							SourceLabels: model.LabelNames{PrometheusNamespaceLabel},
+							TargetLabel:  NamespaceLabel,
+							Action:       config.RelabelReplace,
+						},
+						{
+							SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
+							Regex:        EndpointRegexp,
+							Action:       config.RelabelKeep,
 						},
 					},
 				},
@@ -295,18 +333,20 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 						},
 					},
 					ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-						StaticConfigs: []*config.TargetGroup{
+						KubernetesSDConfigs: []*config.KubernetesSDConfig{
 							{
-								Targets: []model.LabelSet{
-									model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
-								},
-								Labels: model.LabelSet{
-									ClusterLabel:   "",
-									ClusterIDLabel: "xa5ly",
+								APIServer: config.URL{&url.URL{
+									Scheme: "https",
+									Host:   "apiserver.xa5ly",
+								}},
+								Role: config.KubernetesRoleEndpoint,
+								TLSConfig: config.TLSConfig{
+									CAFile:             "/certs/xa5ly-ca.pem",
+									CertFile:           "/certs/xa5ly-crt.pem",
+									KeyFile:            "/certs/xa5ly-key.pem",
+									InsecureSkipVerify: false,
 								},
 							},
-						},
-						KubernetesSDConfigs: []*config.KubernetesSDConfig{
 							{
 								APIServer: config.URL{&url.URL{
 									Scheme: "https",
@@ -326,10 +366,27 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 						{
 							TargetLabel: ClusterLabel,
 							Replacement: ClusterLabel,
+							Action:      config.RelabelReplace,
 						},
 						{
 							TargetLabel: ClusterIDLabel,
 							Replacement: "xa5ly",
+							Action:      config.RelabelReplace,
+						},
+						{
+							SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
+							TargetLabel:  NameLabel,
+							Action:       config.RelabelReplace,
+						},
+						{
+							SourceLabels: model.LabelNames{PrometheusNamespaceLabel},
+							TargetLabel:  NamespaceLabel,
+							Action:       config.RelabelReplace,
+						},
+						{
+							SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
+							Regex:        EndpointRegexp,
+							Action:       config.RelabelKeep,
 						},
 					},
 				},
@@ -391,18 +448,20 @@ func Test_Prometheus_GetScrapeConfigs_Deterministic(t *testing.T) {
 				},
 			},
 			ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-				StaticConfigs: []*config.TargetGroup{
+				KubernetesSDConfigs: []*config.KubernetesSDConfig{
 					{
-						Targets: []model.LabelSet{
-							model.LabelSet{model.AddressLabel: "apiserver.0ba9v"},
-						},
-						Labels: model.LabelSet{
-							ClusterLabel:   "",
-							ClusterIDLabel: "0ba9v",
+						APIServer: config.URL{&url.URL{
+							Scheme: "https",
+							Host:   "apiserver.0ba9v",
+						}},
+						Role: config.KubernetesRoleEndpoint,
+						TLSConfig: config.TLSConfig{
+							CAFile:             "/certs/0ba9v-ca.pem",
+							CertFile:           "/certs/0ba9v-crt.pem",
+							KeyFile:            "/certs/0ba9v-key.pem",
+							InsecureSkipVerify: false,
 						},
 					},
-				},
-				KubernetesSDConfigs: []*config.KubernetesSDConfig{
 					{
 						APIServer: config.URL{&url.URL{
 							Scheme: "https",
@@ -422,10 +481,27 @@ func Test_Prometheus_GetScrapeConfigs_Deterministic(t *testing.T) {
 				{
 					TargetLabel: ClusterLabel,
 					Replacement: ClusterLabel,
+					Action:      config.RelabelReplace,
 				},
 				{
 					TargetLabel: ClusterIDLabel,
 					Replacement: "0ba9v",
+					Action:      config.RelabelReplace,
+				},
+				{
+					SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
+					TargetLabel:  NameLabel,
+					Action:       config.RelabelReplace,
+				},
+				{
+					SourceLabels: model.LabelNames{PrometheusNamespaceLabel},
+					TargetLabel:  NamespaceLabel,
+					Action:       config.RelabelReplace,
+				},
+				{
+					SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
+					Regex:        EndpointRegexp,
+					Action:       config.RelabelKeep,
 				},
 			},
 		},
@@ -441,18 +517,20 @@ func Test_Prometheus_GetScrapeConfigs_Deterministic(t *testing.T) {
 				},
 			},
 			ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-				StaticConfigs: []*config.TargetGroup{
+				KubernetesSDConfigs: []*config.KubernetesSDConfig{
 					{
-						Targets: []model.LabelSet{
-							model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
-						},
-						Labels: model.LabelSet{
-							ClusterLabel:   "",
-							ClusterIDLabel: "xa5ly",
+						APIServer: config.URL{&url.URL{
+							Scheme: "https",
+							Host:   "apiserver.xa5ly",
+						}},
+						Role: config.KubernetesRoleEndpoint,
+						TLSConfig: config.TLSConfig{
+							CAFile:             "/certs/xa5ly-ca.pem",
+							CertFile:           "/certs/xa5ly-crt.pem",
+							KeyFile:            "/certs/xa5ly-key.pem",
+							InsecureSkipVerify: false,
 						},
 					},
-				},
-				KubernetesSDConfigs: []*config.KubernetesSDConfig{
 					{
 						APIServer: config.URL{&url.URL{
 							Scheme: "https",
@@ -472,10 +550,27 @@ func Test_Prometheus_GetScrapeConfigs_Deterministic(t *testing.T) {
 				{
 					TargetLabel: ClusterLabel,
 					Replacement: ClusterLabel,
+					Action:      config.RelabelReplace,
 				},
 				{
 					TargetLabel: ClusterIDLabel,
 					Replacement: "xa5ly",
+					Action:      config.RelabelReplace,
+				},
+				{
+					SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
+					TargetLabel:  NameLabel,
+					Action:       config.RelabelReplace,
+				},
+				{
+					SourceLabels: model.LabelNames{PrometheusNamespaceLabel},
+					TargetLabel:  NamespaceLabel,
+					Action:       config.RelabelReplace,
+				},
+				{
+					SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
+					Regex:        EndpointRegexp,
+					Action:       config.RelabelKeep,
 				},
 			},
 		},
@@ -518,18 +613,20 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
 					},
 				},
 				ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-					StaticConfigs: []*config.TargetGroup{
+					KubernetesSDConfigs: []*config.KubernetesSDConfig{
 						{
-							Targets: []model.LabelSet{
-								model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
-							},
-							Labels: model.LabelSet{
-								ClusterLabel:   "",
-								ClusterIDLabel: "xa5ly",
+							APIServer: config.URL{&url.URL{
+								Scheme: "https",
+								Host:   "apiserver.xa5ly",
+							}},
+							Role: config.KubernetesRoleEndpoint,
+							TLSConfig: config.TLSConfig{
+								CAFile:             "/certs/xa5ly-ca.pem",
+								CertFile:           "/certs/xa5ly-crt.pem",
+								KeyFile:            "/certs/xa5ly-key.pem",
+								InsecureSkipVerify: false,
 							},
 						},
-					},
-					KubernetesSDConfigs: []*config.KubernetesSDConfig{
 						{
 							APIServer: config.URL{&url.URL{
 								Scheme: "https",
@@ -549,23 +646,41 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
 					{
 						TargetLabel: ClusterLabel,
 						Replacement: ClusterLabel,
+						Action:      config.RelabelReplace,
 					},
 					{
 						TargetLabel: ClusterIDLabel,
 						Replacement: "xa5ly",
+						Action:      config.RelabelReplace,
+					},
+					{
+						SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
+						TargetLabel:  NameLabel,
+						Action:       config.RelabelReplace,
+					},
+					{
+						SourceLabels: model.LabelNames{PrometheusNamespaceLabel},
+						TargetLabel:  NamespaceLabel,
+						Action:       config.RelabelReplace,
+					},
+					{
+						SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
+						Regex:        EndpointRegexp,
+						Action:       config.RelabelKeep,
 					},
 				},
 			},
 
 			expectedConfig: `job_name: guest-cluster-xa5ly
 scheme: https
-static_configs:
-- targets:
-  - apiserver.xa5ly
-  labels:
-    cluster_id: xa5ly
-    prometheus_config_controller: ""
 kubernetes_sd_configs:
+- api_server: https://apiserver.xa5ly
+  role: endpoints
+  tls_config:
+    ca_file: /certs/xa5ly-ca.pem
+    cert_file: /certs/xa5ly-crt.pem
+    key_file: /certs/xa5ly-key.pem
+    insecure_skip_verify: false
 - api_server: https://apiserver.xa5ly
   role: node
   tls_config:
@@ -582,9 +697,20 @@ relabel_configs:
 - source_labels: []
   target_label: prometheus_config_controller
   replacement: prometheus_config_controller
+  action: replace
 - source_labels: []
   target_label: cluster_id
   replacement: xa5ly
+  action: replace
+- source_labels: [__meta_kubernetes_service_name]
+  target_label: kubernetes_name
+  action: replace
+- source_labels: [__meta_kubernetes_namespace]
+  target_label: kubernetes_namespace
+  action: replace
+- source_labels: [__meta_kubernetes_service_name]
+  regex: ((\s*|kubernetes))
+  action: keep
 `,
 		},
 	}
