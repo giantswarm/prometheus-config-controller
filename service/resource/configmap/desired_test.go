@@ -276,6 +276,13 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 							},
 							{
 								SourceLabels: model.LabelNames{prometheus.PrometheusServiceNameLabel},
+								TargetLabel:  model.SchemeLabel,
+								Regex:        prometheus.HTTPEndpointRegexp,
+								Replacement:  prometheus.HttpScheme,
+								Action:       config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusServiceNameLabel},
 								Regex:        prometheus.EndpointRegexp,
 								Action:       config.RelabelKeep,
 							},
@@ -357,6 +364,13 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 							{
 								SourceLabels: model.LabelNames{prometheus.PrometheusNamespaceLabel},
 								TargetLabel:  prometheus.NamespaceLabel,
+								Action:       config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusServiceNameLabel},
+								TargetLabel:  model.SchemeLabel,
+								Regex:        prometheus.HTTPEndpointRegexp,
+								Replacement:  prometheus.HttpScheme,
 								Action:       config.RelabelReplace,
 							},
 							{
@@ -463,6 +477,13 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 							},
 							{
 								SourceLabels: model.LabelNames{prometheus.PrometheusServiceNameLabel},
+								TargetLabel:  model.SchemeLabel,
+								Regex:        prometheus.HTTPEndpointRegexp,
+								Replacement:  prometheus.HttpScheme,
+								Action:       config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusServiceNameLabel},
 								Regex:        prometheus.EndpointRegexp,
 								Action:       config.RelabelKeep,
 							},
@@ -563,6 +584,13 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 							},
 							{
 								SourceLabels: model.LabelNames{prometheus.PrometheusServiceNameLabel},
+								TargetLabel:  model.SchemeLabel,
+								Regex:        prometheus.HTTPEndpointRegexp,
+								Replacement:  prometheus.HttpScheme,
+								Action:       config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusServiceNameLabel},
 								Regex:        prometheus.EndpointRegexp,
 								Action:       config.RelabelKeep,
 							},
@@ -623,6 +651,13 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 							{
 								SourceLabels: model.LabelNames{prometheus.PrometheusNamespaceLabel},
 								TargetLabel:  prometheus.NamespaceLabel,
+								Action:       config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusServiceNameLabel},
+								TargetLabel:  model.SchemeLabel,
+								Regex:        prometheus.HTTPEndpointRegexp,
+								Replacement:  prometheus.HttpScheme,
 								Action:       config.RelabelReplace,
 							},
 							{
@@ -780,6 +815,13 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 							{
 								SourceLabels: model.LabelNames{prometheus.PrometheusNamespaceLabel},
 								TargetLabel:  prometheus.NamespaceLabel,
+								Action:       config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusServiceNameLabel},
+								TargetLabel:  model.SchemeLabel,
+								Regex:        prometheus.HTTPEndpointRegexp,
+								Replacement:  prometheus.HttpScheme,
 								Action:       config.RelabelReplace,
 							},
 							{
@@ -954,6 +996,13 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 							{
 								SourceLabels: model.LabelNames{prometheus.PrometheusNamespaceLabel},
 								TargetLabel:  prometheus.NamespaceLabel,
+								Action:       config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusServiceNameLabel},
+								TargetLabel:  model.SchemeLabel,
+								Regex:        prometheus.HTTPEndpointRegexp,
+								Replacement:  prometheus.HttpScheme,
 								Action:       config.RelabelReplace,
 							},
 							{

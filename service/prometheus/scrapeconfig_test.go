@@ -214,6 +214,13 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 						},
 						{
 							SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
+							TargetLabel:  model.SchemeLabel,
+							Regex:        HTTPEndpointRegexp,
+							Replacement:  HttpScheme,
+							Action:       config.RelabelReplace,
+						},
+						{
+							SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
 							Regex:        EndpointRegexp,
 							Action:       config.RelabelKeep,
 						},
@@ -306,6 +313,13 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 						},
 						{
 							SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
+							TargetLabel:  model.SchemeLabel,
+							Regex:        HTTPEndpointRegexp,
+							Replacement:  HttpScheme,
+							Action:       config.RelabelReplace,
+						},
+						{
+							SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
 							Regex:        EndpointRegexp,
 							Action:       config.RelabelKeep,
 						},
@@ -366,6 +380,13 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 						{
 							SourceLabels: model.LabelNames{PrometheusNamespaceLabel},
 							TargetLabel:  NamespaceLabel,
+							Action:       config.RelabelReplace,
+						},
+						{
+							SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
+							TargetLabel:  model.SchemeLabel,
+							Regex:        HTTPEndpointRegexp,
+							Replacement:  HttpScheme,
 							Action:       config.RelabelReplace,
 						},
 						{
@@ -480,6 +501,13 @@ func Test_Prometheus_GetScrapeConfigs_Deterministic(t *testing.T) {
 				},
 				{
 					SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
+					TargetLabel:  model.SchemeLabel,
+					Regex:        HTTPEndpointRegexp,
+					Replacement:  HttpScheme,
+					Action:       config.RelabelReplace,
+				},
+				{
+					SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
 					Regex:        EndpointRegexp,
 					Action:       config.RelabelKeep,
 				},
@@ -540,6 +568,13 @@ func Test_Prometheus_GetScrapeConfigs_Deterministic(t *testing.T) {
 				{
 					SourceLabels: model.LabelNames{PrometheusNamespaceLabel},
 					TargetLabel:  NamespaceLabel,
+					Action:       config.RelabelReplace,
+				},
+				{
+					SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
+					TargetLabel:  model.SchemeLabel,
+					Regex:        HTTPEndpointRegexp,
+					Replacement:  HttpScheme,
 					Action:       config.RelabelReplace,
 				},
 				{
@@ -635,6 +670,13 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
 					},
 					{
 						SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
+						TargetLabel:  model.SchemeLabel,
+						Regex:        HTTPEndpointRegexp,
+						Replacement:  HttpScheme,
+						Action:       config.RelabelReplace,
+					},
+					{
+						SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
 						Regex:        EndpointRegexp,
 						Action:       config.RelabelKeep,
 					},
@@ -675,7 +717,12 @@ relabel_configs:
   target_label: kubernetes_namespace
   action: replace
 - source_labels: [__meta_kubernetes_service_name]
-  regex: ((\s*|kubernetes))
+  regex: (node-exporter)
+  target_label: __scheme__
+  replacement: http
+  action: replace
+- source_labels: [__meta_kubernetes_service_name]
+  regex: (\s*|kubernetes|node-exporter)
   action: keep
 `,
 		},
