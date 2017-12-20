@@ -13,8 +13,11 @@ import (
 )
 
 const (
-	// httpsScheme is the scheme for https connections.
-	httpsScheme = "https"
+	// HttpScheme is the scheme for http connections.
+	HttpScheme = "http"
+
+	// HttpsScheme is the scheme for https connections.
+	HttpsScheme = "https"
 
 	// jobNamePrefix is the prefix for job names.
 	jobNamePrefix = "guest-cluster"
@@ -44,7 +47,7 @@ func getScrapeConfig(service v1.Service, certificateDirectory string) config.Scr
 	clusterID := GetClusterID(service)
 
 	apiServer := config.URL{&url.URL{
-		Scheme: httpsScheme,
+		Scheme: HttpsScheme,
 		Host:   getTargetHost(service),
 	}}
 
@@ -62,7 +65,7 @@ func getScrapeConfig(service v1.Service, certificateDirectory string) config.Scr
 
 	scrapeConfig := config.ScrapeConfig{
 		JobName: getJobName(service),
-		Scheme:  httpsScheme,
+		Scheme:  HttpsScheme,
 		HTTPClientConfig: config.HTTPClientConfig{
 			TLSConfig: clientTlsConfig,
 		},
@@ -98,6 +101,14 @@ func getScrapeConfig(service v1.Service, certificateDirectory string) config.Scr
 			{
 				SourceLabels: model.LabelNames{PrometheusNamespaceLabel},
 				TargetLabel:  NamespaceLabel,
+				Action:       config.RelabelReplace,
+			},
+			// Relabel http endpoints to scrape via http.
+			{
+				SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
+				TargetLabel:  model.SchemeLabel,
+				Regex:        HTTPEndpointRegexp,
+				Replacement:  HttpScheme,
 				Action:       config.RelabelReplace,
 			},
 			// Drop any targets that don't match the regexp.
