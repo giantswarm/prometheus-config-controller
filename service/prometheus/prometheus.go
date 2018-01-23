@@ -40,11 +40,11 @@ var (
 	// must match to be scraped.
 	// The empty string is also matched, so that nodes (which have no service name),
 	// are also matched.
-	EndpointRegexp = config.MustNewRegexp(`(\s*|kubernetes|node-exporter)`)
+	EndpointRegexp = config.MustNewRegexp(`(\s*|kube-state-metrics|kubernetes|node-exporter)`)
 
 	// HTTPEndpointRegexp is the regular expression against which endpoint service
 	// names that we want to scrape via HTTP need to match.
-	HTTPEndpointRegexp = config.MustNewRegexp(`(node-exporter)`)
+	HTTPEndpointRegexp = config.MustNewRegexp(`(kube-state-metrics|node-exporter)`)
 )
 
 // GetClusterID returns the value of the cluster annotation.
