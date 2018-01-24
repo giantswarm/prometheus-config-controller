@@ -717,12 +717,12 @@ relabel_configs:
   target_label: kubernetes_namespace
   action: replace
 - source_labels: [__meta_kubernetes_service_name]
-  regex: (node-exporter)
+  regex: (kube-state-metrics|node-exporter)
   target_label: __scheme__
   replacement: http
   action: replace
 - source_labels: [__meta_kubernetes_service_name]
-  regex: (\s*|kubernetes|node-exporter)
+  regex: (\s*|kube-state-metrics|kubernetes|node-exporter)
   action: keep
 `,
 		},
