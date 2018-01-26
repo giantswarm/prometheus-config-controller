@@ -224,6 +224,11 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 							Regex:        EndpointRegexp,
 							Action:       config.RelabelKeep,
 						},
+						{
+							SourceLabels: model.LabelNames{PrometheusServicePortLabel},
+							Regex:        EndpointPortRegexp,
+							Action:       config.RelabelKeep,
+						},
 					},
 				},
 			},
@@ -323,6 +328,11 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 							Regex:        EndpointRegexp,
 							Action:       config.RelabelKeep,
 						},
+						{
+							SourceLabels: model.LabelNames{PrometheusServicePortLabel},
+							Regex:        EndpointPortRegexp,
+							Action:       config.RelabelKeep,
+						},
 					},
 				},
 				{
@@ -392,6 +402,11 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 						{
 							SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
 							Regex:        EndpointRegexp,
+							Action:       config.RelabelKeep,
+						},
+						{
+							SourceLabels: model.LabelNames{PrometheusServicePortLabel},
+							Regex:        EndpointPortRegexp,
 							Action:       config.RelabelKeep,
 						},
 					},
@@ -511,6 +526,11 @@ func Test_Prometheus_GetScrapeConfigs_Deterministic(t *testing.T) {
 					Regex:        EndpointRegexp,
 					Action:       config.RelabelKeep,
 				},
+				{
+					SourceLabels: model.LabelNames{PrometheusServicePortLabel},
+					Regex:        EndpointPortRegexp,
+					Action:       config.RelabelKeep,
+				},
 			},
 		},
 		{
@@ -580,6 +600,11 @@ func Test_Prometheus_GetScrapeConfigs_Deterministic(t *testing.T) {
 				{
 					SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
 					Regex:        EndpointRegexp,
+					Action:       config.RelabelKeep,
+				},
+				{
+					SourceLabels: model.LabelNames{PrometheusServicePortLabel},
+					Regex:        EndpointPortRegexp,
 					Action:       config.RelabelKeep,
 				},
 			},
@@ -680,6 +705,11 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
 						Regex:        EndpointRegexp,
 						Action:       config.RelabelKeep,
 					},
+					{
+						SourceLabels: model.LabelNames{PrometheusServicePortLabel},
+						Regex:        EndpointPortRegexp,
+						Action:       config.RelabelKeep,
+					},
 				},
 			},
 
@@ -723,6 +753,9 @@ relabel_configs:
   action: replace
 - source_labels: [__meta_kubernetes_service_name]
   regex: (\s*|kube-state-metrics|kubernetes|node-exporter)
+  action: keep
+- source_labels: [__meta_kubernetes_pod_container_port_number]
+  regex: (\s*|443|10300|10301)
   action: keep
 `,
 		},

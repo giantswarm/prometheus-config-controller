@@ -286,6 +286,11 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 								Regex:        prometheus.EndpointRegexp,
 								Action:       config.RelabelKeep,
 							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusServicePortLabel},
+								Regex:        prometheus.EndpointPortRegexp,
+								Action:       config.RelabelKeep,
+							},
 						},
 					},
 				},
@@ -376,6 +381,11 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 							{
 								SourceLabels: model.LabelNames{prometheus.PrometheusServiceNameLabel},
 								Regex:        prometheus.EndpointRegexp,
+								Action:       config.RelabelKeep,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusServicePortLabel},
+								Regex:        prometheus.EndpointPortRegexp,
 								Action:       config.RelabelKeep,
 							},
 						},
@@ -487,6 +497,11 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 								Regex:        prometheus.EndpointRegexp,
 								Action:       config.RelabelKeep,
 							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusServicePortLabel},
+								Regex:        prometheus.EndpointPortRegexp,
+								Action:       config.RelabelKeep,
+							},
 						},
 					},
 				},
@@ -594,6 +609,11 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 								Regex:        prometheus.EndpointRegexp,
 								Action:       config.RelabelKeep,
 							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusServicePortLabel},
+								Regex:        prometheus.EndpointPortRegexp,
+								Action:       config.RelabelKeep,
+							},
 						},
 					},
 					{
@@ -663,6 +683,11 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 							{
 								SourceLabels: model.LabelNames{prometheus.PrometheusServiceNameLabel},
 								Regex:        prometheus.EndpointRegexp,
+								Action:       config.RelabelKeep,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusServicePortLabel},
+								Regex:        prometheus.EndpointPortRegexp,
 								Action:       config.RelabelKeep,
 							},
 						},
@@ -829,6 +854,11 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 								Regex:        prometheus.EndpointRegexp,
 								Action:       config.RelabelKeep,
 							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusServicePortLabel},
+								Regex:        prometheus.EndpointPortRegexp,
+								Action:       config.RelabelKeep,
+							},
 						},
 					},
 				},
@@ -910,6 +940,11 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 							{
 								SourceLabels: model.LabelNames{prometheus.PrometheusServiceNameLabel},
 								Regex:        prometheus.EndpointRegexp,
+								Action:       config.RelabelKeep,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusServicePortLabel},
+								Regex:        prometheus.EndpointPortRegexp,
 								Action:       config.RelabelKeep,
 							},
 						},
@@ -1008,6 +1043,11 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 							{
 								SourceLabels: model.LabelNames{prometheus.PrometheusServiceNameLabel},
 								Regex:        prometheus.EndpointRegexp,
+								Action:       config.RelabelKeep,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusServicePortLabel},
+								Regex:        prometheus.EndpointPortRegexp,
 								Action:       config.RelabelKeep,
 							},
 						},

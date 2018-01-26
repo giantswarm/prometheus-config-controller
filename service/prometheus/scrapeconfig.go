@@ -111,10 +111,16 @@ func getScrapeConfig(service v1.Service, certificateDirectory string) config.Scr
 				Replacement:  HttpScheme,
 				Action:       config.RelabelReplace,
 			},
-			// Drop any targets that don't match the regexp.
+			// Drop any targets that don't match the service name regexp.
 			{
 				SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
 				Regex:        EndpointRegexp,
+				Action:       config.RelabelKeep,
+			},
+			// Drop any targets that don't match the service port regexp.
+			{
+				SourceLabels: model.LabelNames{PrometheusServicePortLabel},
+				Regex:        EndpointPortRegexp,
 				Action:       config.RelabelKeep,
 			},
 		},
