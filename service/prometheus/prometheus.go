@@ -33,6 +33,10 @@ const (
 	// PrometheusServiceNameLabel is the Prometheus label added by the Kubernetes
 	// service discovery to hold an endpoints service name.
 	PrometheusServiceNameLabel = "__meta_kubernetes_service_name"
+
+	// PrometheusServicePortLabel is the Prometheus label added by the Kubernetes
+	// service discovery to hold an endpoints port.
+	PrometheusServicePortLabel = "__meta_kubernetes_pod_container_port_number"
 )
 
 var (
@@ -41,6 +45,12 @@ var (
 	// The empty string is also matched, so that nodes (which have no service name),
 	// are also matched.
 	EndpointRegexp = config.MustNewRegexp(`(\s*|kube-state-metrics|kubernetes|node-exporter)`)
+
+	// EndpointPortRegexp is the regular expression against which endpoint service ports
+	// must match to be scraped.
+	// We specify ports in the cases where users are running kube-state-metrics or node-exporters,
+	// to ensure we only scrape the correct instances.
+	EndpointPortRegexp = config.MustNewRegexp(`(\s*|443|10300|10301)`)
 
 	// HTTPEndpointRegexp is the regular expression against which endpoint service
 	// names that we want to scrape via HTTP need to match.
