@@ -39,79 +39,6 @@ func Test_Prometheus_isManaged(t *testing.T) {
 
 		{
 			scrapeConfig: config.ScrapeConfig{
-				JobName: "xa5ly",
-				ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-					StaticConfigs: []*config.TargetGroup{
-						{
-							Targets: []model.LabelSet{
-								model.LabelSet{"apiserver.xa5ly": ""},
-							},
-							Labels: model.LabelSet{ClusterLabel: ""},
-						},
-					},
-				},
-			},
-			isManaged: true,
-		},
-
-		{
-			scrapeConfig: config.ScrapeConfig{
-				JobName: "guest-cluster-xa5ly",
-				Scheme:  "https",
-				HTTPClientConfig: config.HTTPClientConfig{
-					TLSConfig: config.TLSConfig{
-						CAFile:             "/certs/xa5ly-ca.pem",
-						CertFile:           "/certs/xa5ly-crt.pem",
-						KeyFile:            "/certs/xa5ly-key.pem",
-						InsecureSkipVerify: true,
-					},
-				},
-				ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-					KubernetesSDConfigs: []*config.KubernetesSDConfig{
-						{
-							APIServer: config.URL{&url.URL{
-								Scheme: "https",
-								Host:   "apiserver.xa5ly",
-							}},
-							Role: config.KubernetesRoleEndpoint,
-							TLSConfig: config.TLSConfig{
-								CAFile:             "/certs/xa5ly-ca.pem",
-								CertFile:           "/certs/xa5ly-crt.pem",
-								KeyFile:            "/certs/xa5ly-key.pem",
-								InsecureSkipVerify: false,
-							},
-						},
-						{
-							APIServer: config.URL{&url.URL{
-								Scheme: "https",
-								Host:   "apiserver.xa5ly",
-							}},
-							Role: config.KubernetesRoleNode,
-							TLSConfig: config.TLSConfig{
-								CAFile:             "/certs/xa5ly-ca.pem",
-								CertFile:           "/certs/xa5ly-crt.pem",
-								KeyFile:            "/certs/xa5ly-key.pem",
-								InsecureSkipVerify: false,
-							},
-						},
-					},
-				},
-				RelabelConfigs: []*config.RelabelConfig{
-					{
-						TargetLabel: ClusterLabel,
-						Replacement: ClusterLabel,
-					},
-					{
-						TargetLabel: ClusterIDLabel,
-						Replacement: "xa5ly",
-					},
-				},
-			},
-			isManaged: true,
-		},
-
-		{
-			scrapeConfig: config.ScrapeConfig{
 				JobName: "guest-cluster-xa5ly",
 				Scheme:  "https",
 				HTTPClientConfig: config.HTTPClientConfig{
@@ -194,15 +121,22 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 			},
 			scrapeConfigs: []config.ScrapeConfig{
 				{
-					JobName: "xa5ly",
+					JobName: "guest-cluster-xa5ly",
 					ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-						StaticConfigs: []*config.TargetGroup{
+						KubernetesSDConfigs: []*config.KubernetesSDConfig{
 							{
-								Targets: []model.LabelSet{
-									model.LabelSet{"apiserver.xa5ly": ""},
-								},
-								Labels: model.LabelSet{ClusterLabel: ""},
+								APIServer: config.URL{&url.URL{
+									Scheme: "https",
+									Host:   "apiserver.xa5ly",
+								}},
+								Role: config.KubernetesRoleEndpoint,
 							},
+						},
+					},
+					RelabelConfigs: []*config.RelabelConfig{
+						{
+							TargetLabel: ClusterIDLabel,
+							Replacement: "xa5ly",
 						},
 					},
 				},
@@ -211,15 +145,22 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 			expectedConfig: config.Config{
 				ScrapeConfigs: []*config.ScrapeConfig{
 					{
-						JobName: "xa5ly",
+						JobName: "guest-cluster-xa5ly",
 						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-							StaticConfigs: []*config.TargetGroup{
+							KubernetesSDConfigs: []*config.KubernetesSDConfig{
 								{
-									Targets: []model.LabelSet{
-										model.LabelSet{"apiserver.xa5ly": ""},
-									},
-									Labels: model.LabelSet{ClusterLabel: ""},
+									APIServer: config.URL{&url.URL{
+										Scheme: "https",
+										Host:   "apiserver.xa5ly",
+									}},
+									Role: config.KubernetesRoleEndpoint,
 								},
+							},
+						},
+						RelabelConfigs: []*config.RelabelConfig{
+							{
+								TargetLabel: ClusterIDLabel,
+								Replacement: "xa5ly",
 							},
 						},
 					},
@@ -234,15 +175,22 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 			config: config.Config{
 				ScrapeConfigs: []*config.ScrapeConfig{
 					{
-						JobName: "xa5ly",
+						JobName: "guest-cluster-xa5ly",
 						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-							StaticConfigs: []*config.TargetGroup{
+							KubernetesSDConfigs: []*config.KubernetesSDConfig{
 								{
-									Targets: []model.LabelSet{
-										model.LabelSet{"apiserver.xa5ly": ""},
-									},
-									Labels: model.LabelSet{ClusterLabel: ""},
+									APIServer: config.URL{&url.URL{
+										Scheme: "https",
+										Host:   "apiserver.xa5ly",
+									}},
+									Role: config.KubernetesRoleEndpoint,
 								},
+							},
+						},
+						RelabelConfigs: []*config.RelabelConfig{
+							{
+								TargetLabel: ClusterIDLabel,
+								Replacement: "xa5ly",
 							},
 						},
 					},
@@ -250,15 +198,22 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 			},
 			scrapeConfigs: []config.ScrapeConfig{
 				{
-					JobName: "xa5ly",
+					JobName: "guest-cluster-xa5ly",
 					ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-						StaticConfigs: []*config.TargetGroup{
+						KubernetesSDConfigs: []*config.KubernetesSDConfig{
 							{
-								Targets: []model.LabelSet{
-									model.LabelSet{"apiserver.xa5ly": ""},
-								},
-								Labels: model.LabelSet{ClusterLabel: ""},
+								APIServer: config.URL{&url.URL{
+									Scheme: "https",
+									Host:   "apiserver.xa5ly",
+								}},
+								Role: config.KubernetesRoleEndpoint,
 							},
+						},
+					},
+					RelabelConfigs: []*config.RelabelConfig{
+						{
+							TargetLabel: ClusterIDLabel,
+							Replacement: "xa5ly",
 						},
 					},
 				},
@@ -267,15 +222,22 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 			expectedConfig: config.Config{
 				ScrapeConfigs: []*config.ScrapeConfig{
 					{
-						JobName: "xa5ly",
+						JobName: "guest-cluster-xa5ly",
 						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-							StaticConfigs: []*config.TargetGroup{
+							KubernetesSDConfigs: []*config.KubernetesSDConfig{
 								{
-									Targets: []model.LabelSet{
-										model.LabelSet{"apiserver.xa5ly": ""},
-									},
-									Labels: model.LabelSet{ClusterLabel: ""},
+									APIServer: config.URL{&url.URL{
+										Scheme: "https",
+										Host:   "apiserver.xa5ly",
+									}},
+									Role: config.KubernetesRoleEndpoint,
 								},
+							},
+						},
+						RelabelConfigs: []*config.RelabelConfig{
+							{
+								TargetLabel: ClusterIDLabel,
+								Replacement: "xa5ly",
 							},
 						},
 					},
@@ -290,15 +252,22 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 			config: config.Config{
 				ScrapeConfigs: []*config.ScrapeConfig{
 					{
-						JobName: "xa5ly",
+						JobName: "guest-cluster-xa5ly",
 						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-							StaticConfigs: []*config.TargetGroup{
+							KubernetesSDConfigs: []*config.KubernetesSDConfig{
 								{
-									Targets: []model.LabelSet{
-										model.LabelSet{"apiserver.xa5ly": ""},
-									},
-									Labels: model.LabelSet{ClusterLabel: ""},
+									APIServer: config.URL{&url.URL{
+										Scheme: "https",
+										Host:   "apiserver.xa5ly",
+									}},
+									Role: config.KubernetesRoleEndpoint,
 								},
+							},
+						},
+						RelabelConfigs: []*config.RelabelConfig{
+							{
+								TargetLabel: ClusterIDLabel,
+								Replacement: "xa5ly",
 							},
 						},
 					},
@@ -306,28 +275,42 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 			},
 			scrapeConfigs: []config.ScrapeConfig{
 				{
-					JobName: "xa5ly",
+					JobName: "guest-cluster-xa5ly",
 					ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-						StaticConfigs: []*config.TargetGroup{
+						KubernetesSDConfigs: []*config.KubernetesSDConfig{
 							{
-								Targets: []model.LabelSet{
-									model.LabelSet{"apiserver.xa5ly": ""},
-								},
-								Labels: model.LabelSet{ClusterLabel: ""},
+								APIServer: config.URL{&url.URL{
+									Scheme: "https",
+									Host:   "apiserver.xa5ly",
+								}},
+								Role: config.KubernetesRoleEndpoint,
 							},
+						},
+					},
+					RelabelConfigs: []*config.RelabelConfig{
+						{
+							TargetLabel: ClusterIDLabel,
+							Replacement: "xa5ly",
 						},
 					},
 				},
 				{
-					JobName: "jf02j",
+					JobName: "guest-cluster-jf0sj",
 					ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-						StaticConfigs: []*config.TargetGroup{
+						KubernetesSDConfigs: []*config.KubernetesSDConfig{
 							{
-								Targets: []model.LabelSet{
-									model.LabelSet{"apiserver.jf02j": ""},
-								},
-								Labels: model.LabelSet{ClusterLabel: ""},
+								APIServer: config.URL{&url.URL{
+									Scheme: "https",
+									Host:   "apiserver.jf02j",
+								}},
+								Role: config.KubernetesRoleEndpoint,
 							},
+						},
+					},
+					RelabelConfigs: []*config.RelabelConfig{
+						{
+							TargetLabel: ClusterIDLabel,
+							Replacement: "jf02j",
 						},
 					},
 				},
@@ -336,86 +319,42 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 			expectedConfig: config.Config{
 				ScrapeConfigs: []*config.ScrapeConfig{
 					{
-						JobName: "xa5ly",
+						JobName: "guest-cluster-xa5ly",
 						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-							StaticConfigs: []*config.TargetGroup{
+							KubernetesSDConfigs: []*config.KubernetesSDConfig{
 								{
-									Targets: []model.LabelSet{
-										model.LabelSet{"apiserver.xa5ly": ""},
-									},
-									Labels: model.LabelSet{ClusterLabel: ""},
+									APIServer: config.URL{&url.URL{
+										Scheme: "https",
+										Host:   "apiserver.xa5ly",
+									}},
+									Role: config.KubernetesRoleEndpoint,
 								},
 							},
 						},
-					},
-					{
-						JobName: "jf02j",
-						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-							StaticConfigs: []*config.TargetGroup{
-								{
-									Targets: []model.LabelSet{
-										model.LabelSet{"apiserver.jf02j": ""},
-									},
-									Labels: model.LabelSet{ClusterLabel: ""},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-
-		// Test a config containing one scrape config,
-		// and given a scrape config with the same name but different values,
-		// returns a config containing the new scrape config.
-		{
-			config: config.Config{
-				ScrapeConfigs: []*config.ScrapeConfig{
-					{
-						JobName: "xa5ly",
-						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-							StaticConfigs: []*config.TargetGroup{
-								{
-									Targets: []model.LabelSet{
-										model.LabelSet{"apiserver.xa5ly": ""},
-									},
-									Labels: model.LabelSet{ClusterLabel: ""},
-								},
-							},
-						},
-					},
-				},
-			},
-			scrapeConfigs: []config.ScrapeConfig{
-				{
-					JobName: "xa5ly",
-					ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-						StaticConfigs: []*config.TargetGroup{
+						RelabelConfigs: []*config.RelabelConfig{
 							{
-								Targets: []model.LabelSet{
-									model.LabelSet{"apiserver.xa5ly": ""},
-									model.LabelSet{"kubelet.xa5ly": ""},
-								},
-								Labels: model.LabelSet{ClusterLabel: ""},
+								TargetLabel: ClusterIDLabel,
+								Replacement: "xa5ly",
 							},
 						},
 					},
-				},
-			},
-
-			expectedConfig: config.Config{
-				ScrapeConfigs: []*config.ScrapeConfig{
 					{
-						JobName: "xa5ly",
+						JobName: "guest-cluster-jf0sj",
 						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-							StaticConfigs: []*config.TargetGroup{
+							KubernetesSDConfigs: []*config.KubernetesSDConfig{
 								{
-									Targets: []model.LabelSet{
-										model.LabelSet{"apiserver.xa5ly": ""},
-										model.LabelSet{"kubelet.xa5ly": ""},
-									},
-									Labels: model.LabelSet{ClusterLabel: ""},
+									APIServer: config.URL{&url.URL{
+										Scheme: "https",
+										Host:   "apiserver.jf02j",
+									}},
+									Role: config.KubernetesRoleEndpoint,
 								},
+							},
+						},
+						RelabelConfigs: []*config.RelabelConfig{
+							{
+								TargetLabel: ClusterIDLabel,
+								Replacement: "jf02j",
 							},
 						},
 					},
@@ -434,15 +373,22 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 			},
 			scrapeConfigs: []config.ScrapeConfig{
 				{
-					JobName: "xa5ly",
+					JobName: "guest-cluster-xa5ly",
 					ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-						StaticConfigs: []*config.TargetGroup{
+						KubernetesSDConfigs: []*config.KubernetesSDConfig{
 							{
-								Targets: []model.LabelSet{
-									model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
-								},
-								Labels: model.LabelSet{ClusterLabel: ""},
+								APIServer: config.URL{&url.URL{
+									Scheme: "https",
+									Host:   "apiserver.xa5ly",
+								}},
+								Role: config.KubernetesRoleEndpoint,
 							},
+						},
+					},
+					RelabelConfigs: []*config.RelabelConfig{
+						{
+							TargetLabel: ClusterIDLabel,
+							Replacement: "xa5ly",
 						},
 					},
 				},
@@ -454,15 +400,22 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 						JobName: "kubernetes-nodes",
 					},
 					{
-						JobName: "xa5ly",
+						JobName: "guest-cluster-xa5ly",
 						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-							StaticConfigs: []*config.TargetGroup{
+							KubernetesSDConfigs: []*config.KubernetesSDConfig{
 								{
-									Targets: []model.LabelSet{
-										model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
-									},
-									Labels: model.LabelSet{ClusterLabel: ""},
+									APIServer: config.URL{&url.URL{
+										Scheme: "https",
+										Host:   "apiserver.xa5ly",
+									}},
+									Role: config.KubernetesRoleEndpoint,
 								},
+							},
+						},
+						RelabelConfigs: []*config.RelabelConfig{
+							{
+								TargetLabel: ClusterIDLabel,
+								Replacement: "xa5ly",
 							},
 						},
 					},
@@ -477,15 +430,22 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 			config: config.Config{
 				ScrapeConfigs: []*config.ScrapeConfig{
 					{
-						JobName: "xa5ly",
+						JobName: "guest-cluster-xa5ly",
 						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-							StaticConfigs: []*config.TargetGroup{
+							KubernetesSDConfigs: []*config.KubernetesSDConfig{
 								{
-									Targets: []model.LabelSet{
-										model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
-									},
-									Labels: model.LabelSet{ClusterLabel: ""},
+									APIServer: config.URL{&url.URL{
+										Scheme: "https",
+										Host:   "apiserver.xa5ly",
+									}},
+									Role: config.KubernetesRoleEndpoint,
 								},
+							},
+						},
+						RelabelConfigs: []*config.RelabelConfig{
+							{
+								TargetLabel: ClusterIDLabel,
+								Replacement: "xa5ly",
 							},
 						},
 					},
@@ -495,84 +455,6 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 
 			expectedConfig: config.Config{
 				ScrapeConfigs: []*config.ScrapeConfig{},
-			},
-		},
-
-		// Test that an existing config that contains a non-managed job,
-		// and two existing cluster scrape jobs,
-		// and one of the scrape jobs is removed, and another updated,
-		// returns a config that returns the non-managed job, and the updated job.
-		{
-			config: config.Config{
-				ScrapeConfigs: []*config.ScrapeConfig{
-					{
-						JobName: "kubernetes-nodes",
-					},
-					{
-						JobName: "xa5ly",
-						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-							StaticConfigs: []*config.TargetGroup{
-								{
-									Targets: []model.LabelSet{
-										model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
-									},
-									Labels: model.LabelSet{ClusterLabel: ""},
-								},
-							},
-						},
-					},
-					{
-						JobName: "ru85y",
-						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-							StaticConfigs: []*config.TargetGroup{
-								{
-									Targets: []model.LabelSet{
-										model.LabelSet{model.AddressLabel: "apiserver.ru85y"},
-									},
-									Labels: model.LabelSet{ClusterLabel: ""},
-								},
-							},
-						},
-					},
-				},
-			},
-			scrapeConfigs: []config.ScrapeConfig{
-				{
-					JobName: "xa5ly",
-					ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-						StaticConfigs: []*config.TargetGroup{
-							{
-								Targets: []model.LabelSet{
-									model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
-									model.LabelSet{model.AddressLabel: "kube-state-metrics.xa5ly"},
-								},
-								Labels: model.LabelSet{ClusterLabel: ""},
-							},
-						},
-					},
-				},
-			},
-
-			expectedConfig: config.Config{
-				ScrapeConfigs: []*config.ScrapeConfig{
-					{
-						JobName: "kubernetes-nodes",
-					},
-					{
-						JobName: "xa5ly",
-						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-							StaticConfigs: []*config.TargetGroup{
-								{
-									Targets: []model.LabelSet{
-										model.LabelSet{model.AddressLabel: "apiserver.xa5ly"},
-										model.LabelSet{model.AddressLabel: "kube-state-metrics.xa5ly"},
-									},
-									Labels: model.LabelSet{ClusterLabel: ""},
-								},
-							},
-						},
-					},
-				},
 			},
 		},
 	}
