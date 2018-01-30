@@ -10,10 +10,6 @@ const (
 	// that the prometheus-config-controller should scrape.
 	ClusterAnnotation = "giantswarm.io/prometheus-cluster"
 
-	// ClusterLabel is the Prometheus label used to identify jobs
-	// managed by the prometheus-config-controller.
-	ClusterLabel = "prometheus_config_controller"
-
 	// ClusterIDLabel is the Prometheus label used to identify guest cluster
 	// metrics by external clients.
 	ClusterIDLabel = "cluster_id"
