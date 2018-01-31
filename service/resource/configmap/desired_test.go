@@ -293,6 +293,54 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 							},
 						},
 					},
+					{
+						JobName: "guest-cluster-xa5ly-cadvisor",
+						Scheme:  "https",
+						HTTPClientConfig: config.HTTPClientConfig{
+							TLSConfig: config.TLSConfig{
+								CAFile:             "/certs/xa5ly-ca.pem",
+								CertFile:           "/certs/xa5ly-crt.pem",
+								KeyFile:            "/certs/xa5ly-key.pem",
+								InsecureSkipVerify: true,
+							},
+						},
+						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
+							KubernetesSDConfigs: []*config.KubernetesSDConfig{
+								{
+									APIServer: config.URL{&url.URL{
+										Scheme: "https",
+										Host:   "apiserver.xa5ly",
+									}},
+									Role: config.KubernetesRoleNode,
+									TLSConfig: config.TLSConfig{
+										CAFile:             "/certs/xa5ly-ca.pem",
+										CertFile:           "/certs/xa5ly-crt.pem",
+										KeyFile:            "/certs/xa5ly-key.pem",
+										InsecureSkipVerify: false,
+									},
+								},
+							},
+						},
+						RelabelConfigs: []*config.RelabelConfig{
+							{
+								TargetLabel: prometheus.ClusterIDLabel,
+								Replacement: "xa5ly",
+								Action:      config.RelabelReplace,
+							},
+							{
+								TargetLabel: model.AddressLabel,
+								Replacement: "apiserver.xa5ly",
+								Action:      config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusKubernetesNodeNameLabel},
+								TargetLabel:  model.MetricsPathLabel,
+								Regex:        prometheus.GroupRegex,
+								Replacement:  prometheus.CadvisorMetricsPath,
+								Action:       config.RelabelReplace,
+							},
+						},
+					},
 				},
 			},
 			expectedErrorHandler: nil,
@@ -387,6 +435,54 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 								SourceLabels: model.LabelNames{prometheus.PrometheusServicePortLabel},
 								Regex:        prometheus.EndpointPortRegexp,
 								Action:       config.RelabelKeep,
+							},
+						},
+					},
+					{
+						JobName: "guest-cluster-xa5ly-cadvisor",
+						Scheme:  "https",
+						HTTPClientConfig: config.HTTPClientConfig{
+							TLSConfig: config.TLSConfig{
+								CAFile:             "/certs/xa5ly-ca.pem",
+								CertFile:           "/certs/xa5ly-crt.pem",
+								KeyFile:            "/certs/xa5ly-key.pem",
+								InsecureSkipVerify: true,
+							},
+						},
+						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
+							KubernetesSDConfigs: []*config.KubernetesSDConfig{
+								{
+									APIServer: config.URL{&url.URL{
+										Scheme: "https",
+										Host:   "apiserver.xa5ly",
+									}},
+									Role: config.KubernetesRoleNode,
+									TLSConfig: config.TLSConfig{
+										CAFile:             "/certs/xa5ly-ca.pem",
+										CertFile:           "/certs/xa5ly-crt.pem",
+										KeyFile:            "/certs/xa5ly-key.pem",
+										InsecureSkipVerify: false,
+									},
+								},
+							},
+						},
+						RelabelConfigs: []*config.RelabelConfig{
+							{
+								TargetLabel: prometheus.ClusterIDLabel,
+								Replacement: "xa5ly",
+								Action:      config.RelabelReplace,
+							},
+							{
+								TargetLabel: model.AddressLabel,
+								Replacement: "apiserver.xa5ly",
+								Action:      config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusKubernetesNodeNameLabel},
+								TargetLabel:  model.MetricsPathLabel,
+								Regex:        prometheus.GroupRegex,
+								Replacement:  prometheus.CadvisorMetricsPath,
+								Action:       config.RelabelReplace,
 							},
 						},
 					},
@@ -504,6 +600,54 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 							},
 						},
 					},
+					{
+						JobName: "guest-cluster-xa5ly-cadvisor",
+						Scheme:  "https",
+						HTTPClientConfig: config.HTTPClientConfig{
+							TLSConfig: config.TLSConfig{
+								CAFile:             "/certs/xa5ly-ca.pem",
+								CertFile:           "/certs/xa5ly-crt.pem",
+								KeyFile:            "/certs/xa5ly-key.pem",
+								InsecureSkipVerify: true,
+							},
+						},
+						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
+							KubernetesSDConfigs: []*config.KubernetesSDConfig{
+								{
+									APIServer: config.URL{&url.URL{
+										Scheme: "https",
+										Host:   "apiserver.xa5ly",
+									}},
+									Role: config.KubernetesRoleNode,
+									TLSConfig: config.TLSConfig{
+										CAFile:             "/certs/xa5ly-ca.pem",
+										CertFile:           "/certs/xa5ly-crt.pem",
+										KeyFile:            "/certs/xa5ly-key.pem",
+										InsecureSkipVerify: false,
+									},
+								},
+							},
+						},
+						RelabelConfigs: []*config.RelabelConfig{
+							{
+								TargetLabel: prometheus.ClusterIDLabel,
+								Replacement: "xa5ly",
+								Action:      config.RelabelReplace,
+							},
+							{
+								TargetLabel: model.AddressLabel,
+								Replacement: "apiserver.xa5ly",
+								Action:      config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusKubernetesNodeNameLabel},
+								TargetLabel:  model.MetricsPathLabel,
+								Regex:        prometheus.GroupRegex,
+								Replacement:  prometheus.CadvisorMetricsPath,
+								Action:       config.RelabelReplace,
+							},
+						},
+					},
 				},
 			},
 			setUpConfigMap: &v1.ConfigMap{
@@ -617,6 +761,54 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 						},
 					},
 					{
+						JobName: "guest-cluster-0ba9v-cadvisor",
+						Scheme:  "https",
+						HTTPClientConfig: config.HTTPClientConfig{
+							TLSConfig: config.TLSConfig{
+								CAFile:             "/certs/0ba9v-ca.pem",
+								CertFile:           "/certs/0ba9v-crt.pem",
+								KeyFile:            "/certs/0ba9v-key.pem",
+								InsecureSkipVerify: true,
+							},
+						},
+						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
+							KubernetesSDConfigs: []*config.KubernetesSDConfig{
+								{
+									APIServer: config.URL{&url.URL{
+										Scheme: "https",
+										Host:   "apiserver.0ba9v",
+									}},
+									Role: config.KubernetesRoleNode,
+									TLSConfig: config.TLSConfig{
+										CAFile:             "/certs/0ba9v-ca.pem",
+										CertFile:           "/certs/0ba9v-crt.pem",
+										KeyFile:            "/certs/0ba9v-key.pem",
+										InsecureSkipVerify: false,
+									},
+								},
+							},
+						},
+						RelabelConfigs: []*config.RelabelConfig{
+							{
+								TargetLabel: prometheus.ClusterIDLabel,
+								Replacement: "0ba9v",
+								Action:      config.RelabelReplace,
+							},
+							{
+								TargetLabel: model.AddressLabel,
+								Replacement: "apiserver.0ba9v",
+								Action:      config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusKubernetesNodeNameLabel},
+								TargetLabel:  model.MetricsPathLabel,
+								Regex:        prometheus.GroupRegex,
+								Replacement:  prometheus.CadvisorMetricsPath,
+								Action:       config.RelabelReplace,
+							},
+						},
+					},
+					{
 						JobName: "guest-cluster-xa5ly",
 						Scheme:  "https",
 						HTTPClientConfig: config.HTTPClientConfig{
@@ -689,6 +881,54 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 								SourceLabels: model.LabelNames{prometheus.PrometheusServicePortLabel},
 								Regex:        prometheus.EndpointPortRegexp,
 								Action:       config.RelabelKeep,
+							},
+						},
+					},
+					{
+						JobName: "guest-cluster-xa5ly-cadvisor",
+						Scheme:  "https",
+						HTTPClientConfig: config.HTTPClientConfig{
+							TLSConfig: config.TLSConfig{
+								CAFile:             "/certs/xa5ly-ca.pem",
+								CertFile:           "/certs/xa5ly-crt.pem",
+								KeyFile:            "/certs/xa5ly-key.pem",
+								InsecureSkipVerify: true,
+							},
+						},
+						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
+							KubernetesSDConfigs: []*config.KubernetesSDConfig{
+								{
+									APIServer: config.URL{&url.URL{
+										Scheme: "https",
+										Host:   "apiserver.xa5ly",
+									}},
+									Role: config.KubernetesRoleNode,
+									TLSConfig: config.TLSConfig{
+										CAFile:             "/certs/xa5ly-ca.pem",
+										CertFile:           "/certs/xa5ly-crt.pem",
+										KeyFile:            "/certs/xa5ly-key.pem",
+										InsecureSkipVerify: false,
+									},
+								},
+							},
+						},
+						RelabelConfigs: []*config.RelabelConfig{
+							{
+								TargetLabel: prometheus.ClusterIDLabel,
+								Replacement: "xa5ly",
+								Action:      config.RelabelReplace,
+							},
+							{
+								TargetLabel: model.AddressLabel,
+								Replacement: "apiserver.xa5ly",
+								Action:      config.RelabelReplace,
+							},
+							{
+								SourceLabels: model.LabelNames{prometheus.PrometheusKubernetesNodeNameLabel},
+								TargetLabel:  model.MetricsPathLabel,
+								Regex:        prometheus.GroupRegex,
+								Replacement:  prometheus.CadvisorMetricsPath,
+								Action:       config.RelabelReplace,
 							},
 						},
 					},

@@ -24,8 +24,15 @@ const (
 )
 
 // getJobName takes a cluster ID, and returns a suitable job name.
-func getJobName(service v1.Service) string {
-	return fmt.Sprintf("%s-%s", jobNamePrefix, service.Namespace)
+func getJobName(service v1.Service, name string) string {
+	jobName := fmt.Sprintf("%s-%s", jobNamePrefix, service.Namespace)
+
+	// TODO: Remove once all job names have suffixes.
+	if name != "" {
+		jobName = fmt.Sprintf("%s-%s", jobName, name)
+	}
+
+	return jobName
 }
 
 // getTargetHost takes a Kubernetes Service, and returns a suitable host.
@@ -63,13 +70,21 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 	kubernetesTlsConfig := tlsConfig
 	kubernetesTlsConfig.InsecureSkipVerify = false
 
+	httpClientConfig := config.HTTPClientConfig{
+		TLSConfig: clientTlsConfig,
+	}
+
+	clusterIDRelabelConfig := &config.RelabelConfig{
+		TargetLabel: ClusterIDLabel,
+		Replacement: clusterID,
+		Action:      config.RelabelReplace,
+	}
+
 	scrapeConfigs := []config.ScrapeConfig{
 		{
-			JobName: getJobName(service),
-			Scheme:  HttpsScheme,
-			HTTPClientConfig: config.HTTPClientConfig{
-				TLSConfig: clientTlsConfig,
-			},
+			JobName:          getJobName(service, ""),
+			Scheme:           HttpsScheme,
+			HTTPClientConfig: httpClientConfig,
 			ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
 				KubernetesSDConfigs: []*config.KubernetesSDConfig{
 					{
@@ -85,13 +100,8 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				},
 			},
 			RelabelConfigs: []*config.RelabelConfig{
-				// Add the cluster id label, so we can identify the specific
-				// guest cluster.
-				{
-					TargetLabel: ClusterIDLabel,
-					Replacement: clusterID,
-					Action:      config.RelabelReplace,
-				},
+				clusterIDRelabelConfig,
+
 				// Copy the meta service name label to a named label.
 				{
 					SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
@@ -123,6 +133,35 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					SourceLabels: model.LabelNames{PrometheusServicePortLabel},
 					Regex:        EndpointPortRegexp,
 					Action:       config.RelabelKeep,
+				},
+			},
+		},
+		{
+			JobName:          getJobName(service, "cadvisor"),
+			Scheme:           HttpsScheme,
+			HTTPClientConfig: httpClientConfig,
+			ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
+				KubernetesSDConfigs: []*config.KubernetesSDConfig{
+					{
+						APIServer: apiServer,
+						Role:      config.KubernetesRoleNode,
+						TLSConfig: kubernetesTlsConfig,
+					},
+				},
+			},
+			RelabelConfigs: []*config.RelabelConfig{
+				clusterIDRelabelConfig,
+				{
+					TargetLabel: model.AddressLabel,
+					Replacement: getTargetHost(service),
+					Action:      config.RelabelReplace,
+				},
+				{
+					SourceLabels: model.LabelNames{PrometheusKubernetesNodeNameLabel},
+					TargetLabel:  model.MetricsPathLabel,
+					Regex:        GroupRegex,
+					Replacement:  CadvisorMetricsPath,
+					Action:       config.RelabelReplace,
 				},
 			},
 		},
