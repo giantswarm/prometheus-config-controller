@@ -33,6 +33,13 @@ const (
 	// PrometheusServicePortLabel is the Prometheus label added by the Kubernetes
 	// service discovery to hold an endpoints port.
 	PrometheusServicePortLabel = "__meta_kubernetes_pod_container_port_number"
+
+	// PrometheusServicePortLabel is the Prometheus label added by the Kubernetes
+	// service discovery to hold a node's name.
+	PrometheusKubernetesNodeNameLabel = "__meta_kubernetes_node_name"
+
+	// CadvisorMetricsPath is the path under which cadvisor metrics can be scraped.
+	CadvisorMetricsPath = "/api/v1/nodes/${1}:4194/proxy/metrics"
 )
 
 var (
@@ -51,6 +58,9 @@ var (
 	// HTTPEndpointRegexp is the regular expression against which endpoint service
 	// names that we want to scrape via HTTP need to match.
 	HTTPEndpointRegexp = config.MustNewRegexp(`(kube-state-metrics|node-exporter)`)
+
+	// GroupRegex is the regular expression with which we can group strings.
+	GroupRegex = config.MustNewRegexp(`(.+)`)
 )
 
 // GetClusterID returns the value of the cluster annotation.
