@@ -41,9 +41,9 @@ func getTarget(service v1.Service) model.LabelSet {
 	}
 }
 
-// getScrapeConfig takes a Service, and returns a ScrapeConfig.
+// getScrapeConfigs takes a Service, and returns a list of ScrapeConfigs.
 // It is assumed that filtering has already taken place, and the cluster annotation exists.
-func getScrapeConfig(service v1.Service, certificateDirectory string) config.ScrapeConfig {
+func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.ScrapeConfig {
 	clusterID := GetClusterID(service)
 
 	apiServer := config.URL{&url.URL{
@@ -63,70 +63,72 @@ func getScrapeConfig(service v1.Service, certificateDirectory string) config.Scr
 	kubernetesTlsConfig := tlsConfig
 	kubernetesTlsConfig.InsecureSkipVerify = false
 
-	scrapeConfig := config.ScrapeConfig{
-		JobName: getJobName(service),
-		Scheme:  HttpsScheme,
-		HTTPClientConfig: config.HTTPClientConfig{
-			TLSConfig: clientTlsConfig,
-		},
-		ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-			KubernetesSDConfigs: []*config.KubernetesSDConfig{
-				{
-					APIServer: apiServer,
-					Role:      config.KubernetesRoleEndpoint,
-					TLSConfig: kubernetesTlsConfig,
+	scrapeConfigs := []config.ScrapeConfig{
+		{
+			JobName: getJobName(service),
+			Scheme:  HttpsScheme,
+			HTTPClientConfig: config.HTTPClientConfig{
+				TLSConfig: clientTlsConfig,
+			},
+			ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
+				KubernetesSDConfigs: []*config.KubernetesSDConfig{
+					{
+						APIServer: apiServer,
+						Role:      config.KubernetesRoleEndpoint,
+						TLSConfig: kubernetesTlsConfig,
+					},
+					{
+						APIServer: apiServer,
+						Role:      config.KubernetesRoleNode,
+						TLSConfig: kubernetesTlsConfig,
+					},
 				},
+			},
+			RelabelConfigs: []*config.RelabelConfig{
+				// Add the cluster id label, so we can identify the specific
+				// guest cluster.
 				{
-					APIServer: apiServer,
-					Role:      config.KubernetesRoleNode,
-					TLSConfig: kubernetesTlsConfig,
+					TargetLabel: ClusterIDLabel,
+					Replacement: clusterID,
+					Action:      config.RelabelReplace,
 				},
-			},
-		},
-		RelabelConfigs: []*config.RelabelConfig{
-			// Add the cluster id label, so we can identify the specific
-			// guest cluster.
-			{
-				TargetLabel: ClusterIDLabel,
-				Replacement: clusterID,
-				Action:      config.RelabelReplace,
-			},
-			// Copy the meta service name label to a named label.
-			{
-				SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
-				TargetLabel:  NameLabel,
-				Action:       config.RelabelReplace,
-			},
-			// Copy the meta namespace name label to a named label.
-			{
-				SourceLabels: model.LabelNames{PrometheusNamespaceLabel},
-				TargetLabel:  NamespaceLabel,
-				Action:       config.RelabelReplace,
-			},
-			// Relabel http endpoints to scrape via http.
-			{
-				SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
-				TargetLabel:  model.SchemeLabel,
-				Regex:        HTTPEndpointRegexp,
-				Replacement:  HttpScheme,
-				Action:       config.RelabelReplace,
-			},
-			// Drop any targets that don't match the service name regexp.
-			{
-				SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
-				Regex:        EndpointRegexp,
-				Action:       config.RelabelKeep,
-			},
-			// Drop any targets that don't match the service port regexp.
-			{
-				SourceLabels: model.LabelNames{PrometheusServicePortLabel},
-				Regex:        EndpointPortRegexp,
-				Action:       config.RelabelKeep,
+				// Copy the meta service name label to a named label.
+				{
+					SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
+					TargetLabel:  NameLabel,
+					Action:       config.RelabelReplace,
+				},
+				// Copy the meta namespace name label to a named label.
+				{
+					SourceLabels: model.LabelNames{PrometheusNamespaceLabel},
+					TargetLabel:  NamespaceLabel,
+					Action:       config.RelabelReplace,
+				},
+				// Relabel http endpoints to scrape via http.
+				{
+					SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
+					TargetLabel:  model.SchemeLabel,
+					Regex:        HTTPEndpointRegexp,
+					Replacement:  HttpScheme,
+					Action:       config.RelabelReplace,
+				},
+				// Drop any targets that don't match the service name regexp.
+				{
+					SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
+					Regex:        EndpointRegexp,
+					Action:       config.RelabelKeep,
+				},
+				// Drop any targets that don't match the service port regexp.
+				{
+					SourceLabels: model.LabelNames{PrometheusServicePortLabel},
+					Regex:        EndpointPortRegexp,
+					Action:       config.RelabelKeep,
+				},
 			},
 		},
 	}
 
-	return scrapeConfig
+	return scrapeConfigs
 }
 
 // GetScrapeConfigs takes a list of Kubernetes Services,
@@ -136,7 +138,7 @@ func GetScrapeConfigs(services []v1.Service, certificateDirectory string) ([]con
 
 	scrapeConfigs := []config.ScrapeConfig{}
 	for _, service := range filteredServices {
-		scrapeConfigs = append(scrapeConfigs, getScrapeConfig(service, certificateDirectory))
+		scrapeConfigs = append(scrapeConfigs, getScrapeConfigs(service, certificateDirectory)...)
 	}
 
 	sort.Slice(scrapeConfigs, func(i, j int) bool {

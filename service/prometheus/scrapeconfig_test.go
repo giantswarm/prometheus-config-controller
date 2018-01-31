@@ -631,143 +631,145 @@ func Test_Prometheus_GetScrapeConfigs_Deterministic(t *testing.T) {
 // Test_Prometheus_YamlMarshal tests that Prometheus marshals yaml correctly.
 func Test_Prometheus_YamlMarshal(t *testing.T) {
 	tests := []struct {
-		scrapeConfig config.ScrapeConfig
+		scrapeConfigs []config.ScrapeConfig
 
-		expectedConfig string
+		expectedConfigs string
 	}{
 		{
-			scrapeConfig: config.ScrapeConfig{
-				JobName: "guest-cluster-xa5ly",
-				Scheme:  "https",
-				HTTPClientConfig: config.HTTPClientConfig{
-					TLSConfig: config.TLSConfig{
-						CAFile:             "/certs/xa5ly-ca.pem",
-						CertFile:           "/certs/xa5ly-crt.pem",
-						KeyFile:            "/certs/xa5ly-key.pem",
-						InsecureSkipVerify: true,
-					},
-				},
-				ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-					KubernetesSDConfigs: []*config.KubernetesSDConfig{
-						{
-							APIServer: config.URL{&url.URL{
-								Scheme: "https",
-								Host:   "apiserver.xa5ly",
-							}},
-							Role: config.KubernetesRoleEndpoint,
-							TLSConfig: config.TLSConfig{
-								CAFile:             "/certs/xa5ly-ca.pem",
-								CertFile:           "/certs/xa5ly-crt.pem",
-								KeyFile:            "/certs/xa5ly-key.pem",
-								InsecureSkipVerify: false,
-							},
-						},
-						{
-							APIServer: config.URL{&url.URL{
-								Scheme: "https",
-								Host:   "apiserver.xa5ly",
-							}},
-							Role: config.KubernetesRoleNode,
-							TLSConfig: config.TLSConfig{
-								CAFile:             "/certs/xa5ly-ca.pem",
-								CertFile:           "/certs/xa5ly-crt.pem",
-								KeyFile:            "/certs/xa5ly-key.pem",
-								InsecureSkipVerify: false,
-							},
+			scrapeConfigs: []config.ScrapeConfig{
+				{
+					JobName: "guest-cluster-xa5ly",
+					Scheme:  "https",
+					HTTPClientConfig: config.HTTPClientConfig{
+						TLSConfig: config.TLSConfig{
+							CAFile:             "/certs/xa5ly-ca.pem",
+							CertFile:           "/certs/xa5ly-crt.pem",
+							KeyFile:            "/certs/xa5ly-key.pem",
+							InsecureSkipVerify: true,
 						},
 					},
-				},
-				RelabelConfigs: []*config.RelabelConfig{
-					{
-						TargetLabel: ClusterIDLabel,
-						Replacement: "xa5ly",
-						Action:      config.RelabelReplace,
+					ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
+						KubernetesSDConfigs: []*config.KubernetesSDConfig{
+							{
+								APIServer: config.URL{&url.URL{
+									Scheme: "https",
+									Host:   "apiserver.xa5ly",
+								}},
+								Role: config.KubernetesRoleEndpoint,
+								TLSConfig: config.TLSConfig{
+									CAFile:             "/certs/xa5ly-ca.pem",
+									CertFile:           "/certs/xa5ly-crt.pem",
+									KeyFile:            "/certs/xa5ly-key.pem",
+									InsecureSkipVerify: false,
+								},
+							},
+							{
+								APIServer: config.URL{&url.URL{
+									Scheme: "https",
+									Host:   "apiserver.xa5ly",
+								}},
+								Role: config.KubernetesRoleNode,
+								TLSConfig: config.TLSConfig{
+									CAFile:             "/certs/xa5ly-ca.pem",
+									CertFile:           "/certs/xa5ly-crt.pem",
+									KeyFile:            "/certs/xa5ly-key.pem",
+									InsecureSkipVerify: false,
+								},
+							},
+						},
 					},
-					{
-						SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
-						TargetLabel:  NameLabel,
-						Action:       config.RelabelReplace,
-					},
-					{
-						SourceLabels: model.LabelNames{PrometheusNamespaceLabel},
-						TargetLabel:  NamespaceLabel,
-						Action:       config.RelabelReplace,
-					},
-					{
-						SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
-						TargetLabel:  model.SchemeLabel,
-						Regex:        HTTPEndpointRegexp,
-						Replacement:  HttpScheme,
-						Action:       config.RelabelReplace,
-					},
-					{
-						SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
-						Regex:        EndpointRegexp,
-						Action:       config.RelabelKeep,
-					},
-					{
-						SourceLabels: model.LabelNames{PrometheusServicePortLabel},
-						Regex:        EndpointPortRegexp,
-						Action:       config.RelabelKeep,
+					RelabelConfigs: []*config.RelabelConfig{
+						{
+							TargetLabel: ClusterIDLabel,
+							Replacement: "xa5ly",
+							Action:      config.RelabelReplace,
+						},
+						{
+							SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
+							TargetLabel:  NameLabel,
+							Action:       config.RelabelReplace,
+						},
+						{
+							SourceLabels: model.LabelNames{PrometheusNamespaceLabel},
+							TargetLabel:  NamespaceLabel,
+							Action:       config.RelabelReplace,
+						},
+						{
+							SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
+							TargetLabel:  model.SchemeLabel,
+							Regex:        HTTPEndpointRegexp,
+							Replacement:  HttpScheme,
+							Action:       config.RelabelReplace,
+						},
+						{
+							SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
+							Regex:        EndpointRegexp,
+							Action:       config.RelabelKeep,
+						},
+						{
+							SourceLabels: model.LabelNames{PrometheusServicePortLabel},
+							Regex:        EndpointPortRegexp,
+							Action:       config.RelabelKeep,
+						},
 					},
 				},
 			},
 
-			expectedConfig: `job_name: guest-cluster-xa5ly
-scheme: https
-kubernetes_sd_configs:
-- api_server: https://apiserver.xa5ly
-  role: endpoints
+			expectedConfigs: `- job_name: guest-cluster-xa5ly
+  scheme: https
+  kubernetes_sd_configs:
+  - api_server: https://apiserver.xa5ly
+    role: endpoints
+    tls_config:
+      ca_file: /certs/xa5ly-ca.pem
+      cert_file: /certs/xa5ly-crt.pem
+      key_file: /certs/xa5ly-key.pem
+      insecure_skip_verify: false
+  - api_server: https://apiserver.xa5ly
+    role: node
+    tls_config:
+      ca_file: /certs/xa5ly-ca.pem
+      cert_file: /certs/xa5ly-crt.pem
+      key_file: /certs/xa5ly-key.pem
+      insecure_skip_verify: false
   tls_config:
     ca_file: /certs/xa5ly-ca.pem
     cert_file: /certs/xa5ly-crt.pem
     key_file: /certs/xa5ly-key.pem
-    insecure_skip_verify: false
-- api_server: https://apiserver.xa5ly
-  role: node
-  tls_config:
-    ca_file: /certs/xa5ly-ca.pem
-    cert_file: /certs/xa5ly-crt.pem
-    key_file: /certs/xa5ly-key.pem
-    insecure_skip_verify: false
-tls_config:
-  ca_file: /certs/xa5ly-ca.pem
-  cert_file: /certs/xa5ly-crt.pem
-  key_file: /certs/xa5ly-key.pem
-  insecure_skip_verify: true
-relabel_configs:
-- source_labels: []
-  target_label: cluster_id
-  replacement: xa5ly
-  action: replace
-- source_labels: [__meta_kubernetes_service_name]
-  target_label: kubernetes_name
-  action: replace
-- source_labels: [__meta_kubernetes_namespace]
-  target_label: kubernetes_namespace
-  action: replace
-- source_labels: [__meta_kubernetes_service_name]
-  regex: (kube-state-metrics|node-exporter)
-  target_label: __scheme__
-  replacement: http
-  action: replace
-- source_labels: [__meta_kubernetes_service_name]
-  regex: (\s*|kube-state-metrics|kubernetes|node-exporter)
-  action: keep
-- source_labels: [__meta_kubernetes_pod_container_port_number]
-  regex: (\s*|443|10300|10301)
-  action: keep
+    insecure_skip_verify: true
+  relabel_configs:
+  - source_labels: []
+    target_label: cluster_id
+    replacement: xa5ly
+    action: replace
+  - source_labels: [__meta_kubernetes_service_name]
+    target_label: kubernetes_name
+    action: replace
+  - source_labels: [__meta_kubernetes_namespace]
+    target_label: kubernetes_namespace
+    action: replace
+  - source_labels: [__meta_kubernetes_service_name]
+    regex: (kube-state-metrics|node-exporter)
+    target_label: __scheme__
+    replacement: http
+    action: replace
+  - source_labels: [__meta_kubernetes_service_name]
+    regex: (\s*|kube-state-metrics|kubernetes|node-exporter)
+    action: keep
+  - source_labels: [__meta_kubernetes_pod_container_port_number]
+    regex: (\s*|443|10300|10301)
+    action: keep
 `,
 		},
 	}
 
 	for index, test := range tests {
-		data, err := yaml.Marshal(test.scrapeConfig)
+		data, err := yaml.Marshal(test.scrapeConfigs)
 		if err != nil {
 			t.Fatalf("%d: error occurred marshaling yaml: %s\n", index, err)
 		}
 
-		expectedLines := strings.Split(test.expectedConfig, "\n")
+		expectedLines := strings.Split(test.expectedConfigs, "\n")
 		returnedLines := strings.Split(string(data), "\n")
 
 		if len(expectedLines) == len(returnedLines) {
@@ -778,11 +780,11 @@ relabel_configs:
 			}
 		}
 
-		if test.expectedConfig != string(data) {
+		if test.expectedConfigs != string(data) {
 			t.Fatalf(
-				"%d: expected scrape config does not match returned scrape config.\nexpected:\n%s\nreturned:\n%s\n",
+				"%d: expected scrape configs do not match returned scrape configs.\nexpected:\n%s\nreturned:\n%s\n",
 				index,
-				test.expectedConfig,
+				test.expectedConfigs,
 				string(data),
 			)
 		}
