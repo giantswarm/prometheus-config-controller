@@ -1,6 +1,8 @@
 package prometheus
 
 import (
+	"strings"
+
 	"github.com/prometheus/prometheus/config"
 )
 
@@ -31,11 +33,5 @@ func UpdateConfig(promcfg config.Config, scrapeConfigs []config.ScrapeConfig) (c
 // isManaged returns true if the given scrape config is managed by the prometheus-config-controller,
 // false otherwise.
 func isManaged(scrapeConfig config.ScrapeConfig) bool {
-	for _, relabelConfig := range scrapeConfig.RelabelConfigs {
-		if relabelConfig.TargetLabel == ClusterIDLabel {
-			return true
-		}
-	}
-
-	return false
+	return strings.HasPrefix(scrapeConfig.JobName, jobNamePrefix)
 }
