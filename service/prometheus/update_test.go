@@ -88,6 +88,40 @@ func Test_Prometheus_isManaged(t *testing.T) {
 			},
 			isManaged: true,
 		},
+
+		{
+			scrapeConfig: config.ScrapeConfig{
+				JobName: "guest-cluster-xa5ly-cadvisor",
+				RelabelConfigs: []*config.RelabelConfig{
+					{
+						TargetLabel: ClusterIDLabel,
+						Replacement: "xa5ly",
+					},
+				},
+			},
+			isManaged: true,
+		},
+
+		{
+			scrapeConfig: config.ScrapeConfig{
+				JobName: "guest-cluster-xa5ly-cadvisor",
+			},
+			isManaged: true,
+		},
+
+		{
+			scrapeConfig: config.ScrapeConfig{
+				JobName: "host-cluster-gauss",
+			},
+			isManaged: false,
+		},
+
+		{
+			scrapeConfig: config.ScrapeConfig{
+				JobName: "host-cluster-gauss-cadvisor",
+			},
+			isManaged: false,
+		},
 	}
 
 	for index, test := range tests {
