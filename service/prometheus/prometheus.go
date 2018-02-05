@@ -1,6 +1,7 @@
 package prometheus
 
 import (
+	"github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/config"
 	"k8s.io/api/core/v1"
 )
@@ -9,58 +10,101 @@ const (
 	// ClusterAnnotation is the Kubernetes annotation that identifies Services
 	// that the prometheus-config-controller should scrape.
 	ClusterAnnotation = "giantswarm.io/prometheus-cluster"
-
-	// ClusterIDLabel is the Prometheus label used to identify guest cluster
-	// metrics by external clients.
-	ClusterIDLabel = "cluster_id"
-
-	// NamespaceLabel is the Prometheus label we use internally for an
-	// endpoints namespace.
-	NameLabel = "kubernetes_name"
-
-	// NamespaceLabel is the Prometheus label we use internally for
-	// an endpoints namespace.
-	NamespaceLabel = "kubernetes_namespace"
-
-	// PrometheusNamespaceLabel is the Prometheus label added by the Kubernetes
-	// service discovery to hold an endpoint targets namespace.
-	PrometheusNamespaceLabel = "__meta_kubernetes_namespace"
-
-	// PrometheusServiceNameLabel is the Prometheus label added by the Kubernetes
-	// service discovery to hold an endpoints service name.
-	PrometheusServiceNameLabel = "__meta_kubernetes_service_name"
-
-	// PrometheusServicePortLabel is the Prometheus label added by the Kubernetes
-	// service discovery to hold an endpoints port.
-	PrometheusServicePortLabel = "__meta_kubernetes_pod_container_port_number"
-
-	// PrometheusServicePortLabel is the Prometheus label added by the Kubernetes
-	// service discovery to hold a node's name.
-	PrometheusKubernetesNodeNameLabel = "__meta_kubernetes_node_name"
-
-	// CadvisorMetricsPath is the path under which cadvisor metrics can be scraped.
-	CadvisorMetricsPath = "/api/v1/nodes/${1}:4194/proxy/metrics"
 )
 
+// Prometheus Kubernetes service discovery labels.
 var (
-	// EndpointRegexp is the regular expression against which endpoint service names
-	// must match to be scraped.
-	// The empty string is also matched, so that nodes (which have no service name),
-	// are also matched.
-	EndpointRegexp = config.MustNewRegexp(`(\s*|kube-state-metrics|kubernetes|node-exporter)`)
+	// KubernetesSDEndpointPortNameLabel is the label applied to the target
+	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes endpoint port name.
+	KubernetesSDEndpointPortNameLabel = model.LabelName("__meta_kubernetes_endpoint_port_name")
 
-	// EndpointPortRegexp is the regular expression against which endpoint service ports
-	// must match to be scraped.
-	// We specify ports in the cases where users are running kube-state-metrics or node-exporters,
-	// to ensure we only scrape the correct instances.
-	EndpointPortRegexp = config.MustNewRegexp(`(\s*|443|10300|10301)`)
+	// KubernetesSDNamespaceLabel is the label applied to the target
+	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes namespace.
+	KubernetesSDNamespaceLabel = model.LabelName("__meta_kubernetes_namespace")
 
-	// HTTPEndpointRegexp is the regular expression against which endpoint service
-	// names that we want to scrape via HTTP need to match.
-	HTTPEndpointRegexp = config.MustNewRegexp(`(kube-state-metrics|node-exporter)`)
+	// KubernetesSDNodeNameLabel is the label applied to the target
+	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes node name.
+	KubernetesSDNodeNameLabel = model.LabelName("__meta_kubernetes_node_name")
 
-	// GroupRegex is the regular expression with which we can group strings.
-	GroupRegex = config.MustNewRegexp(`(.+)`)
+	// KubernetesSDNodeAddressInternalIPLabel is the label applied to the target
+	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes node addres internal IP.
+	KubernetesSDNodeAddressInternalIPLabel = model.LabelName("__meta_kubernetes_node_address_InternalIP")
+
+	// KubernetesSDNodeLabelRole is the label applied to the target
+	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes node role label.
+	KubernetesSDNodeLabelRole = model.LabelName("__meta_kubernetes_node_label_role")
+
+	// KubernetesSDServiceNameLabel is the label applied to the target
+	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes service.
+	KubernetesSDServiceNameLabel = model.LabelName("__meta_kubernetes_service_name")
+)
+
+// Giant Swarm metrics schema labels.
+var (
+	// AppLabel is the label used to hold the application's name.
+	AppLabel = "app"
+
+	// ClusterIDLabel is the label used to hold the cluster's ID.
+	ClusterIDLabel = "cluster_id"
+
+	// ClusterTypeLabel is the label used to hold the cluster's type.
+	ClusterTypeLabel = "cluster_type"
+
+	// IPLabel is the label used to hold the machine's IP.
+	IPLabel = "ip"
+
+	// NamespaceLabel is the label used to hold the application's namespace.
+	NamespaceLabel = "namespace"
+
+	// RoleLabel is the label used to hold the machine's role.
+	RoleLabel = "role"
+)
+
+// Giant Swarm metrics schema values.
+const (
+	// CadvisorAppName is the label value for Cadvisor targets.
+	CadvisorAppName = "cadvisor"
+
+	// GuestClusterType is the cluster type for guest clusters.
+	GuestClusterType = "guest"
+
+	// KubeletAppName is the label value for kubelets.
+	KubeletAppName = "kubelet"
+
+	// KubernetesAppName is the label value for Kubernetes API servers.
+	KubernetesAppName = "kubernetes"
+
+	// NodeExporterAppName is the label value for node-exporters.
+	NodeExporterAppName = "node-exporter"
+
+	// WorkerRole is the label value used for Kubernetes workers.
+	WorkerRole = "worker"
+)
+
+// Path replacements.
+const (
+	// CadvisorMetricsPath is the path under which cadvisor metrics can be scraped.
+	CadvisorMetricsPath = "/api/v1/nodes/${1}:4194/proxy/metrics"
+
+	// NodeExportePath is the path under which node-exporter metrics can be scraped.
+	NodeExporterPort = "${1}:9100"
+)
+
+// Regular expressions.
+var (
+	// APIServerRegexp is the regular expression to match against Kubernetes API servers.
+	APIServerRegexp = config.MustNewRegexp(`default;kubernetes;https`)
+
+	// EmptyRegexp is the regular expression to match against the empty string.
+	EmptyRegexp = config.MustNewRegexp(``)
+
+	// KubeletPortRegexp is the regular expression to match against the
+	// Kubelet IP (including port), and capture the IP.
+	KubeletPortRegexp = config.MustNewRegexp(`(.*):10250`)
+
+	// NodeExporterRegexp is the regular expression to match against the
+	// node-exporter name.
+	NodeExporterRegexp = config.MustNewRegexp(`node-exporter`)
 )
 
 // GetClusterID returns the value of the cluster annotation.
