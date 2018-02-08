@@ -398,17 +398,20 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
   scheme: http
   kubernetes_sd_configs:
   - api_server: https://apiserver.xa5ly
-    role: node
+    role: endpoints
     tls_config:
       ca_file: /certs/xa5ly-ca.pem
       cert_file: /certs/xa5ly-crt.pem
       key_file: /certs/xa5ly-key.pem
       insecure_skip_verify: false
   relabel_configs:
+  - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name]
+    regex: kube-system;node-exporter
+    action: keep
   - source_labels: [__address__]
     regex: (.*):10250
     target_label: __address__
-    replacement: ${1}:9100
+    replacement: ${1}:10300
   - source_labels: []
     target_label: app
     replacement: node-exporter
@@ -418,14 +421,10 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
   - source_labels: []
     target_label: cluster_type
     replacement: guest
-  - source_labels: [__meta_kubernetes_node_address_InternalIP]
+  - source_labels: [__address__]
+    regex: (.*):10300
     target_label: ip
-  - source_labels: [__meta_kubernetes_node_label_role]
-    target_label: role
-  - source_labels: [__meta_kubernetes_node_label_role]
-    regex: null
-    target_label: role
-    replacement: worker
+    replacement: ${1}
 - job_name: guest-cluster-xa5ly-workload
   scheme: http
   kubernetes_sd_configs:
@@ -437,9 +436,9 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
       key_file: /certs/xa5ly-key.pem
       insecure_skip_verify: false
   relabel_configs:
-  - source_labels: [__meta_kubernetes_service_name]
-    regex: node-exporter
-    action: drop
+  - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name]
+    regex: kube-system;kube-state-metrics|node-exporter
+    action: keep
   - source_labels: [__meta_kubernetes_service_name]
     target_label: app
   - source_labels: [__meta_kubernetes_namespace]

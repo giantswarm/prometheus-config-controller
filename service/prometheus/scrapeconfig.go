@@ -211,8 +211,17 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 		{
 			JobName:                getJobName(service, NodeExporterJobType),
 			Scheme:                 HttpScheme,
-			ServiceDiscoveryConfig: nodeSDConfig,
+			ServiceDiscoveryConfig: endpointSDConfig,
 			RelabelConfigs: []*config.RelabelConfig{
+				// Only keep node-exporter endpoints.
+				{
+					SourceLabels: model.LabelNames{
+						KubernetesSDNamespaceLabel,
+						KubernetesSDServiceNameLabel,
+					},
+					Regex:  NodeExporterRegexp,
+					Action: config.RelabelKeep,
+				},
 				// Relabel address to node-exporter port.
 				{
 					SourceLabels: model.LabelNames{model.AddressLabel},
@@ -230,10 +239,12 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				// Add cluster_type label.
 				clusterTypeLabelRelabelConfig,
 				// Add ip label.
-				ipLabelRelabelConfig,
-				// Add role label.
-				roleLabelRelabelConfig,
-				missingRoleLabelRelabelConfig,
+				{
+					SourceLabels: model.LabelNames{model.AddressLabel},
+					Regex:        NodeExporterPortRegexp,
+					Replacement:  GroupCapture,
+					TargetLabel:  IPLabel,
+				},
 			},
 		},
 
@@ -242,11 +253,11 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 			Scheme:                 HttpScheme,
 			ServiceDiscoveryConfig: endpointSDConfig,
 			RelabelConfigs: []*config.RelabelConfig{
-				// Drop node-exporter targets.
+				// Only keep kube-state-metrics targets.
 				{
-					SourceLabels: model.LabelNames{KubernetesSDServiceNameLabel},
-					Regex:        NodeExporterRegexp,
-					Action:       config.RelabelDrop,
+					SourceLabels: model.LabelNames{KubernetesSDNamespaceLabel, KubernetesSDServiceNameLabel},
+					Regex:        WhitelistRegexp,
+					Action:       config.RelabelKeep,
 				},
 				// Add app label.
 				{

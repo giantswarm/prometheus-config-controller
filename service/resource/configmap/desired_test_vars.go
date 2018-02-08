@@ -194,7 +194,7 @@ var (
 						Scheme: "https",
 						Host:   "apiserver.xa5ly",
 					}},
-					Role: config.KubernetesRoleNode,
+					Role: config.KubernetesRoleEndpoint,
 					TLSConfig: config.TLSConfig{
 						CAFile:             "/certs/xa5ly-ca.pem",
 						CertFile:           "/certs/xa5ly-crt.pem",
@@ -205,6 +205,14 @@ var (
 			},
 		},
 		RelabelConfigs: []*config.RelabelConfig{
+			{
+				SourceLabels: model.LabelNames{
+					prometheus.KubernetesSDNamespaceLabel,
+					prometheus.KubernetesSDServiceNameLabel,
+				},
+				Regex:  prometheus.NodeExporterRegexp,
+				Action: config.RelabelKeep,
+			},
 			{
 				SourceLabels: model.LabelNames{model.AddressLabel},
 				Regex:        prometheus.KubeletPortRegexp,
@@ -224,18 +232,10 @@ var (
 				Replacement: prometheus.GuestClusterType,
 			},
 			{
+				SourceLabels: model.LabelNames{model.AddressLabel},
+				Regex:        prometheus.NodeExporterPortRegexp,
+				Replacement:  prometheus.GroupCapture,
 				TargetLabel:  prometheus.IPLabel,
-				SourceLabels: model.LabelNames{prometheus.KubernetesSDNodeAddressInternalIPLabel},
-			},
-			{
-				TargetLabel:  prometheus.RoleLabel,
-				SourceLabels: model.LabelNames{prometheus.KubernetesSDNodeLabelRole},
-			},
-			{
-				SourceLabels: model.LabelNames{prometheus.KubernetesSDNodeLabelRole},
-				Regex:        prometheus.EmptyRegexp,
-				Replacement:  prometheus.WorkerRole,
-				TargetLabel:  prometheus.RoleLabel,
 			},
 		},
 	}
@@ -261,9 +261,9 @@ var (
 		},
 		RelabelConfigs: []*config.RelabelConfig{
 			{
-				SourceLabels: model.LabelNames{prometheus.KubernetesSDServiceNameLabel},
-				Regex:        prometheus.NodeExporterRegexp,
-				Action:       config.RelabelDrop,
+				SourceLabels: model.LabelNames{prometheus.KubernetesSDNamespaceLabel, prometheus.KubernetesSDServiceNameLabel},
+				Regex:        prometheus.WhitelistRegexp,
+				Action:       config.RelabelKeep,
 			},
 			{
 				TargetLabel:  prometheus.AppLabel,
@@ -336,7 +336,7 @@ func init() {
 	TestConfigTwoNodeExporter.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.CAFile = caFile
 	TestConfigTwoNodeExporter.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.CertFile = crtFile
 	TestConfigTwoNodeExporter.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.KeyFile = keyFile
-	TestConfigTwoNodeExporter.RelabelConfigs[2].Replacement = clusterID
+	TestConfigTwoNodeExporter.RelabelConfigs[3].Replacement = clusterID
 
 	TestConfigTwoWorkload.JobName = "guest-cluster-0ba9v-workload"
 	TestConfigTwoWorkload.ServiceDiscoveryConfig.KubernetesSDConfigs[0].APIServer.Host = apiserver

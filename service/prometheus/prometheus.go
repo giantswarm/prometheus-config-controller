@@ -82,8 +82,11 @@ const (
 	// CadvisorMetricsPath is the path under which cadvisor metrics can be scraped.
 	CadvisorMetricsPath = "/api/v1/nodes/${1}:4194/proxy/metrics"
 
-	// NodeExportePath is the path under which node-exporter metrics can be scraped.
-	NodeExporterPort = "${1}:9100"
+	// NodeExporterPort is the path under which node-exporter metrics can be scraped.
+	NodeExporterPort = "${1}:10300"
+
+	// GroupCapture is the regular expression to match against the first capture group.
+	GroupCapture = "${1}"
 )
 
 // Regular expressions.
@@ -100,7 +103,14 @@ var (
 
 	// NodeExporterRegexp is the regular expression to match against the
 	// node-exporter name.
-	NodeExporterRegexp = config.MustNewRegexp(`node-exporter`)
+	NodeExporterRegexp = config.MustNewRegexp(`kube-system;node-exporter`)
+
+	// NodeExporterPortRegexp is the regular expression to match against the
+	// node-exporter IP (including port), and capture the IP.
+	NodeExporterPortRegexp = config.MustNewRegexp(`(.*):10300`)
+
+	// WhitelistRegexp is the regular expression to match workload targets to scrape.
+	WhitelistRegexp = config.MustNewRegexp(`kube-system;kube-state-metrics|node-exporter`)
 )
 
 // GetClusterID returns the value of the cluster annotation.
