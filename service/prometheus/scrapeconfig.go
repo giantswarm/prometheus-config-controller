@@ -135,7 +135,6 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					SourceLabels: model.LabelNames{
 						KubernetesSDNamespaceLabel,
 						KubernetesSDServiceNameLabel,
-						KubernetesSDEndpointPortNameLabel,
 					},
 					Regex:  APIServerRegexp,
 					Action: config.RelabelKeep,

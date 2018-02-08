@@ -41,7 +41,6 @@ var (
 				SourceLabels: model.LabelNames{
 					KubernetesSDNamespaceLabel,
 					KubernetesSDServiceNameLabel,
-					KubernetesSDEndpointPortNameLabel,
 				},
 				Regex:  APIServerRegexp,
 				Action: config.RelabelKeep,

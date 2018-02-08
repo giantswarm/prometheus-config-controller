@@ -310,8 +310,8 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
     key_file: /certs/xa5ly-key.pem
     insecure_skip_verify: true
   relabel_configs:
-  - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
-    regex: default;kubernetes;https
+  - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name]
+    regex: default;kubernetes
     action: keep
   - source_labels: []
     target_label: app

@@ -43,7 +43,6 @@ var (
 				SourceLabels: model.LabelNames{
 					prometheus.KubernetesSDNamespaceLabel,
 					prometheus.KubernetesSDServiceNameLabel,
-					prometheus.KubernetesSDEndpointPortNameLabel,
 				},
 				Regex:  prometheus.APIServerRegexp,
 				Action: config.RelabelKeep,

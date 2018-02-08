@@ -14,10 +14,6 @@ const (
 
 // Prometheus Kubernetes service discovery labels.
 var (
-	// KubernetesSDEndpointPortNameLabel is the label applied to the target
-	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes endpoint port name.
-	KubernetesSDEndpointPortNameLabel = model.LabelName("__meta_kubernetes_endpoint_port_name")
-
 	// KubernetesSDNamespaceLabel is the label applied to the target
 	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes namespace.
 	KubernetesSDNamespaceLabel = model.LabelName("__meta_kubernetes_namespace")
@@ -93,7 +89,7 @@ const (
 // Regular expressions.
 var (
 	// APIServerRegexp is the regular expression to match against Kubernetes API servers.
-	APIServerRegexp = config.MustNewRegexp(`default;kubernetes;https`)
+	APIServerRegexp = config.MustNewRegexp(`default;kubernetes`)
 
 	// EmptyRegexp is the regular expression to match against the empty string.
 	EmptyRegexp = config.MustNewRegexp(``)
