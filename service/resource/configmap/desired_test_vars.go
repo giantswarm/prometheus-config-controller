@@ -18,7 +18,7 @@ var (
 				CAFile:             "/certs/xa5ly-ca.pem",
 				CertFile:           "/certs/xa5ly-crt.pem",
 				KeyFile:            "/certs/xa5ly-key.pem",
-				InsecureSkipVerify: false,
+				InsecureSkipVerify: true,
 			},
 		},
 		ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
@@ -297,40 +297,52 @@ var (
 func init() {
 	apiserver := "apiserver.0ba9v"
 	clusterID := "0ba9v"
-	tlsConfig := config.TLSConfig{
-		CAFile:             "/certs/0ba9v-ca.pem",
-		CertFile:           "/certs/0ba9v-crt.pem",
-		KeyFile:            "/certs/0ba9v-key.pem",
-		InsecureSkipVerify: false,
-	}
+	caFile := "/certs/0ba9v-ca.pem"
+	crtFile := "/certs/0ba9v-crt.pem"
+	keyFile := "/certs/0ba9v-key.pem"
 
 	TestConfigTwoApiserver.JobName = "guest-cluster-0ba9v-apiserver"
-	TestConfigTwoApiserver.HTTPClientConfig.TLSConfig = tlsConfig
+	TestConfigTwoApiserver.HTTPClientConfig.TLSConfig.CAFile = caFile
+	TestConfigTwoApiserver.HTTPClientConfig.TLSConfig.CertFile = crtFile
+	TestConfigTwoApiserver.HTTPClientConfig.TLSConfig.KeyFile = keyFile
 	TestConfigTwoApiserver.ServiceDiscoveryConfig.KubernetesSDConfigs[0].APIServer.Host = apiserver
-	TestConfigTwoApiserver.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig = tlsConfig
+	TestConfigTwoApiserver.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.CAFile = caFile
+	TestConfigTwoApiserver.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.CertFile = crtFile
+	TestConfigTwoApiserver.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.KeyFile = keyFile
 	TestConfigTwoApiserver.RelabelConfigs[2].Replacement = clusterID
 
 	TestConfigTwoCadvisor.JobName = "guest-cluster-0ba9v-cadvisor"
-	TestConfigTwoCadvisor.HTTPClientConfig.TLSConfig = tlsConfig
+	TestConfigTwoCadvisor.HTTPClientConfig.TLSConfig.CAFile = caFile
+	TestConfigTwoCadvisor.HTTPClientConfig.TLSConfig.CertFile = crtFile
+	TestConfigTwoCadvisor.HTTPClientConfig.TLSConfig.KeyFile = keyFile
 	TestConfigTwoCadvisor.ServiceDiscoveryConfig.KubernetesSDConfigs[0].APIServer.Host = apiserver
-	TestConfigTwoCadvisor.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig = tlsConfig
+	TestConfigTwoCadvisor.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.CAFile = caFile
+	TestConfigTwoCadvisor.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.CertFile = crtFile
+	TestConfigTwoCadvisor.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.KeyFile = keyFile
 	TestConfigTwoCadvisor.RelabelConfigs[0].Replacement = apiserver
 	TestConfigTwoCadvisor.RelabelConfigs[3].Replacement = clusterID
 
 	TestConfigTwoKubelet.JobName = "guest-cluster-0ba9v-kubelet"
-	TestConfigTwoKubelet.HTTPClientConfig.TLSConfig = tlsConfig
-	TestConfigTwoKubelet.HTTPClientConfig.TLSConfig.InsecureSkipVerify = true
+	TestConfigTwoKubelet.HTTPClientConfig.TLSConfig.CAFile = caFile
+	TestConfigTwoKubelet.HTTPClientConfig.TLSConfig.CertFile = crtFile
+	TestConfigTwoKubelet.HTTPClientConfig.TLSConfig.KeyFile = keyFile
 	TestConfigTwoKubelet.ServiceDiscoveryConfig.KubernetesSDConfigs[0].APIServer.Host = apiserver
-	TestConfigTwoKubelet.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig = tlsConfig
+	TestConfigTwoKubelet.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.CAFile = caFile
+	TestConfigTwoKubelet.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.CertFile = crtFile
+	TestConfigTwoKubelet.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.KeyFile = keyFile
 	TestConfigTwoKubelet.RelabelConfigs[1].Replacement = clusterID
 
 	TestConfigTwoNodeExporter.JobName = "guest-cluster-0ba9v-node-exporter"
 	TestConfigTwoNodeExporter.ServiceDiscoveryConfig.KubernetesSDConfigs[0].APIServer.Host = apiserver
-	TestConfigTwoNodeExporter.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig = tlsConfig
+	TestConfigTwoNodeExporter.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.CAFile = caFile
+	TestConfigTwoNodeExporter.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.CertFile = crtFile
+	TestConfigTwoNodeExporter.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.KeyFile = keyFile
 	TestConfigTwoNodeExporter.RelabelConfigs[2].Replacement = clusterID
 
 	TestConfigTwoWorkload.JobName = "guest-cluster-0ba9v-workload"
 	TestConfigTwoWorkload.ServiceDiscoveryConfig.KubernetesSDConfigs[0].APIServer.Host = apiserver
-	TestConfigTwoWorkload.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig = tlsConfig
+	TestConfigTwoWorkload.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.CAFile = caFile
+	TestConfigTwoWorkload.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.CertFile = crtFile
+	TestConfigTwoWorkload.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.KeyFile = keyFile
 	TestConfigTwoWorkload.RelabelConfigs[3].Replacement = clusterID
 }

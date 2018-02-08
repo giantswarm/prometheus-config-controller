@@ -127,7 +127,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 		{
 			JobName:                getJobName(service, APIServerJobType),
 			Scheme:                 HttpsScheme,
-			HTTPClientConfig:       secureHTTPClientConfig,
+			HTTPClientConfig:       insecureHTTPClientConfig,
 			ServiceDiscoveryConfig: endpointSDConfig,
 			RelabelConfigs: []*config.RelabelConfig{
 				// Only keep api server endpoints.
