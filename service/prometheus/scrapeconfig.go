@@ -13,26 +13,29 @@ import (
 )
 
 const (
+	// jobNamePrefix is the prefix for all guest cluster jobs.
+	jobNamePrefix = "guest-cluster"
+
 	// HttpScheme is the scheme for http connections.
 	HttpScheme = "http"
-
 	// HttpsScheme is the scheme for https connections.
 	HttpsScheme = "https"
 
-	// jobNamePrefix is the prefix for job names.
-	jobNamePrefix = "guest-cluster"
+	// APIServerJobType is the job type for scraping Kubernetes API servers.
+	APIServerJobType = "apiserver"
+	// CadvisorJobType is the job type for scraping Cadvisor.
+	CadvisorJobType = "cadvisor"
+	// KubeletJobType is the job type for scraping kubelets.
+	KubeletJobType = "kubelet"
+	// NodeExporterJobType is the job type for scraping node-exporters
+	NodeExporterJobType = "node-exporter"
+	// WorkloadJobType is the job type for scraping general workloads.
+	WorkloadJobType = "workload"
 )
 
 // getJobName takes a cluster ID, and returns a suitable job name.
 func getJobName(service v1.Service, name string) string {
-	jobName := fmt.Sprintf("%s-%s", jobNamePrefix, service.Namespace)
-
-	// TODO: Remove once all job names have suffixes.
-	if name != "" {
-		jobName = fmt.Sprintf("%s-%s", jobName, name)
-	}
-
-	return jobName
+	return fmt.Sprintf("%s-%s-%s", jobNamePrefix, service.Namespace, name)
 }
 
 // getTargetHost takes a Kubernetes Service, and returns a suitable host.
@@ -53,116 +56,223 @@ func getTarget(service v1.Service) model.LabelSet {
 func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.ScrapeConfig {
 	clusterID := GetClusterID(service)
 
-	apiServer := config.URL{&url.URL{
-		Scheme: HttpsScheme,
-		Host:   getTargetHost(service),
-	}}
-
-	tlsConfig := config.TLSConfig{
-		CAFile:   key.CAPath(certificateDirectory, clusterID),
-		CertFile: key.CrtPath(certificateDirectory, clusterID),
-		KeyFile:  key.KeyPath(certificateDirectory, clusterID),
+	secureTLSConfig := config.TLSConfig{
+		CAFile:             key.CAPath(certificateDirectory, clusterID),
+		CertFile:           key.CrtPath(certificateDirectory, clusterID),
+		KeyFile:            key.KeyPath(certificateDirectory, clusterID),
+		InsecureSkipVerify: false,
+	}
+	secureHTTPClientConfig := config.HTTPClientConfig{
+		TLSConfig: secureTLSConfig,
+	}
+	insecureTLSConfig := config.TLSConfig{
+		CAFile:             key.CAPath(certificateDirectory, clusterID),
+		CertFile:           key.CrtPath(certificateDirectory, clusterID),
+		KeyFile:            key.KeyPath(certificateDirectory, clusterID),
+		InsecureSkipVerify: true,
+	}
+	insecureHTTPClientConfig := config.HTTPClientConfig{
+		TLSConfig: insecureTLSConfig,
 	}
 
-	clientTlsConfig := tlsConfig
-	clientTlsConfig.InsecureSkipVerify = true
-
-	kubernetesTlsConfig := tlsConfig
-	kubernetesTlsConfig.InsecureSkipVerify = false
-
-	httpClientConfig := config.HTTPClientConfig{
-		TLSConfig: clientTlsConfig,
+	endpointSDConfig := config.ServiceDiscoveryConfig{
+		KubernetesSDConfigs: []*config.KubernetesSDConfig{
+			{
+				APIServer: config.URL{&url.URL{
+					Scheme: HttpsScheme,
+					Host:   getTargetHost(service),
+				}},
+				Role:      config.KubernetesRoleEndpoint,
+				TLSConfig: secureTLSConfig,
+			},
+		},
+	}
+	nodeSDConfig := config.ServiceDiscoveryConfig{
+		KubernetesSDConfigs: []*config.KubernetesSDConfig{
+			{
+				APIServer: config.URL{&url.URL{
+					Scheme: HttpsScheme,
+					Host:   getTargetHost(service),
+				}},
+				Role:      config.KubernetesRoleNode,
+				TLSConfig: secureTLSConfig,
+			},
+		},
 	}
 
-	clusterIDRelabelConfig := &config.RelabelConfig{
+	clusterIDLabelRelabelConfig := &config.RelabelConfig{
 		TargetLabel: ClusterIDLabel,
 		Replacement: clusterID,
-		Action:      config.RelabelReplace,
+	}
+	clusterTypeLabelRelabelConfig := &config.RelabelConfig{
+		TargetLabel: ClusterTypeLabel,
+		Replacement: GuestClusterType,
+	}
+	ipLabelRelabelConfig := &config.RelabelConfig{
+		TargetLabel:  IPLabel,
+		SourceLabels: model.LabelNames{KubernetesSDNodeAddressInternalIPLabel},
+	}
+	roleLabelRelabelConfig := &config.RelabelConfig{
+		TargetLabel:  RoleLabel,
+		SourceLabels: model.LabelNames{KubernetesSDNodeLabelRole},
+	}
+	missingRoleLabelRelabelConfig := &config.RelabelConfig{
+		SourceLabels: model.LabelNames{KubernetesSDNodeLabelRole},
+		Regex:        EmptyRegexp,
+		Replacement:  WorkerRole,
+		TargetLabel:  RoleLabel,
 	}
 
 	scrapeConfigs := []config.ScrapeConfig{
 		{
-			JobName:          getJobName(service, ""),
-			Scheme:           HttpsScheme,
-			HTTPClientConfig: httpClientConfig,
-			ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-				KubernetesSDConfigs: []*config.KubernetesSDConfig{
-					{
-						APIServer: apiServer,
-						Role:      config.KubernetesRoleEndpoint,
-						TLSConfig: kubernetesTlsConfig,
-					},
-					{
-						APIServer: apiServer,
-						Role:      config.KubernetesRoleNode,
-						TLSConfig: kubernetesTlsConfig,
-					},
-				},
-			},
+			JobName:                getJobName(service, APIServerJobType),
+			Scheme:                 HttpsScheme,
+			HTTPClientConfig:       insecureHTTPClientConfig,
+			ServiceDiscoveryConfig: endpointSDConfig,
 			RelabelConfigs: []*config.RelabelConfig{
-				clusterIDRelabelConfig,
-
-				// Copy the meta service name label to a named label.
+				// Only keep api server endpoints.
 				{
-					SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
-					TargetLabel:  NameLabel,
-					Action:       config.RelabelReplace,
+					SourceLabels: model.LabelNames{
+						KubernetesSDNamespaceLabel,
+						KubernetesSDServiceNameLabel,
+					},
+					Regex:  APIServerRegexp,
+					Action: config.RelabelKeep,
 				},
-				// Copy the meta namespace name label to a named label.
+				// Add app label.
 				{
-					SourceLabels: model.LabelNames{PrometheusNamespaceLabel},
-					TargetLabel:  NamespaceLabel,
-					Action:       config.RelabelReplace,
+					TargetLabel: AppLabel,
+					Replacement: KubernetesAppName,
 				},
-				// Relabel http endpoints to scrape via http.
-				{
-					SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
-					TargetLabel:  model.SchemeLabel,
-					Regex:        HTTPEndpointRegexp,
-					Replacement:  HttpScheme,
-					Action:       config.RelabelReplace,
-				},
-				// Drop any targets that don't match the service name regexp.
-				{
-					SourceLabels: model.LabelNames{PrometheusServiceNameLabel},
-					Regex:        EndpointRegexp,
-					Action:       config.RelabelKeep,
-				},
-				// Drop any targets that don't match the service port regexp.
-				{
-					SourceLabels: model.LabelNames{PrometheusServicePortLabel},
-					Regex:        EndpointPortRegexp,
-					Action:       config.RelabelKeep,
-				},
+				// Add cluster_id label.
+				clusterIDLabelRelabelConfig,
+				// Add cluster_type label.
+				clusterTypeLabelRelabelConfig,
 			},
 		},
+
 		{
-			JobName:          getJobName(service, "cadvisor"),
-			Scheme:           HttpsScheme,
-			HTTPClientConfig: httpClientConfig,
-			ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-				KubernetesSDConfigs: []*config.KubernetesSDConfig{
-					{
-						APIServer: apiServer,
-						Role:      config.KubernetesRoleNode,
-						TLSConfig: kubernetesTlsConfig,
-					},
-				},
-			},
+			JobName:                getJobName(service, CadvisorJobType),
+			Scheme:                 HttpsScheme,
+			HTTPClientConfig:       secureHTTPClientConfig,
+			ServiceDiscoveryConfig: nodeSDConfig,
 			RelabelConfigs: []*config.RelabelConfig{
-				clusterIDRelabelConfig,
+				// Relabel address to kubernetes service.
 				{
 					TargetLabel: model.AddressLabel,
 					Replacement: getTargetHost(service),
-					Action:      config.RelabelReplace,
 				},
+				// Relabel metrics path to cadvisor proxy.
 				{
-					SourceLabels: model.LabelNames{PrometheusKubernetesNodeNameLabel},
-					TargetLabel:  model.MetricsPathLabel,
-					Regex:        GroupRegex,
+					SourceLabels: model.LabelNames{KubernetesSDNodeNameLabel},
 					Replacement:  CadvisorMetricsPath,
-					Action:       config.RelabelReplace,
+					TargetLabel:  model.MetricsPathLabel,
 				},
+				// Add app label.
+				{
+					TargetLabel: AppLabel,
+					Replacement: CadvisorAppName,
+				},
+				// Add cluster_id label.
+				clusterIDLabelRelabelConfig,
+				// Add cluster_type label.
+				clusterTypeLabelRelabelConfig,
+				// Add ip label.
+				ipLabelRelabelConfig,
+				// Add role label.
+				roleLabelRelabelConfig,
+				missingRoleLabelRelabelConfig,
+			},
+		},
+
+		{
+			JobName:                getJobName(service, KubeletJobType),
+			Scheme:                 HttpsScheme,
+			HTTPClientConfig:       insecureHTTPClientConfig,
+			ServiceDiscoveryConfig: nodeSDConfig,
+			RelabelConfigs: []*config.RelabelConfig{
+				// Add app label.
+				{
+					TargetLabel: AppLabel,
+					Replacement: KubeletAppName,
+				},
+				// Add cluster_id label.
+				clusterIDLabelRelabelConfig,
+				// Add cluster_type label.
+				clusterTypeLabelRelabelConfig,
+				// Add ip label.
+				ipLabelRelabelConfig,
+				// Add role label.
+				roleLabelRelabelConfig,
+				missingRoleLabelRelabelConfig,
+			},
+		},
+
+		{
+			JobName:                getJobName(service, NodeExporterJobType),
+			Scheme:                 HttpScheme,
+			ServiceDiscoveryConfig: endpointSDConfig,
+			RelabelConfigs: []*config.RelabelConfig{
+				// Only keep node-exporter endpoints.
+				{
+					SourceLabels: model.LabelNames{
+						KubernetesSDNamespaceLabel,
+						KubernetesSDServiceNameLabel,
+					},
+					Regex:  NodeExporterRegexp,
+					Action: config.RelabelKeep,
+				},
+				// Relabel address to node-exporter port.
+				{
+					SourceLabels: model.LabelNames{model.AddressLabel},
+					Regex:        KubeletPortRegexp,
+					Replacement:  NodeExporterPort,
+					TargetLabel:  model.AddressLabel,
+				},
+				// Add app label.
+				{
+					TargetLabel: AppLabel,
+					Replacement: NodeExporterAppName,
+				},
+				// Add cluster_id label.
+				clusterIDLabelRelabelConfig,
+				// Add cluster_type label.
+				clusterTypeLabelRelabelConfig,
+				// Add ip label.
+				{
+					SourceLabels: model.LabelNames{model.AddressLabel},
+					Regex:        NodeExporterPortRegexp,
+					Replacement:  GroupCapture,
+					TargetLabel:  IPLabel,
+				},
+			},
+		},
+
+		{
+			JobName:                getJobName(service, WorkloadJobType),
+			Scheme:                 HttpScheme,
+			ServiceDiscoveryConfig: endpointSDConfig,
+			RelabelConfigs: []*config.RelabelConfig{
+				// Only keep kube-state-metrics targets.
+				{
+					SourceLabels: model.LabelNames{KubernetesSDNamespaceLabel, KubernetesSDServiceNameLabel},
+					Regex:        WhitelistRegexp,
+					Action:       config.RelabelKeep,
+				},
+				// Add app label.
+				{
+					TargetLabel:  AppLabel,
+					SourceLabels: model.LabelNames{KubernetesSDServiceNameLabel},
+				},
+				// Add namespace label.
+				{
+					TargetLabel:  NamespaceLabel,
+					SourceLabels: model.LabelNames{KubernetesSDNamespaceLabel},
+				},
+				// Add cluster_id label.
+				clusterIDLabelRelabelConfig,
+				// Add cluster_type label.
+				clusterTypeLabelRelabelConfig,
 			},
 		},
 	}
