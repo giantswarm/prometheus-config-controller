@@ -15,6 +15,11 @@ import (
 	"github.com/giantswarm/prometheus-config-controller/service/prometheus"
 )
 
+const (
+	// serviceLabelSelector is the label selector to match master services.
+	serviceLabelSelector = "app=master"
+)
+
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
 	r.logger.Log("debug", fmt.Sprintf("fetching configmap: %s/%s", r.configMapNamespace, r.configMapName))
 
@@ -43,7 +48,9 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	r.logger.Log("debug", fmt.Sprintf("fetching all services"))
 
 	servicesTimer := prometheusclient.NewTimer(kubernetesResource.WithLabelValues("services", "list"))
-	services, err := r.k8sClient.CoreV1().Services("").List(metav1.ListOptions{})
+	services, err := r.k8sClient.CoreV1().Services("").List(metav1.ListOptions{
+		LabelSelector: serviceLabelSelector,
+	})
 	servicesTimer.ObserveDuration()
 
 	if err != nil {

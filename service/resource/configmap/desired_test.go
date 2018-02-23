@@ -171,6 +171,57 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 		},
 
 		// Test that if the configmap does exist, with a valid config,
+		// and an annotated service exists, without the app=master label,
+		// the configmap is returned without modification.
+		{
+			setUpPrometheusConfiguration: &config.Config{
+				GlobalConfig: config.GlobalConfig{
+					ScrapeInterval: model.Duration(1 * time.Minute),
+				},
+				ScrapeConfigs: []*config.ScrapeConfig{
+					{
+						JobName: "kubernetes-nodes",
+					},
+				},
+			},
+			setUpConfigMap: &v1.ConfigMap{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      configMapName,
+					Namespace: configMapNamespace,
+				},
+			},
+			setUpServices: []*v1.Service{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "apiserver",
+						Namespace: "xa5ly",
+						Annotations: map[string]string{
+							prometheus.ClusterAnnotation: "xa5ly",
+						},
+					},
+				},
+			},
+
+			expectedPrometheusConfiguration: &config.Config{
+				GlobalConfig: config.GlobalConfig{
+					ScrapeInterval:     model.Duration(1 * time.Minute),
+					ScrapeTimeout:      model.Duration(10 * time.Second),
+					EvaluationInterval: model.Duration(1 * time.Minute),
+				},
+				ScrapeConfigs: []*config.ScrapeConfig{
+					{
+						JobName:        "kubernetes-nodes",
+						ScrapeInterval: model.Duration(1 * time.Minute),
+						ScrapeTimeout:  model.Duration(10 * time.Second),
+						MetricsPath:    "/metrics",
+						Scheme:         "http",
+					},
+				},
+			},
+			expectedErrorHandler: nil,
+		},
+
+		// Test that if the configmap does exist, with a valid config,
 		// and an annotated service exists,
 		// the configmap is returned with the new service.
 		{
@@ -197,6 +248,9 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 						Namespace: "xa5ly",
 						Annotations: map[string]string{
 							prometheus.ClusterAnnotation: "xa5ly",
+						},
+						Labels: map[string]string{
+							"app": "master",
 						},
 					},
 				},
@@ -308,6 +362,9 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 						Annotations: map[string]string{
 							prometheus.ClusterAnnotation: "xa5ly",
 						},
+						Labels: map[string]string{
+							"app": "master",
+						},
 					},
 				},
 				{
@@ -316,6 +373,9 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 						Namespace: "0ba9v",
 						Annotations: map[string]string{
 							prometheus.ClusterAnnotation: "0ba9v",
+						},
+						Labels: map[string]string{
+							"app": "master",
 						},
 					},
 				},
