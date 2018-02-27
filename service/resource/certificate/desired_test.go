@@ -48,6 +48,9 @@ func Test_Resource_Certificate_GetDesiredState(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "foo",
 						Namespace: "default",
+						Labels: map[string]string{
+							"app": "master",
+						},
 					},
 				},
 			},
@@ -69,10 +72,51 @@ func Test_Resource_Certificate_GetDesiredState(t *testing.T) {
 						Annotations: map[string]string{
 							prometheus.ClusterAnnotation: "xa5ly",
 						},
+						Labels: map[string]string{
+							"app": "master",
+						},
 					},
 				},
 			},
 			secrets: nil,
+
+			expectedCertificateFiles: nil,
+			expectedErrorHandler:     nil,
+		},
+
+		// Test that a service with a cluster annotation, and the certificate
+		// present, but the app=master label missing, does not return
+		// the certificates.
+		{
+			certificateDirectory: defaultCertificateDirectory,
+			services: []*v1.Service{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "apiserver",
+						Namespace: "xa5ly",
+						Annotations: map[string]string{
+							prometheus.ClusterAnnotation: "xa5ly",
+						},
+					},
+				},
+			},
+			secrets: []*v1.Secret{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "xa5ly-prometheus",
+						Namespace: "default",
+						Labels: map[string]string{
+							"clusterComponent": "prometheus",
+							"clusterID":        "xa5ly",
+						},
+					},
+					Data: map[string][]byte{
+						"ca":  []byte("foo"),
+						"crt": []byte("bar"),
+						"key": []byte("baz"),
+					},
+				},
+			},
 
 			expectedCertificateFiles: nil,
 			expectedErrorHandler:     nil,
@@ -91,6 +135,9 @@ func Test_Resource_Certificate_GetDesiredState(t *testing.T) {
 						Annotations: map[string]string{
 							prometheus.ClusterAnnotation: "0ajf9",
 						},
+						Labels: map[string]string{
+							"app": "master",
+						},
 					},
 				},
 				{
@@ -99,6 +146,9 @@ func Test_Resource_Certificate_GetDesiredState(t *testing.T) {
 						Namespace: "xa5ly",
 						Annotations: map[string]string{
 							prometheus.ClusterAnnotation: "xa5ly",
+						},
+						Labels: map[string]string{
+							"app": "master",
 						},
 					},
 				},
@@ -150,6 +200,9 @@ func Test_Resource_Certificate_GetDesiredState(t *testing.T) {
 						Annotations: map[string]string{
 							prometheus.ClusterAnnotation: "xa5ly",
 						},
+						Labels: map[string]string{
+							"app": "master",
+						},
 					},
 				},
 			},
@@ -192,6 +245,9 @@ func Test_Resource_Certificate_GetDesiredState(t *testing.T) {
 						Namespace: "xa5ly",
 						Annotations: map[string]string{
 							prometheus.ClusterAnnotation: "xa5ly",
+						},
+						Labels: map[string]string{
+							"app": "master",
 						},
 					},
 				},
@@ -243,6 +299,9 @@ func Test_Resource_Certificate_GetDesiredState(t *testing.T) {
 						Annotations: map[string]string{
 							prometheus.ClusterAnnotation: "xa5ly",
 						},
+						Labels: map[string]string{
+							"app": "master",
+						},
 					},
 				},
 				{
@@ -251,6 +310,9 @@ func Test_Resource_Certificate_GetDesiredState(t *testing.T) {
 						Namespace: "al9qy",
 						Annotations: map[string]string{
 							prometheus.ClusterAnnotation: "al9qy",
+						},
+						Labels: map[string]string{
+							"app": "master",
 						},
 					},
 				},
@@ -309,6 +371,9 @@ func Test_Resource_Certificate_GetDesiredState(t *testing.T) {
 						Namespace: "xa5ly",
 						Annotations: map[string]string{
 							prometheus.ClusterAnnotation: "xa5ly",
+						},
+						Labels: map[string]string{
+							"app": "master",
 						},
 					},
 				},

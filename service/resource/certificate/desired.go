@@ -17,13 +17,18 @@ const (
 	caKey  = "ca"  // CaKey is the key in the Secret that holds the CA.
 	crtKey = "crt" // CrtKey is the key in the Secret that holds the certificate.
 	keyKey = "key" // KeyKey is the key in the Secret that holds the key.
+
+	// ServiceLabelSelector is the label selector to match master services.
+	serviceLabelSelector = "app=master"
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
 	r.logger.Log("debug", "fetching all services")
 
 	servicesTimer := prometheusclient.NewTimer(kubernetesResource.WithLabelValues("services", "list"))
-	services, err := r.k8sClient.CoreV1().Services("").List(metav1.ListOptions{})
+	services, err := r.k8sClient.CoreV1().Services("").List(metav1.ListOptions{
+		LabelSelector: serviceLabelSelector,
+	})
 	servicesTimer.ObserveDuration()
 
 	if err != nil {
