@@ -19,11 +19,6 @@ import (
 	"github.com/giantswarm/operatorkit/framework"
 )
 
-const (
-	// serviceLabelSelector is the label selector to match master services.
-	serviceLabelSelector = "app=master"
-)
-
 type Config struct {
 	BackOff           backoff.BackOff
 	K8sClient         kubernetes.Interface
@@ -118,12 +113,10 @@ func (o *Controller) bootWithError() error {
 	listWatch := &cache.ListWatch{
 		ListFunc: func(options apismetav1.ListOptions) (runtime.Object, error) {
 			o.logger.Log("debug", "listing all services", "event", "list")
-			options.LabelSelector = serviceLabelSelector
 			return o.k8sClient.CoreV1().Services("").List(options)
 		},
 		WatchFunc: func(options apismetav1.ListOptions) (watch.Interface, error) {
 			o.logger.Log("debug", "watching all services", "event", "watch")
-			options.LabelSelector = serviceLabelSelector
 			return o.k8sClient.CoreV1().Services("").Watch(options)
 		},
 	}
