@@ -9,7 +9,7 @@ import (
 // NewDeletePatch is a no-op.
 // We do not want to delete the configmap, as the running prometheus relies on it.
 func (r *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*framework.Patch, error) {
-	return nil, nil
+	return &framework.Patch{}, nil
 }
 
 // ApplyDeleteChange is a no-op.
