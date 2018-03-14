@@ -2,12 +2,14 @@ package configmap
 
 import (
 	"context"
+	"reflect"
 	"testing"
 
 	"k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes/fake"
 
 	"github.com/giantswarm/micrologger/microloggertest"
+	"github.com/giantswarm/operatorkit/framework"
 	"github.com/giantswarm/prometheus-config-controller/service/prometheus/prometheustest"
 )
 
@@ -36,8 +38,13 @@ func Test_Resource_ConfigMap_NewDeletePatch(t *testing.T) {
 		t.Fatalf("error returned getting delete patch: %s\n", err)
 	}
 
-	if deletePatch != nil {
-		t.Fatalf("delete patch should be nil, was: %#v", deletePatch)
+	expectedPatch := &framework.Patch{}
+	if !reflect.DeepEqual(deletePatch, expectedPatch) {
+		t.Fatalf("delete patch should be %#v, was: %#v", expectedPatch, deletePatch)
+	}
+
+	if err != nil {
+		t.Fatalf("err should be nil, was %#v", err)
 	}
 }
 
