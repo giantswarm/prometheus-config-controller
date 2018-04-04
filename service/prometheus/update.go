@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/prometheus/prometheus/config"
+	"fmt"
 )
 
 // UpdateConfig takes an existing Prometheus configuration,
@@ -16,6 +17,7 @@ func UpdateConfig(promcfg config.Config, scrapeConfigs []config.ScrapeConfig) (c
 	// Make sure to preserve all scrape configs that the prometheus-config-controller does not manage.
 	for _, config := range promcfg.ScrapeConfigs {
 		if !isManaged(*config) {
+			fmt.Printf("appending non-manged config: %s\n", config.JobName)
 			desiredScrapeConfigs = append(desiredScrapeConfigs, config)
 		}
 	}
