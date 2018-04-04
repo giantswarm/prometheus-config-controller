@@ -3,8 +3,8 @@ package prometheus
 import (
 	"strings"
 
-	"github.com/prometheus/prometheus/config"
 	"fmt"
+	"github.com/prometheus/prometheus/config"
 )
 
 // UpdateConfig takes an existing Prometheus configuration,
