@@ -17,13 +17,14 @@ func UpdateConfig(promcfg config.Config, scrapeConfigs []config.ScrapeConfig) (c
 	// Make sure to preserve all scrape configs that the prometheus-config-controller does not manage.
 	for _, config := range promcfg.ScrapeConfigs {
 		if !isManaged(*config) {
-			fmt.Printf("appending non-manged config: %s\n", config.JobName)
+			fmt.Printf("appending non-managed config: %s\n", config.JobName)
 			desiredScrapeConfigs = append(desiredScrapeConfigs, config)
 		}
 	}
 
 	// And append the supplied, desired scrape configs.
 	for i, _ := range scrapeConfigs {
+		fmt.Printf("appending managed config: %s\n", scrapeConfigs[i].JobName)
 		desiredScrapeConfigs = append(desiredScrapeConfigs, &scrapeConfigs[i])
 	}
 
