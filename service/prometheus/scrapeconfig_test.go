@@ -361,6 +361,10 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
     regex: null
     target_label: role
     replacement: worker
+  metric_relabel_configs:
+  - source_labels: [namespace]
+    regex: kube-system
+    action: keep
 - job_name: guest-cluster-xa5ly-kubelet
   scheme: https
   kubernetes_sd_configs:
@@ -425,6 +429,16 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
     regex: (.*):10300
     target_label: ip
     replacement: ${1}
+  metric_relabel_configs:
+  - source_labels: [fstype]
+    regex: (cgroup|devpts|mqueue|nsfs|overlay|tmpfs)
+    action: keep
+  - source_labels: [__name__, state]
+    regex: node_systemd_unit_state;(active|activating|deactivating|inactive)
+    action: drop
+  - source_labels: [__name__, name]
+    regex: node_systemd_unit_state;(dev-disk-by|run-docker-netns|sys-devices|sys-subsystem-net|var-lib-docker-overlay2|var-lib-docker-containers|var-lib-kubelet-pods).*
+    action: drop
 - job_name: guest-cluster-xa5ly-workload
   scheme: http
   kubernetes_sd_configs:
