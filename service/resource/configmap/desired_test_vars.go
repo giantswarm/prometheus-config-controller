@@ -133,6 +133,12 @@ var (
 				SourceLabels: model.LabelNames{prometheus.MetricNamespaceLabel},
 				Regex:        prometheus.KubeSystemGiantswarmNSRegexp,
 			},
+			// drop cadvisor metrics about container network statistics
+			{
+				Action:       prometheus.ActionDrop,
+				SourceLabels: model.LabelNames{prometheus.MetricNameLabel},
+				Regex:        prometheus.MetricDropContainerNetworkRegexp,
+			},
 		},
 	}
 	TestConfigOneKubelet = config.ScrapeConfig{
