@@ -363,7 +363,7 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
     replacement: worker
   metric_relabel_configs:
   - source_labels: [namespace]
-    regex: kube-system
+    regex: (kube-system|giantswarm)
     action: keep
 - job_name: guest-cluster-xa5ly-kubelet
   scheme: https
