@@ -193,7 +193,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				{
 					Action:       ActionKeep,
 					SourceLabels: model.LabelNames{MetricNamespaceLabel},
-					Regex:        KubeSystemRegexp,
+					Regex:        KubeSystemGiantswarmNSRegexp,
 				},
 			},
 		},

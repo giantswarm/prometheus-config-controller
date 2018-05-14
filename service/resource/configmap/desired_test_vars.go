@@ -131,7 +131,7 @@ var (
 			{
 				Action:       prometheus.ActionKeep,
 				SourceLabels: model.LabelNames{prometheus.MetricNamespaceLabel},
-				Regex:        prometheus.KubeSystemRegexp,
+				Regex:        prometheus.KubeSystemGiantswarmNSRegexp,
 			},
 		},
 	}

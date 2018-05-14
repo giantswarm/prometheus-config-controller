@@ -115,16 +115,16 @@ var (
 	// Kubelet IP (including port), and capture the IP.
 	KubeletPortRegexp = config.MustNewRegexp(`(.*):10250`)
 
-	// KubeSystemRegexp is the regular expression to match against the kube-system namespace.
-	KubeSystemRegexp = config.MustNewRegexp(`kube-system`)
+	// KubeSystemGiantswarmNSRegexp is the regular expression to match against the kube-system and giantswarm namespace.
+	KubeSystemGiantswarmNSRegexp = config.MustNewRegexp(`(kube-system|giantswarm)`)
 
-	// MetricDropFStypeRegexp is the regular expression to match againts not interesting filesystem types.
+	// MetricDropFStypeRegexp is the regular expression to match againts not interesting filesystem (for node exporter metrics).
 	MetricDropFStypeRegexp = config.MustNewRegexp(`(cgroup|devpts|mqueue|nsfs|overlay|tmpfs)`)
 
-	// MetricDropSystemdStateRegexp is the regular expression to match againts not interesting systemd unit states.
+	// MetricDropSystemdStateRegexp is the regular expression to match againts not interesting systemd unit (for node exporter metrics).
 	MetricDropSystemdStateRegexp = config.MustNewRegexp(`node_systemd_unit_state;(active|activating|deactivating|inactive)`)
 
-	// MetricDropSystemdNameRegexp is the regulat expression to match against not interesting systemd units(docker mounts and calico network devices).
+	// MetricDropSystemdNameRegexp is the regular expression to match against not interesting systemd units(docker mounts and calico network devices).
 	MetricDropSystemdNameRegexp = config.MustNewRegexp(`node_systemd_unit_state;(dev-disk-by|run-docker-netns|sys-devices|sys-subsystem-net|var-lib-docker-overlay2|var-lib-docker-containers|var-lib-kubelet-pods).*`)
 
 	// NodeExporterRegexp is the regular expression to match against the

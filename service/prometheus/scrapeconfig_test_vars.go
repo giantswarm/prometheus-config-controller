@@ -129,7 +129,7 @@ var (
 			{
 				Action:       ActionKeep,
 				SourceLabels: model.LabelNames{MetricNamespaceLabel},
-				Regex:        KubeSystemRegexp,
+				Regex:        KubeSystemGiantswarmNSRegexp,
 			},
 		},
 	}
