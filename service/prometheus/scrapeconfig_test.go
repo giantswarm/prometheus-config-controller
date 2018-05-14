@@ -463,6 +463,10 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
   - source_labels: []
     target_label: cluster_type
     replacement: guest
+  metric_relabel_configs:
+  - source_labels: [exported_namespace]
+    regex: (kube-system|giantswarm)
+    action: keep
 `,
 		},
 	}

@@ -307,6 +307,14 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				// Add cluster_type label.
 				clusterTypeLabelRelabelConfig,
 			},
+			MetricRelabelConfigs: []*config.RelabelConfig{
+				// keep only kube-system cadvisor metrics
+				{
+					Action:       ActionKeep,
+					SourceLabels: model.LabelNames{MetricExportedNamespaceLabel},
+					Regex:        KubeSystemGiantswarmNSRegexp,
+				},
+			},
 		},
 	}
 

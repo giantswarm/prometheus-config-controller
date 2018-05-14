@@ -37,6 +37,8 @@ var (
 
 // Prometheus Kubernetes metrics labels.
 var (
+	// MetricExportedNamespaceLabel is label for filtering by k8s namespace in kube-state-metric.
+	MetricExportedNamespaceLabel = model.LabelName("exported_namespace")
 	// MetricNamespaceLabel is label for filtering by k8s namespace
 	MetricNamespaceLabel = model.LabelName("namespace")
 	// MetricNameLabel is label for filtering by metric name.
