@@ -310,6 +310,14 @@ var (
 				Replacement: prometheus.GuestClusterType,
 			},
 		},
+		MetricRelabelConfigs: []*config.RelabelConfig{
+			// keep only kube-system cadvisor metrics
+			{
+				Action:       prometheus.ActionKeep,
+				SourceLabels: model.LabelNames{prometheus.MetricExportedNamespaceLabel},
+				Regex:        prometheus.KubeSystemGiantswarmNSRegexp,
+			},
+		},
 	}
 )
 

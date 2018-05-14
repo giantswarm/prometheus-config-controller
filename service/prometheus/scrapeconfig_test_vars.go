@@ -308,6 +308,14 @@ var (
 				Replacement: GuestClusterType,
 			},
 		},
+		MetricRelabelConfigs: []*config.RelabelConfig{
+			// keep only kube-system cadvisor metrics
+			{
+				Action:       ActionKeep,
+				SourceLabels: model.LabelNames{MetricExportedNamespaceLabel},
+				Regex:        KubeSystemGiantswarmNSRegexp,
+			},
+		},
 	}
 )
 
