@@ -120,6 +120,9 @@ var (
 	// KubeSystemGiantswarmNSRegexp is the regular expression to match against the kube-system and giantswarm namespace.
 	KubeSystemGiantswarmNSRegexp = config.MustNewRegexp(`(kube-system|giantswarm)`)
 
+	// MetricDropContainerNetworkRegexp is the regular expression to match againts cadvisor container network metrics.
+	MetricDropContainerNetworkRegexp = config.MustNewRegexp(`container_network_.*`)
+
 	// MetricDropFStypeRegexp is the regular expression to match againts not interesting filesystem (for node exporter metrics).
 	MetricDropFStypeRegexp = config.MustNewRegexp(`(cgroup|devpts|mqueue|nsfs|overlay|tmpfs)`)
 

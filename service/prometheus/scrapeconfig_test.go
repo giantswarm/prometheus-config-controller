@@ -365,6 +365,9 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
   - source_labels: [namespace]
     regex: (kube-system|giantswarm)
     action: keep
+  - source_labels: [__name__]
+    regex: container_network_.*
+    action: keep
 - job_name: guest-cluster-xa5ly-kubelet
   scheme: https
   kubernetes_sd_configs:

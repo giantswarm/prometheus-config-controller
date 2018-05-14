@@ -131,6 +131,12 @@ var (
 				SourceLabels: model.LabelNames{MetricNamespaceLabel},
 				Regex:        KubeSystemGiantswarmNSRegexp,
 			},
+			// drop cadvisor metrics about container network statistics
+			{
+				Action:       ActionDrop,
+				SourceLabels: model.LabelNames{MetricNameLabel},
+				Regex:        MetricDropContainerNetworkRegexp,
+			},
 		},
 	}
 	TestConfigOneKubelet = config.ScrapeConfig{

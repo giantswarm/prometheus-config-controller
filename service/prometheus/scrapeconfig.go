@@ -195,6 +195,12 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					SourceLabels: model.LabelNames{MetricNamespaceLabel},
 					Regex:        KubeSystemGiantswarmNSRegexp,
 				},
+				// drop cadvisor metrics about container network statistics
+				{
+					Action:       ActionDrop,
+					SourceLabels: model.LabelNames{MetricNameLabel},
+					Regex:        MetricDropContainerNetworkRegexp,
+				},
 			},
 		},
 
