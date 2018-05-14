@@ -124,6 +124,14 @@ var (
 				TargetLabel:  RoleLabel,
 			},
 		},
+		MetricRelabelConfigs: []*config.RelabelConfig{
+			// keep only kube-system cadvisor metrics
+			{
+				Action:       ActionKeep,
+				SourceLabels: model.LabelNames{MetricNamespaceLabel},
+				Regex:        KubeSystemGiantswarmNSRegexp,
+			},
+		},
 	}
 	TestConfigOneKubelet = config.ScrapeConfig{
 		JobName: "guest-cluster-xa5ly-kubelet",
@@ -234,6 +242,26 @@ var (
 				Regex:        NodeExporterPortRegexp,
 				Replacement:  GroupCapture,
 				TargetLabel:  IPLabel,
+			},
+		},
+		MetricRelabelConfigs: []*config.RelabelConfig{
+			// Drop many mounts that are not interesting based on fstype.
+			{
+				Action:       ActionKeep,
+				SourceLabels: model.LabelNames{MetricFSTypeLabel},
+				Regex:        MetricDropFStypeRegexp,
+			},
+			// We care only about systemd state failed, we can drop the rest.
+			{
+				Action:       ActionDrop,
+				SourceLabels: model.LabelNames{MetricNameLabel, MetricSystemdStateLabel},
+				Regex:        MetricDropSystemdStateRegexp,
+			},
+			// Drop all systemd units that are connected to docker mounts or networking, we don't care about them.
+			{
+				Action:       ActionDrop,
+				SourceLabels: model.LabelNames{MetricNameLabel, MetricSystemdNameLabel},
+				Regex:        MetricDropSystemdNameRegexp,
 			},
 		},
 	}

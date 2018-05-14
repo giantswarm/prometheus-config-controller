@@ -35,6 +35,20 @@ var (
 	KubernetesSDServiceNameLabel = model.LabelName("__meta_kubernetes_service_name")
 )
 
+// Prometheus Kubernetes metrics labels.
+var (
+	// MetricNamespaceLabel is label for filtering by k8s namespace
+	MetricNamespaceLabel = model.LabelName("namespace")
+	// MetricNameLabel is label for filtering by metric name.
+	MetricNameLabel = model.LabelName("__name__")
+	// MetricSystemdNameLabel is a label for filtering by systemd unit name.
+	MetricSystemdNameLabel = model.LabelName("name")
+	// MetricSystemdStateLabel is a label for filtering by systemd unit state.
+	MetricSystemdStateLabel = model.LabelName("state")
+	// MetricFSTypeLabel is a label for filtering by mount filesystem type.
+	MetricFSTypeLabel = model.LabelName("fstype")
+)
+
 // Giant Swarm metrics schema labels.
 var (
 	// AppLabel is the label used to hold the application's name.
@@ -100,6 +114,18 @@ var (
 	// KubeletPortRegexp is the regular expression to match against the
 	// Kubelet IP (including port), and capture the IP.
 	KubeletPortRegexp = config.MustNewRegexp(`(.*):10250`)
+
+	// KubeSystemGiantswarmNSRegexp is the regular expression to match against the kube-system and giantswarm namespace.
+	KubeSystemGiantswarmNSRegexp = config.MustNewRegexp(`(kube-system|giantswarm)`)
+
+	// MetricDropFStypeRegexp is the regular expression to match againts not interesting filesystem (for node exporter metrics).
+	MetricDropFStypeRegexp = config.MustNewRegexp(`(cgroup|devpts|mqueue|nsfs|overlay|tmpfs)`)
+
+	// MetricDropSystemdStateRegexp is the regular expression to match againts not interesting systemd unit (for node exporter metrics).
+	MetricDropSystemdStateRegexp = config.MustNewRegexp(`node_systemd_unit_state;(active|activating|deactivating|inactive)`)
+
+	// MetricDropSystemdNameRegexp is the regular expression to match against not interesting systemd units(docker mounts and calico network devices).
+	MetricDropSystemdNameRegexp = config.MustNewRegexp(`node_systemd_unit_state;(dev-disk-by|run-docker-netns|sys-devices|sys-subsystem-net|var-lib-docker-overlay2|var-lib-docker-containers|var-lib-kubelet-pods).*`)
 
 	// NodeExporterRegexp is the regular expression to match against the
 	// node-exporter name.

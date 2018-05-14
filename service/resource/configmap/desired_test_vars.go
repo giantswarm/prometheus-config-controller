@@ -126,6 +126,14 @@ var (
 				TargetLabel:  prometheus.RoleLabel,
 			},
 		},
+		MetricRelabelConfigs: []*config.RelabelConfig{
+			// keep only kube-system cadvisor metrics
+			{
+				Action:       prometheus.ActionKeep,
+				SourceLabels: model.LabelNames{prometheus.MetricNamespaceLabel},
+				Regex:        prometheus.KubeSystemGiantswarmNSRegexp,
+			},
+		},
 	}
 	TestConfigOneKubelet = config.ScrapeConfig{
 		JobName: "guest-cluster-xa5ly-kubelet",
@@ -236,6 +244,26 @@ var (
 				Regex:        prometheus.NodeExporterPortRegexp,
 				Replacement:  prometheus.GroupCapture,
 				TargetLabel:  prometheus.IPLabel,
+			},
+		},
+		MetricRelabelConfigs: []*config.RelabelConfig{
+			// Drop many mounts that are not interesting based on fstype.
+			{
+				Action:       prometheus.ActionKeep,
+				SourceLabels: model.LabelNames{prometheus.MetricFSTypeLabel},
+				Regex:        prometheus.MetricDropFStypeRegexp,
+			},
+			// We care only about systemd state failed, we can drop the rest.
+			{
+				Action:       prometheus.ActionDrop,
+				SourceLabels: model.LabelNames{prometheus.MetricNameLabel, prometheus.MetricSystemdStateLabel},
+				Regex:        prometheus.MetricDropSystemdStateRegexp,
+			},
+			// Drop all systemd units that are connected to docker mounts or networking, we don't care about them.
+			{
+				Action:       prometheus.ActionDrop,
+				SourceLabels: model.LabelNames{prometheus.MetricNameLabel, prometheus.MetricSystemdNameLabel},
+				Regex:        prometheus.MetricDropSystemdNameRegexp,
 			},
 		},
 	}
