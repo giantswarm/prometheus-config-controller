@@ -268,7 +268,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 			MetricRelabelConfigs: []*config.RelabelConfig{
 				// Drop many mounts that are not interesting based on fstype.
 				{
-					Action:       ActionKeep,
+					Action:       ActionDrop,
 					SourceLabels: model.LabelNames{MetricFSTypeLabel},
 					Regex:        MetricDropFStypeRegexp,
 				},
