@@ -255,7 +255,7 @@ var (
 		MetricRelabelConfigs: []*config.RelabelConfig{
 			// Drop many mounts that are not interesting based on fstype.
 			{
-				Action:       prometheus.ActionKeep,
+				Action:       prometheus.ActionDrop,
 				SourceLabels: model.LabelNames{prometheus.MetricFSTypeLabel},
 				Regex:        prometheus.MetricDropFStypeRegexp,
 			},

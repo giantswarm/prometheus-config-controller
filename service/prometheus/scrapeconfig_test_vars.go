@@ -253,7 +253,7 @@ var (
 		MetricRelabelConfigs: []*config.RelabelConfig{
 			// Drop many mounts that are not interesting based on fstype.
 			{
-				Action:       ActionKeep,
+				Action:       ActionDrop,
 				SourceLabels: model.LabelNames{MetricFSTypeLabel},
 				Regex:        MetricDropFStypeRegexp,
 			},

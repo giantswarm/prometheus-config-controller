@@ -435,7 +435,7 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
   metric_relabel_configs:
   - source_labels: [fstype]
     regex: (cgroup|devpts|mqueue|nsfs|overlay|tmpfs)
-    action: keep
+    action: drop
   - source_labels: [__name__, state]
     regex: node_systemd_unit_state;(active|activating|deactivating|inactive)
     action: drop
