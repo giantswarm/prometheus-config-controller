@@ -304,6 +304,8 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
       cert_file: /certs/xa5ly-crt.pem
       key_file: /certs/xa5ly-key.pem
       insecure_skip_verify: false
+    namespaces:
+      names: []
   tls_config:
     ca_file: /certs/xa5ly-ca.pem
     cert_file: /certs/xa5ly-crt.pem
@@ -313,14 +315,11 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
   - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name]
     regex: default;kubernetes
     action: keep
-  - source_labels: []
-    target_label: app
+  - target_label: app
     replacement: kubernetes
-  - source_labels: []
-    target_label: cluster_id
+  - target_label: cluster_id
     replacement: xa5ly
-  - source_labels: []
-    target_label: cluster_type
+  - target_label: cluster_type
     replacement: guest
 - job_name: guest-cluster-xa5ly-cadvisor
   scheme: https
@@ -332,26 +331,24 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
       cert_file: /certs/xa5ly-crt.pem
       key_file: /certs/xa5ly-key.pem
       insecure_skip_verify: false
+    namespaces:
+      names: []
   tls_config:
     ca_file: /certs/xa5ly-ca.pem
     cert_file: /certs/xa5ly-crt.pem
     key_file: /certs/xa5ly-key.pem
     insecure_skip_verify: false
   relabel_configs:
-  - source_labels: []
-    target_label: __address__
+  - target_label: __address__
     replacement: apiserver.xa5ly
   - source_labels: [__meta_kubernetes_node_name]
     target_label: __metrics_path__
     replacement: /api/v1/nodes/${1}:4194/proxy/metrics
-  - source_labels: []
-    target_label: app
+  - target_label: app
     replacement: cadvisor
-  - source_labels: []
-    target_label: cluster_id
+  - target_label: cluster_id
     replacement: xa5ly
-  - source_labels: []
-    target_label: cluster_type
+  - target_label: cluster_type
     replacement: guest
   - source_labels: [__meta_kubernetes_node_address_InternalIP]
     target_label: ip
@@ -378,20 +375,19 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
       cert_file: /certs/xa5ly-crt.pem
       key_file: /certs/xa5ly-key.pem
       insecure_skip_verify: false
+    namespaces:
+      names: []
   tls_config:
     ca_file: /certs/xa5ly-ca.pem
     cert_file: /certs/xa5ly-crt.pem
     key_file: /certs/xa5ly-key.pem
     insecure_skip_verify: true
   relabel_configs:
-  - source_labels: []
-    target_label: app
+  - target_label: app
     replacement: kubelet
-  - source_labels: []
-    target_label: cluster_id
+  - target_label: cluster_id
     replacement: xa5ly
-  - source_labels: []
-    target_label: cluster_type
+  - target_label: cluster_type
     replacement: guest
   - source_labels: [__meta_kubernetes_node_address_InternalIP]
     target_label: ip
@@ -411,6 +407,8 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
       cert_file: /certs/xa5ly-crt.pem
       key_file: /certs/xa5ly-key.pem
       insecure_skip_verify: false
+    namespaces:
+      names: []
   relabel_configs:
   - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name]
     regex: kube-system;node-exporter
@@ -419,14 +417,11 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
     regex: (.*):10250
     target_label: __address__
     replacement: ${1}:10300
-  - source_labels: []
-    target_label: app
+  - target_label: app
     replacement: node-exporter
-  - source_labels: []
-    target_label: cluster_id
+  - target_label: cluster_id
     replacement: xa5ly
-  - source_labels: []
-    target_label: cluster_type
+  - target_label: cluster_type
     replacement: guest
   - source_labels: [__address__]
     regex: (.*):10300
@@ -452,6 +447,8 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
       cert_file: /certs/xa5ly-crt.pem
       key_file: /certs/xa5ly-key.pem
       insecure_skip_verify: false
+    namespaces:
+      names: []
   relabel_configs:
   - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name]
     regex: kube-system;kube-state-metrics|node-exporter
@@ -460,11 +457,9 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
     target_label: app
   - source_labels: [__meta_kubernetes_namespace]
     target_label: namespace
-  - source_labels: []
-    target_label: cluster_id
+  - target_label: cluster_id
     replacement: xa5ly
-  - source_labels: []
-    target_label: cluster_type
+  - target_label: cluster_type
     replacement: guest
   metric_relabel_configs:
   - source_labels: [exported_namespace]
