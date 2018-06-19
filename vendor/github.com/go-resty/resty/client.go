@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2017 Jeevanandam M (jeeva@myjeeva.com), All rights reserved.
+// Copyright (c) 2015-2018 Jeevanandam M (jeeva@myjeeva.com), All rights reserved.
 // resty source code and usage is governed by a MIT style
 // license that can be found in the LICENSE file.
 
@@ -6,6 +6,7 @@ package resty
 
 import (
 	"bytes"
+	"compress/gzip"
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
@@ -46,18 +47,19 @@ const (
 )
 
 var (
-	hdrUserAgentKey     = http.CanonicalHeaderKey("User-Agent")
-	hdrAcceptKey        = http.CanonicalHeaderKey("Accept")
-	hdrContentTypeKey   = http.CanonicalHeaderKey("Content-Type")
-	hdrContentLengthKey = http.CanonicalHeaderKey("Content-Length")
-	hdrAuthorizationKey = http.CanonicalHeaderKey("Authorization")
+	hdrUserAgentKey       = http.CanonicalHeaderKey("User-Agent")
+	hdrAcceptKey          = http.CanonicalHeaderKey("Accept")
+	hdrContentTypeKey     = http.CanonicalHeaderKey("Content-Type")
+	hdrContentLengthKey   = http.CanonicalHeaderKey("Content-Length")
+	hdrContentEncodingKey = http.CanonicalHeaderKey("Content-Encoding")
+	hdrAuthorizationKey   = http.CanonicalHeaderKey("Authorization")
 
 	plainTextType   = "text/plain; charset=utf-8"
 	jsonContentType = "application/json; charset=utf-8"
 	formContentType = "application/x-www-form-urlencoded"
 
-	jsonCheck = regexp.MustCompile("(?i:[application|text]/json)")
-	xmlCheck  = regexp.MustCompile("(?i:[application|text]/xml)")
+	jsonCheck = regexp.MustCompile(`(?i:(application|text)/(problem\+json|json))`)
+	xmlCheck  = regexp.MustCompile(`(?i:(application|text)/(problem\+xml|xml))`)
 
 	hdrUserAgentValue = "go-resty v%s - https://github.com/go-resty/resty"
 	bufPool           = &sync.Pool{New: func() interface{} { return &bytes.Buffer{} }}
@@ -85,18 +87,21 @@ type Client struct {
 	JSONMarshal           func(v interface{}) ([]byte, error)
 	JSONUnmarshal         func(data []byte, v interface{}) error
 
-	httpClient       *http.Client
-	setContentLength bool
-	isHTTPMode       bool
-	outputDirectory  string
-	scheme           string
-	proxyURL         *url.URL
-	closeConnection  bool
-	notParseResponse bool
-	beforeRequest    []func(*Client, *Request) error
-	udBeforeRequest  []func(*Client, *Request) error
-	preReqHook       func(*Client, *Request) error
-	afterResponse    []func(*Client, *Response) error
+	httpClient         *http.Client
+	setContentLength   bool
+	isHTTPMode         bool
+	outputDirectory    string
+	scheme             string
+	proxyURL           *url.URL
+	closeConnection    bool
+	notParseResponse   bool
+	debugBodySizeLimit int64
+	logPrefix          string
+	pathParams         map[string]string
+	beforeRequest      []func(*Client, *Request) error
+	udBeforeRequest    []func(*Client, *Request) error
+	preReqHook         func(*Client, *Request) error
+	afterResponse      []func(*Client, *Response) error
 }
 
 // User type is to hold an username and password information
@@ -297,18 +302,20 @@ func (c *Client) SetAuthToken(token string) *Client {
 // R method creates a request instance, its used for Get, Post, Put, Delete, Patch, Head and Options.
 func (c *Client) R() *Request {
 	r := &Request{
-		URL:            "",
-		Method:         "",
-		QueryParam:     url.Values{},
-		FormData:       url.Values{},
-		Header:         http.Header{},
-		Body:           nil,
-		Result:         nil,
-		Error:          nil,
-		RawRequest:     nil,
-		client:         c,
-		bodyBuf:        nil,
-		multipartFiles: []*File{},
+		URL:             "",
+		Method:          "",
+		QueryParam:      url.Values{},
+		FormData:        url.Values{},
+		Header:          http.Header{},
+		Body:            nil,
+		Result:          nil,
+		Error:           nil,
+		RawRequest:      nil,
+		client:          c,
+		bodyBuf:         nil,
+		multipartFiles:  []*File{},
+		multipartFields: []*multipartField{},
+		pathParams:      make(map[string]string),
 	}
 
 	return r
@@ -369,6 +376,14 @@ func (c *Client) SetPreRequestHook(h func(*Client, *Request) error) *Client {
 //
 func (c *Client) SetDebug(d bool) *Client {
 	c.Debug = d
+	return c
+}
+
+// SetDebugBodyLimit sets the maximum size for which the response body will be logged in debug mode.
+//		resty.SetDebugBodyLimit(1000000)
+//
+func (c *Client) SetDebugBodyLimit(sl int64) *Client {
+	c.debugBodySizeLimit = sl
 	return c
 }
 
@@ -491,21 +506,21 @@ func (c *Client) AddRetryCondition(condition RetryConditionFunc) *Client {
 	return c
 }
 
-// SetHTTPMode method sets go-resty mode into HTTP
+// SetHTTPMode method sets go-resty mode to 'http'
 func (c *Client) SetHTTPMode() *Client {
 	return c.SetMode("http")
 }
 
-// SetRESTMode method sets go-resty mode into RESTful
+// SetRESTMode method sets go-resty mode to 'rest'
 func (c *Client) SetRESTMode() *Client {
 	return c.SetMode("rest")
 }
 
 // SetMode method sets go-resty client mode to given value such as 'http' & 'rest'.
-// 	RESTful:
+//	'rest':
 //		- No Redirect
 //		- Automatic response unmarshal if it is JSON or XML
-//	HTML:
+//	'http':
 //		- Up to 10 Redirects
 //		- No automatic unmarshall. Response will be treated as `response.String()`
 //
@@ -702,9 +717,40 @@ func (c *Client) SetDoNotParseResponse(parse bool) *Client {
 	return c
 }
 
+// SetLogPrefix method sets the Resty logger prefix value.
+func (c *Client) SetLogPrefix(prefix string) *Client {
+	c.logPrefix = prefix
+	c.Log.SetPrefix(prefix)
+	return c
+}
+
+// SetPathParams method sets multiple URL path key-value pairs at one go in the
+// resty client instance.
+// 		resty.SetPathParams(map[string]string{
+// 		   "userId": "sample@sample.com",
+// 		   "subAccountId": "100002",
+// 		})
+//
+// 		Result:
+// 		   URL - /v1/users/{userId}/{subAccountId}/details
+// 		   Composed URL - /v1/users/sample@sample.com/100002/details
+// It replace the value of the key while composing request URL. Also it can be
+// overridden at request level Path Params options, see `Request.SetPathParams`.
+func (c *Client) SetPathParams(params map[string]string) *Client {
+	for p, v := range params {
+		c.pathParams[p] = v
+	}
+	return c
+}
+
 // IsProxySet method returns the true if proxy is set on client otherwise false.
 func (c *Client) IsProxySet() bool {
 	return c.proxyURL != nil
+}
+
+// GetClient method returns the current http.Client used by the resty client.
+func (c *Client) GetClient() *http.Client {
+	return c.httpClient
 }
 
 //‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
@@ -753,11 +799,21 @@ func (c *Client) execute(req *Request) (*Response, error) {
 	}
 
 	if !req.isSaveResponse {
-		defer func() {
-			_ = resp.Body.Close()
-		}()
+		defer closeq(resp.Body)
+		body := resp.Body
 
-		if response.body, err = ioutil.ReadAll(resp.Body); err != nil {
+		// GitHub #142
+		if strings.EqualFold(resp.Header.Get(hdrContentEncodingKey), "gzip") {
+			if _, ok := body.(*gzip.Reader); !ok {
+				body, err = gzip.NewReader(body)
+				if err != nil {
+					return response, err
+				}
+				defer closeq(body)
+			}
+		}
+
+		if response.body, err = ioutil.ReadAll(body); err != nil {
 			return response, err
 		}
 
@@ -777,7 +833,7 @@ func (c *Client) execute(req *Request) (*Response, error) {
 // enables a log prefix
 func (c *Client) enableLogPrefix() {
 	c.Log.SetFlags(log.LstdFlags)
-	c.Log.SetPrefix("RESTY ")
+	c.Log.SetPrefix(c.logPrefix)
 }
 
 // disables a log prefix
@@ -801,6 +857,10 @@ func (c *Client) getTLSConfig() (*tls.Config, error) {
 // returns `*http.Transport` currently in use or error
 // in case currently used `transport` is not an `*http.Transport`
 func (c *Client) getTransport() (*http.Transport, error) {
+	if c.httpClient.Transport == nil {
+		c.SetTransport(new(http.Transport))
+	}
+
 	if transport, ok := c.httpClient.Transport.(*http.Transport); ok {
 		return transport, nil
 	}
@@ -821,4 +881,12 @@ type File struct {
 // String returns string value of current file details
 func (f *File) String() string {
 	return fmt.Sprintf("ParamName: %v; FileName: %v", f.ParamName, f.Name)
+}
+
+// multipartField represent custom data part for multipart request
+type multipartField struct {
+	Param       string
+	FileName    string
+	ContentType string
+	io.Reader
 }

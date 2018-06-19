@@ -1,17 +1,10 @@
 package server
 
 import (
-	"github.com/giantswarm/microerror"
-	"github.com/juju/errgo"
-)
+	"net/http"
 
-func errorTrace(err error) string {
-	switch e := err.(type) {
-	case *errgo.Err:
-		return e.GoString()
-	}
-	return "n/a"
-}
+	"github.com/giantswarm/microerror"
+)
 
 var invalidConfigError = microerror.New("invalid config")
 
@@ -32,4 +25,24 @@ var invalidTransactionIDError = microerror.New("invalid transaction ID")
 // IsInvalidTransactionID asserts invalidTransactionIDError.
 func IsInvalidTransactionID(err error) bool {
 	return microerror.Cause(err) == invalidTransactionIDError
+}
+
+var serverClosedError = microerror.New("server closed")
+
+// IsServerClosed asserts serverClosedError.
+func IsServerClosed(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	c := microerror.Cause(err)
+
+	if c == http.ErrServerClosed {
+		return true
+	}
+	if c == serverClosedError {
+		return true
+	}
+
+	return false
 }

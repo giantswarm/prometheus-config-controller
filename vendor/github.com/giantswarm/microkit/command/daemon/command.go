@@ -22,30 +22,14 @@ var (
 
 // Config represents the configuration used to create a new daemon command.
 type Config struct {
-	// Dependencies.
 	Logger        micrologger.Logger
 	ServerFactory ServerFactory
 
-	// Settings.
 	Viper *viper.Viper
-}
-
-// DefaultConfig provides a default configuration to create a new daemon command
-// by best effort.
-func DefaultConfig() Config {
-	return Config{
-		// Dependencies.
-		Logger:        nil,
-		ServerFactory: nil,
-
-		// Settings.
-		Viper: viper.New(),
-	}
 }
 
 // New creates a new daemon command.
 func New(config Config) (Command, error) {
-	// Dependencies.
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "logger must not be empty")
 	}
@@ -53,18 +37,15 @@ func New(config Config) (Command, error) {
 		return nil, microerror.Maskf(invalidConfigError, "server factory must not be empty")
 	}
 	if config.Viper == nil {
-		return nil, microerror.Maskf(invalidConfigError, "viper must not be empty")
+		config.Viper = viper.New()
 	}
 
 	newCommand := &command{
-		// Dependencies.
 		logger:        config.Logger,
 		serverFactory: config.ServerFactory,
 
-		// Internals.
 		cobraCommand: nil,
 
-		// Settings.
 		viper: config.Viper,
 	}
 
@@ -79,6 +60,7 @@ func New(config Config) (Command, error) {
 	newCommand.cobraCommand.PersistentFlags().StringSlice(f.Config.Files, []string{"config"}, "List of the config file names. All viper supported extensions can be used.")
 
 	newCommand.cobraCommand.PersistentFlags().String(f.Server.Listen.Address, "http://127.0.0.1:8000", "Address used to make the server listen to.")
+	newCommand.cobraCommand.PersistentFlags().String(f.Server.Listen.MetricsAddress, "", "Optional alternate address to expose metrics on at /metrics. Leave blank to use the default server (listen address above).")
 	newCommand.cobraCommand.PersistentFlags().Bool(f.Server.Log.Access, false, "Whether to emit logs for each requested route.")
 	newCommand.cobraCommand.PersistentFlags().String(f.Server.TLS.CaFile, "", "File path of the TLS root CA file, if any.")
 	newCommand.cobraCommand.PersistentFlags().String(f.Server.TLS.CrtFile, "", "File path of the TLS public key file, if any.")
@@ -124,6 +106,9 @@ func (c *command) Execute(cmd *cobra.Command, args []string) {
 		serverConfig.LogAccess = c.viper.GetBool(f.Server.Log.Access)
 		if serverConfig.ListenAddress == "" {
 			serverConfig.ListenAddress = c.viper.GetString(f.Server.Listen.Address)
+		}
+		if serverConfig.ListenMetricsAddress == "" {
+			serverConfig.ListenMetricsAddress = c.viper.GetString(f.Server.Listen.MetricsAddress)
 		}
 		if serverConfig.TLSCAFile == "" {
 			serverConfig.TLSCAFile = c.viper.GetString(f.Server.TLS.CaFile)
