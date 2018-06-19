@@ -1,291 +1,142 @@
 package service
 
 import (
-	"os"
 	"sync"
-	"time"
-
-	"github.com/cenkalti/backoff"
-	"github.com/spf13/afero"
-	"github.com/spf13/viper"
-	"k8s.io/client-go/kubernetes"
 
 	"github.com/giantswarm/microendpoint/service/version"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/client/k8sclient"
-	"github.com/giantswarm/operatorkit/framework"
-	"github.com/giantswarm/operatorkit/framework/resource/metricsresource"
-	"github.com/giantswarm/operatorkit/framework/resource/retryresource"
-	"github.com/giantswarm/operatorkit/informer"
+	"github.com/giantswarm/operatorkit/client/k8srestconfig"
+	"github.com/spf13/viper"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 
 	"github.com/giantswarm/prometheus-config-controller/flag"
 	"github.com/giantswarm/prometheus-config-controller/service/controller"
 	"github.com/giantswarm/prometheus-config-controller/service/healthz"
-	"github.com/giantswarm/prometheus-config-controller/service/prometheus"
-	"github.com/giantswarm/prometheus-config-controller/service/resource/certificate"
-	"github.com/giantswarm/prometheus-config-controller/service/resource/configmap"
 )
 
 type Config struct {
-	Flag   *flag.Flag
 	Logger micrologger.Logger
-	Viper  *viper.Viper
 
 	Description string
+	Flag        *flag.Flag
 	GitCommit   string
 	Name        string
 	Source      string
-
-	ControllerBackOffDuration time.Duration
-	FrameworkBackOffDuration  time.Duration
-	ResourceRetries           int
-}
-
-func DefaultConfig() Config {
-	return Config{
-		Flag:   nil,
-		Logger: nil,
-		Viper:  nil,
-
-		Description: "",
-		GitCommit:   "",
-		Name:        "",
-		Source:      "",
-
-		ControllerBackOffDuration: time.Duration(0),
-		FrameworkBackOffDuration:  time.Duration(0),
-		ResourceRetries:           0,
-	}
+	Viper       *viper.Viper
 }
 
 type Service struct {
-	Controller *controller.Controller
-	Healthz    *healthz.Service
-	Version    *version.Service
+	Healthz *healthz.Service
+	Version *version.Service
 
-	bootOnce sync.Once
+	bootOnce             sync.Once
+	prometheusController *controller.Prometheus
 }
 
 func New(config Config) (*Service, error) {
 	if config.Flag == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.Flag must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.Flag must not be empty", config)
 	}
 	if config.Viper == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.Viper must not be empty")
-	}
-
-	if config.ControllerBackOffDuration == 0 {
-		return nil, microerror.Maskf(invalidConfigError, "config.ControllerBackOffDuration must not be zero")
-	}
-	if config.FrameworkBackOffDuration == 0 {
-		return nil, microerror.Maskf(invalidConfigError, "config.FrameworkBackOffDuration must not be zero")
-	}
-	if config.ResourceRetries == 0 {
-		return nil, microerror.Maskf(invalidConfigError, "config.ResourceRetries must not be zero")
+		return nil, microerror.Maskf(invalidConfigError, "%T.Viper must not be empty", config)
 	}
 
 	var err error
 
-	var newFs afero.Fs
+	var restConfig *rest.Config
 	{
-		newFs = afero.NewOsFs()
-	}
+		c := k8srestconfig.Config{
+			Logger: config.Logger,
 
-	var newK8sClient kubernetes.Interface
-	{
-		k8sConfig := k8sclient.DefaultConfig()
+			Address:   config.Viper.GetString(config.Flag.Service.Kubernetes.Address),
+			InCluster: config.Viper.GetBool(config.Flag.Service.Kubernetes.InCluster),
+			TLS: k8srestconfig.TLSClientConfig{
+				CAFile:  config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CAFile),
+				CrtFile: config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CrtFile),
+				KeyFile: config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.KeyFile),
+			},
+		}
 
-		k8sConfig.Logger = config.Logger
-
-		k8sConfig.Address = config.Viper.GetString(config.Flag.Service.Kubernetes.Address)
-		k8sConfig.InCluster = config.Viper.GetBool(config.Flag.Service.Kubernetes.InCluster)
-		k8sConfig.TLS.CAFile = config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CAFile)
-		k8sConfig.TLS.CrtFile = config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CrtFile)
-		k8sConfig.TLS.KeyFile = config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.KeyFile)
-
-		newK8sClient, err = k8sclient.New(k8sConfig)
+		restConfig, err = k8srestconfig.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
-	var newPrometheusReloader prometheus.PrometheusReloader
+	k8sClient, err := kubernetes.NewForConfig(restConfig)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	var healthzService *healthz.Service
 	{
-		prometheusConfig := prometheus.DefaultConfig()
+		c := healthz.Config{
+			K8sClient: k8sClient,
+			Logger:    config.Logger,
+		}
 
-		prometheusConfig.K8sClient = newK8sClient
-		prometheusConfig.Logger = config.Logger
-
-		prometheusConfig.Address = config.Viper.GetString(config.Flag.Service.Prometheus.Address)
-		prometheusConfig.ConfigMapKey = config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Key)
-		prometheusConfig.ConfigMapName = config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Name)
-		prometheusConfig.ConfigMapNamespace = config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Namespace)
-		prometheusConfig.MinimumReloadTime = config.Viper.GetDuration(config.Flag.Service.Resource.ConfigMap.MinimumReloadTime)
-
-		newPrometheusReloader, err = prometheus.New(prometheusConfig)
+		healthzService, err = healthz.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
-	var newCertificateResource framework.Resource
+	var prometheusController *controller.Prometheus
 	{
-		certificateConfig := certificate.DefaultConfig()
+		c := controller.PrometheusConfig{
+			K8sClient: k8sClient,
+			Logger:    config.Logger,
 
-		certificateConfig.Fs = newFs
-		certificateConfig.K8sClient = newK8sClient
-		certificateConfig.Logger = config.Logger
-		certificateConfig.PrometheusReloader = newPrometheusReloader
+			ConfigMapKey:       config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Key),
+			ConfigMapName:      config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Name),
+			ConfigMapNamespace: config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Namespace),
+			CertComponentName:  config.Viper.GetString(config.Flag.Service.Resource.Certificate.ComponentName),
+			CertDirectory:      config.Viper.GetString(config.Flag.Service.Resource.Certificate.Directory),
+			CertNamespace:      config.Viper.GetString(config.Flag.Service.Resource.Certificate.Namespace),
+			CertPermission:     config.Viper.GetInt(config.Flag.Service.Resource.Certificate.Permission),
+			MinReloadTime:      config.Viper.GetDuration(config.Flag.Service.Resource.ConfigMap.MinimumReloadTime),
+			ProjectName:        config.Name,
+			PrometheusAddress:  config.Viper.GetString(config.Flag.Service.Prometheus.Address),
+			ResyncPeriod:       config.Viper.GetDuration(config.Flag.Service.Controller.ResyncPeriod),
+		}
 
-		certificateConfig.CertificateComponentName = config.Viper.GetString(config.Flag.Service.Resource.Certificate.ComponentName)
-		certificateConfig.CertificateDirectory = config.Viper.GetString(config.Flag.Service.Resource.Certificate.Directory)
-		certificateConfig.CertificateNamespace = config.Viper.GetString(config.Flag.Service.Resource.Certificate.Namespace)
-		certificateConfig.CertificatePermission = os.FileMode(config.Viper.GetInt(config.Flag.Service.Resource.Certificate.Permission))
-
-		newCertificateResource, err = certificate.New(certificateConfig)
+		prometheusController, err = controller.NewPrometheus(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
-	var newConfigMapResource framework.Resource
+	var versionService *version.Service
 	{
-		configMapConfig := configmap.DefaultConfig()
+		c := version.Config{
+			Description:    config.Description,
+			GitCommit:      config.GitCommit,
+			Name:           config.Name,
+			Source:         config.Source,
+			VersionBundles: NewVersionBundles(),
+		}
 
-		configMapConfig.K8sClient = newK8sClient
-		configMapConfig.Logger = config.Logger
-		configMapConfig.PrometheusReloader = newPrometheusReloader
-
-		configMapConfig.CertificateDirectory = config.Viper.GetString(config.Flag.Service.Resource.Certificate.Directory)
-		configMapConfig.ConfigMapKey = config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Key)
-		configMapConfig.ConfigMapName = config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Name)
-		configMapConfig.ConfigMapNamespace = config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Namespace)
-
-		newConfigMapResource, err = configmap.New(configMapConfig)
+		versionService, err = version.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
-	var resources []framework.Resource
-	{
-		resources = []framework.Resource{
-			newCertificateResource,
-			newConfigMapResource,
-		}
+	s := &Service{
+		Healthz: healthzService,
+		Version: versionService,
 
-		retryWrapConfig := retryresource.DefaultWrapConfig()
-		retryWrapConfig.BackOffFactory = func() backoff.BackOff {
-			return backoff.WithMaxTries(backoff.NewExponentialBackOff(), uint64(config.ResourceRetries))
-		}
-		retryWrapConfig.Logger = config.Logger
-		resources, err = retryresource.Wrap(resources, retryWrapConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		metricsWrapConfig := metricsresource.DefaultWrapConfig()
-		metricsWrapConfig.Name = config.Name
-		resources, err = metricsresource.Wrap(resources, metricsWrapConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
+		bootOnce:             sync.Once{},
+		prometheusController: prometheusController,
 	}
 
-	var newInformer *informer.Informer
-	{
-		informerConfig := informer.DefaultConfig()
-
-		informerConfig.Watcher = newK8sClient.CoreV1().Services("")
-
-		informerConfig.RateWait = config.Viper.GetDuration(config.Flag.Service.Controller.ResyncPeriod)
-		informerConfig.ResyncPeriod = config.Viper.GetDuration(config.Flag.Service.Controller.ResyncPeriod)
-
-		newInformer, err = informer.New(informerConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var newOperatorFramework *framework.Framework
-	{
-		backOff := backoff.NewExponentialBackOff()
-		backOff.MaxElapsedTime = config.FrameworkBackOffDuration
-
-		frameworkConfig := framework.DefaultConfig()
-
-		frameworkConfig.Informer = newInformer
-		frameworkConfig.Logger = config.Logger
-		frameworkConfig.ResourceRouter = framework.DefaultResourceRouter(resources)
-
-		newOperatorFramework, err = framework.New(frameworkConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var newHealthzService *healthz.Service
-	{
-		healthzConfig := healthz.DefaultConfig()
-
-		healthzConfig.K8sClient = newK8sClient
-		healthzConfig.Logger = config.Logger
-
-		newHealthzService, err = healthz.New(healthzConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var newController *controller.Controller
-	{
-		backOff := backoff.NewExponentialBackOff()
-		backOff.MaxElapsedTime = config.ControllerBackOffDuration
-
-		controllerConfig := controller.DefaultConfig()
-
-		controllerConfig.BackOff = backOff
-		controllerConfig.K8sClient = newK8sClient
-		controllerConfig.Logger = config.Logger
-		controllerConfig.OperatorFramework = newOperatorFramework
-
-		controllerConfig.ResyncPeriod = config.Viper.GetDuration(config.Flag.Service.Controller.ResyncPeriod)
-
-		newController, err = controller.New(controllerConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var newVersionService *version.Service
-	{
-		versionConfig := version.DefaultConfig()
-
-		versionConfig.Description = config.Description
-		versionConfig.GitCommit = config.GitCommit
-		versionConfig.Name = config.Name
-		versionConfig.Source = config.Source
-
-		newVersionService, err = version.New(versionConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	newService := &Service{
-		Controller: newController,
-		Healthz:    newHealthzService,
-		Version:    newVersionService,
-
-		bootOnce: sync.Once{},
-	}
-
-	return newService, nil
+	return s, nil
 }
 
 func (s *Service) Boot() {
 	s.bootOnce.Do(func() {
-		s.Controller.Boot()
+		go s.prometheusController.Boot()
 	})
 }
