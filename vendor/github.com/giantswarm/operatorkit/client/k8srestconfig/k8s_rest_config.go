@@ -9,7 +9,7 @@
 //		apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 //
 //		"github.com/giantswarm/operatorkit/client/k8srestconfig"
-//		gsclient "github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+//		"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 //		"github.com/giantswarm/microerror"
 //	)
 //
@@ -18,15 +18,17 @@
 //
 //		var restConfig *rest.Config
 //		{
-//	 		c := k8srestconfig.DefaultConfig()
+//			c := k8srestconfig.Config{
+//				Logger: config.Logger,
 //
-//			c.Logger = config.Logger
-//
-//			c.Address = config.Viper.GetString(config.Flag.Service.Kubernetes.Address)
-//			c.InCluster = config.Viper.GetBool(config.Flag.Service.Kubernetes.InCluster)
-//			c.TLS.CAFile = config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CAFile)
-//			c.TLS.CrtFile = config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CrtFile)
-//			c.TLS.KeyFile = config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.KeyFile)
+//				Address:   config.Viper.GetString(config.Flag.Service.Kubernetes.Address),
+//				InCluster: config.Viper.GetBool(config.Flag.Service.Kubernetes.InCluster),
+//				TLS: TLSClientConfig{
+//					CAFile:  config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CAFile),
+//					CrtFile: config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CrtFile),
+//					KeyFile: config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.KeyFile),
+//				},
+//			}
 //
 //			restConfig, err = k8srestconfig.New(c)
 //			if err != nil {
@@ -44,7 +46,7 @@
 //			return micorerror.Mask(err)
 //		}
 //
-//		gsClient, err := gsclient.NewForConfig(restConfig)
+//		g8sClient, err := versioned.NewForConfig(restConfig)
 //		if err != nil {
 //			return microerror.Mask(err)
 //		}
@@ -54,6 +56,7 @@ package k8srestconfig
 
 import (
 	"net/url"
+	"time"
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -64,7 +67,8 @@ const (
 	// Maximum QPS to the master from this client.
 	MaxQPS = 100
 	// Maximum burst for throttle.
-	MaxBurst = 100
+	MaxBurst       = 100
+	DefaultTimeout = 30 * time.Second
 )
 
 // TLSClientConfig contains settings to enable transport layer security.
@@ -91,21 +95,8 @@ type Config struct {
 	// Settings
 	Address   string
 	InCluster bool
+	Timeout   time.Duration
 	TLS       TLSClientConfig
-}
-
-// DefaultConfig provides a default configuration to create a new Kubernetes
-// Clientset by best effort.
-func DefaultConfig() Config {
-	return Config{
-		// Dependencies.
-		Logger: nil,
-
-		// Settings.
-		Address:   "",
-		InCluster: true,
-		TLS:       TLSClientConfig{},
-	}
 }
 
 // New returns a Kubernetes REST configuration for clients.
@@ -122,26 +113,29 @@ func New(config Config) (*rest.Config, error) {
 	if config.Address != "" {
 		_, err := url.Parse(config.Address)
 		if err != nil {
-			return nil, microerror.Maskf(invalidConfigError,
-				"config.Address=%s must be a valid URL: %s", config.Address, err)
+			return nil, microerror.Maskf(invalidConfigError, "config.Address=%s must be a valid URL: %s", config.Address, err)
 		}
+	}
+	if config.Timeout.Seconds() == 0 {
+		config.Timeout = DefaultTimeout
 	}
 
 	var err error
 
 	var restConfig *rest.Config
 	if config.InCluster {
-		config.Logger.Log("debug", "creating in-cluster config")
+		config.Logger.Log("level", "debug", "message", "creating in-cluster config")
 
 		restConfig, err = rest.InClusterConfig()
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	} else {
-		config.Logger.Log("debug", "creating out-cluster config")
+		config.Logger.Log("level", "debug", "message", "creating out-cluster config")
 
 		restConfig = &rest.Config{
-			Host: config.Address,
+			Host:    config.Address,
+			Timeout: config.Timeout,
 			TLSClientConfig: rest.TLSClientConfig{
 				CertFile: config.TLS.CrtFile,
 				KeyFile:  config.TLS.KeyFile,

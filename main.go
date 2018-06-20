@@ -2,18 +2,13 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"time"
-
-	"github.com/spf13/viper"
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/microkit/command"
 	microserver "github.com/giantswarm/microkit/server"
-	"github.com/giantswarm/microkit/transaction"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/microstorage"
-	"github.com/giantswarm/microstorage/memory"
+	"github.com/spf13/viper"
 
 	"github.com/giantswarm/prometheus-config-controller/flag"
 	"github.com/giantswarm/prometheus-config-controller/server"
@@ -36,101 +31,84 @@ func panicOnErr(err error) {
 }
 
 func main() {
-	err := mainWithError()
+	err := mainError()
 	if err != nil {
-		panic(fmt.Sprintf("%#v\n", microerror.Mask(err)))
+		panic(fmt.Sprintf("%#v\n", err))
 	}
 }
 
-func mainWithError() error {
+func mainError() error {
 	var err error
 
 	var newLogger micrologger.Logger
 	{
-		loggerConfig := micrologger.DefaultConfig()
+		c := micrologger.Config{}
 
-		loggerConfig.IOWriter = os.Stdout
-
-		newLogger, err = micrologger.New(loggerConfig)
+		newLogger, err = micrologger.New(c)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 	}
 
+	// We define a server factory to create the custom server once all command
+	// line flags are parsed and all microservice configuration is storted out.
 	newServerFactory := func(v *viper.Viper) microserver.Server {
+		// Create a new custom service which implements business logic.
 		var newService *service.Service
 		{
-			serviceConfig := service.DefaultConfig()
+			c := service.Config{
+				Logger: newLogger,
 
-			serviceConfig.Flag = f
-			serviceConfig.Logger = newLogger
-			serviceConfig.Viper = v
+				Description: description,
+				Flag:        f,
+				GitCommit:   gitCommit,
+				Name:        name,
+				Source:      source,
+				Viper:       v,
+			}
 
-			serviceConfig.Description = description
-			serviceConfig.GitCommit = gitCommit
-			serviceConfig.Name = name
-			serviceConfig.Source = source
-
-			serviceConfig.ControllerBackOffDuration = v.GetDuration(f.Service.Controller.ControllerBackOffDuration)
-			serviceConfig.FrameworkBackOffDuration = v.GetDuration(f.Service.Controller.FrameworkBackOffDuration)
-			serviceConfig.ResourceRetries = v.GetInt(f.Service.Resource.Retries)
-
-			newService, err = service.New(serviceConfig)
-			panicOnErr(err)
-
+			newService, err = service.New(c)
+			if err != nil {
+				panic(fmt.Sprintf("%#v", err))
+			}
 			go newService.Boot()
 		}
 
-		var newStorage microstorage.Storage
-		{
-			storageConfig := memory.DefaultConfig()
-
-			newStorage, err = memory.New(storageConfig)
-			panicOnErr(err)
-		}
-
-		var newTransactionResponder transaction.Responder
-		{
-			transactionResponderConfig := transaction.DefaultResponderConfig()
-
-			transactionResponderConfig.Logger = newLogger
-			transactionResponderConfig.Storage = newStorage
-
-			newTransactionResponder, err = transaction.NewResponder(transactionResponderConfig)
-			panicOnErr(err)
-		}
-
+		// Create a new custom server which bundles our endpoints.
 		var newServer microserver.Server
 		{
-			serverConfig := server.DefaultConfig()
+			c := server.Config{
+				Logger:  newLogger,
+				Service: newService,
+				Viper:   v,
 
-			serverConfig.MicroServerConfig.Logger = newLogger
-			serverConfig.MicroServerConfig.TransactionResponder = newTransactionResponder
-			serverConfig.MicroServerConfig.Viper = v
-			serverConfig.Service = newService
+				ProjectName: name,
+			}
 
-			serverConfig.MicroServerConfig.ServiceName = name
-
-			newServer, err = server.New(serverConfig)
-			panicOnErr(err)
+			newServer, err = server.New(c)
+			if err != nil {
+				panic(fmt.Sprintf("%#v", err))
+			}
 		}
 
 		return newServer
 	}
 
+	// Create a new microkit command which manages our custom microservice.
 	var newCommand command.Command
 	{
-		commandConfig := command.DefaultConfig()
+		c := command.Config{
+			Logger:        newLogger,
+			ServerFactory: newServerFactory,
 
-		commandConfig.Logger = newLogger
-		commandConfig.ServerFactory = newServerFactory
+			Description:    description,
+			GitCommit:      gitCommit,
+			Name:           name,
+			Source:         source,
+			VersionBundles: service.NewVersionBundles(),
+		}
 
-		commandConfig.Description = description
-		commandConfig.GitCommit = gitCommit
-		commandConfig.Name = name
-		commandConfig.Source = source
-
-		newCommand, err = command.New(commandConfig)
+		newCommand, err = command.New(c)
 		if err != nil {
 			return microerror.Mask(err)
 		}
