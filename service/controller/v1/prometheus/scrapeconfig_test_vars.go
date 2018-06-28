@@ -313,6 +313,17 @@ var (
 				TargetLabel: ClusterTypeLabel,
 				Replacement: GuestClusterType,
 			},
+			{
+				SourceLabels: model.LabelNames{MetricNameLabel, MetricAddressLabel},
+				Regex:        NginxICDropDuplicates,
+				Action:       ActionDrop,
+			},
+			{
+				SourceLabels: model.LabelNames{MetricAddressLabel},
+				Regex:        NginxICChangeScrapePort,
+				TargetLabel:  AddressLabel,
+				Replacement:  NginxICMetricPort,
+			},
 		},
 		MetricRelabelConfigs: []*config.RelabelConfig{
 			// keep only kube-system cadvisor metrics

@@ -315,6 +315,17 @@ var (
 				TargetLabel: prometheus.ClusterTypeLabel,
 				Replacement: prometheus.GuestClusterType,
 			},
+			{
+				SourceLabels: model.LabelNames{prometheus.MetricNameLabel, prometheus.MetricAddressLabel},
+				Regex:        prometheus.NginxICDropDuplicates,
+				Action:       prometheus.ActionDrop,
+			},
+			{
+				SourceLabels: model.LabelNames{prometheus.MetricAddressLabel},
+				Regex:        prometheus.NginxICChangeScrapePort,
+				TargetLabel:  prometheus.AddressLabel,
+				Replacement:  prometheus.NginxICMetricPort,
+			},
 		},
 		MetricRelabelConfigs: []*config.RelabelConfig{
 			// keep only kube-system cadvisor metrics

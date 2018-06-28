@@ -451,7 +451,7 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
       names: []
   relabel_configs:
   - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name]
-    regex: kube-system;(kube-state-metrics|node-exporter|nginx-ingress-controller)
+    regex: kube-system;(kube-state-metrics|nginx-ingress-controller)
     action: keep
   - source_labels: [__meta_kubernetes_service_name]
     target_label: app
@@ -461,6 +461,13 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
     replacement: xa5ly
   - target_label: cluster_type
     replacement: guest
+  - source_labels: [__name__, __address__]
+    regex: nginx-ingress-controller;(.*):80
+    action: drop
+  - source_labels: [__address__]
+    regex: (.*):443
+    target_label: __address__
+    replacement: ${1}:10254
   metric_relabel_configs:
   - source_labels: [exported_namespace]
     regex: (kube-system|giantswarm)
