@@ -37,6 +37,8 @@ var (
 
 // Prometheus Kubernetes metrics labels.
 var (
+	// MetricAddressLabel is label for filtering by target address.
+	MetricAddressLabel = model.LabelName("__address__")
 	// MetricExportedNamespaceLabel is label for filtering by k8s namespace in kube-state-metric.
 	MetricExportedNamespaceLabel = model.LabelName("exported_namespace")
 	// MetricNamespaceLabel is label for filtering by k8s namespace
@@ -53,6 +55,8 @@ var (
 
 // Giant Swarm metrics schema labels.
 var (
+	// AddressLabel is the label used to hold target ip and port.
+	AddressLabel = "__address__"
 	// AppLabel is the label used to hold the application's name.
 	AppLabel = "app"
 
@@ -101,6 +105,9 @@ const (
 	// NodeExporterPort is the path under which node-exporter metrics can be scraped.
 	NodeExporterPort = "${1}:10300"
 
+	// NginxICMetricPort is the path port under which ingress controller metrics can be scraped.
+	NginxICMetricPort = "${1}:10254"
+
 	// GroupCapture is the regular expression to match against the first capture group.
 	GroupCapture = "${1}"
 )
@@ -131,6 +138,12 @@ var (
 
 	// MetricDropSystemdNameRegexp is the regular expression to match against not interesting systemd units(docker mounts and calico network devices).
 	MetricDropSystemdNameRegexp = config.MustNewRegexp(`node_systemd_unit_state;(dev-disk-by|run-docker-netns|sys-devices|sys-subsystem-net|var-lib-docker-overlay2|var-lib-docker-containers|var-lib-kubelet-pods).*`)
+
+	// NginxICChangeScrapePort is the regular expression to match nginx ic port in order to change it scrape port.
+	NginxICChangeScrapePort = config.MustNewRegexp(`(.*):443`)
+
+	// NginxICDropDuplicates is the regular expression to match against nginx ic target endpoint with port 80.
+	NginxICDropDuplicates = config.MustNewRegexp(`nginx-ingress-controller;(.*):80`)
 
 	// NodeExporterRegexp is the regular expression to match against the
 	// node-exporter name.
