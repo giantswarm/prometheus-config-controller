@@ -6,8 +6,11 @@ import (
 )
 
 const (
-	MasterPrefix    = "master"
-	APIServerPrefix = "apiserver"
+	NginxICMetricPort   = "10254"
+	KubeStaeMetricsPort = "10301"
+
+	PrefixMaster    = "master"
+	PrefixApiServer = "apiserver"
 )
 
 func certPath(certificateDirectory, clusterID, suffix string) string {
@@ -26,6 +29,10 @@ func KeyPath(certificateDirectory, clusterID string) string {
 	return certPath(certificateDirectory, clusterID, "key")
 }
 
-func NginxPodProxyUrlTemplate(masterPrefix string, clusterID string) string {
-	return fmt.Sprintf("https://%s.%s:443/api/v1/namespaces/kube-system/pods/${1}:10254/proxy/metrics", masterPrefix, clusterID)
+func APIProxyPodMetricsPath(port string) string {
+	return fmt.Sprintf("/api/v1/namespaces/kube-system/pods/${1}:%s/proxy/metrics", port)
+}
+
+func APIServiceHost(prefix string, clusterID string) string {
+	return fmt.Sprintf("%s.%s:443", prefix, clusterID)
 }

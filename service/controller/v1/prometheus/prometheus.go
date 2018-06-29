@@ -74,6 +74,9 @@ var (
 	// NamespaceLabel is the label used to hold the application's namespace.
 	NamespaceLabel = "namespace"
 
+	// MetricPathLabel is the label used to hold the scrape metrics path.
+	MetricPathLabel = "__metrics_path__"
+
 	// RoleLabel is the label used to hold the machine's role.
 	RoleLabel = "role"
 )
@@ -141,8 +144,11 @@ var (
 	// MetricDropSystemdNameRegexp is the regular expression to match against not interesting systemd units(docker mounts and calico network devices).
 	MetricDropSystemdNameRegexp = config.MustNewRegexp(`node_systemd_unit_state;(dev-disk-by|run-docker-netns|sys-devices|sys-subsystem-net|var-lib-docker-overlay2|var-lib-docker-containers|var-lib-kubelet-pods).*`)
 
-	// NginxICChangeScrapePort is the regular expression to match nginx ic port in order to change it scrape port.
+	// NginxICPodNameRegexp is the regular expression to match nginx ic pod name.
 	NginxICPodNameRegexp = config.MustNewRegexp(`nginx-ingress-controller(.*)`)
+
+	// KubeStateMetricsPodNameRegexp is the regular expression to match kube-state-metrics pod name..
+	KubeStateMetricsPodNameRegexp = config.MustNewRegexp(`kube-state-metrics(.*)`)
 
 	// NodeExporterRegexp is the regular expression to match against the
 	// node-exporter name.

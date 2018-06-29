@@ -113,12 +113,23 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 		TargetLabel: ClusterTypeLabel,
 		Replacement: GuestClusterType,
 	}
-	rebuildICScrapeURLRelabelConfig := &config.RelabelConfig{
+	rewriteAddress := &config.RelabelConfig{
+		TargetLabel: AddressLabel,
+		Replacement: key.APIServiceHost(key.PrefixMaster, clusterID),
+	}
+	rewriteKubeStateMetricPath := &config.RelabelConfig{
+		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
+		Regex:        KubeStateMetricsPodNameRegexp,
+		TargetLabel:  MetricPathLabel,
+		Replacement:  key.APIProxyPodMetricsPath(key.KubeStaeMetricsPort),
+	}
+	rewriteICMetricPath := &config.RelabelConfig{
 		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 		Regex:        NginxICPodNameRegexp,
-		TargetLabel:  AddressLabel,
-		Replacement:  key.NginxPodProxyUrlTemplate(key.MasterPrefix, clusterID),
+		TargetLabel:  MetricPathLabel,
+		Replacement:  key.APIProxyPodMetricsPath(key.NginxICMetricPort),
 	}
+
 	ipLabelRelabelConfig := &config.RelabelConfig{
 		TargetLabel:  IPLabel,
 		SourceLabels: model.LabelNames{KubernetesSDNodeAddressInternalIPLabel},
@@ -295,7 +306,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 
 		{
 			JobName:                getJobName(service, WorkloadJobType),
-			Scheme:                 HttpScheme,
+			Scheme:                 HttpsScheme,
 			ServiceDiscoveryConfig: endpointSDConfig,
 			RelabelConfigs: []*config.RelabelConfig{
 				// Only keep kube-state-metrics targets.
@@ -318,8 +329,11 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				clusterIDLabelRelabelConfig,
 				// Add cluster_type label.
 				clusterTypeLabelRelabelConfig,
-				// change IC target port
-				rebuildICScrapeURLRelabelConfig,
+				// rewrite host to api proxy
+				rewriteAddress,
+				// rewrite metrics scrape path to connect pods
+				rewriteKubeStateMetricPath,
+				rewriteICMetricPath,
 			},
 			MetricRelabelConfigs: []*config.RelabelConfig{
 				// keep only kube-system cadvisor metrics

@@ -438,7 +438,7 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
     regex: node_systemd_unit_state;(dev-disk-by|run-docker-netns|sys-devices|sys-subsystem-net|var-lib-docker-overlay2|var-lib-docker-containers|var-lib-kubelet-pods).*
     action: drop
 - job_name: guest-cluster-xa5ly-workload
-  scheme: http
+  scheme: https
   kubernetes_sd_configs:
   - api_server: https://apiserver.xa5ly
     role: endpoints
@@ -461,10 +461,16 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
     replacement: xa5ly
   - target_label: cluster_type
     replacement: guest
+  - target_label: __address__
+    replacement: master.xa5ly:443
+  - source_labels: [__meta_kubernetes_pod_name]
+    regex: kube-state-metrics(.*)
+    target_label: __metrics_path__
+    replacement: /api/v1/namespaces/kube-system/pods/${1}:10301/proxy/metrics
   - source_labels: [__meta_kubernetes_pod_name]
     regex: nginx-ingress-controller(.*)
-    target_label: __address__
-    replacement: https://master.xa5ly:443/api/v1/namespaces/kube-system/pods/${1}:10254/proxy/metrics
+    target_label: __metrics_path__
+    replacement: /api/v1/namespaces/kube-system/pods/${1}:10254/proxy/metrics
   metric_relabel_configs:
   - source_labels: [exported_namespace]
     regex: (kube-system|giantswarm)

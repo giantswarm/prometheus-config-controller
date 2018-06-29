@@ -274,7 +274,7 @@ var (
 	}
 	TestConfigOneWorkload = config.ScrapeConfig{
 		JobName: "guest-cluster-xa5ly-workload",
-		Scheme:  "http",
+		Scheme:  "https",
 		ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
 			KubernetesSDConfigs: []*config.KubernetesSDConfig{
 				{
@@ -315,10 +315,20 @@ var (
 				Replacement: GuestClusterType,
 			},
 			{
+				TargetLabel: AddressLabel,
+				Replacement: key.APIServiceHost(key.PrefixMaster, "xa5ly"),
+			},
+			{
+				SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
+				Regex:        KubeStateMetricsPodNameRegexp,
+				TargetLabel:  MetricPathLabel,
+				Replacement:  key.APIProxyPodMetricsPath(key.KubeStaeMetricsPort),
+			},
+			{
 				SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 				Regex:        NginxICPodNameRegexp,
-				TargetLabel:  AddressLabel,
-				Replacement:  key.NginxPodProxyUrlTemplate(key.MasterPrefix, "xa5ly"),
+				TargetLabel:  MetricPathLabel,
+				Replacement:  key.APIProxyPodMetricsPath(key.NginxICMetricPort),
 			},
 		},
 		MetricRelabelConfigs: []*config.RelabelConfig{
@@ -391,5 +401,5 @@ func init() {
 	TestConfigTwoWorkload.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.CertFile = crtFile
 	TestConfigTwoWorkload.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.KeyFile = keyFile
 	TestConfigTwoWorkload.RelabelConfigs[3].Replacement = clusterID
-	TestConfigTwoWorkload.RelabelConfigs[5].Replacement = key.NginxPodProxyUrlTemplate(key.MasterPrefix, clusterID)
+	TestConfigTwoWorkload.RelabelConfigs[5].Replacement = key.APIServiceHost(key.PrefixMaster, clusterID)
 }
