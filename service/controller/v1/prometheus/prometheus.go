@@ -68,7 +68,7 @@ var (
 	// ClusterTypeLabel is the label used to hold the cluster's type.
 	ClusterTypeLabel = "cluster_type"
 
-	// NamespaceLabel is the label used to hold the application's namespace.
+	// ExportedNamespaceLabel is the label used to hold the application's namespace.
 	ExportedNamespaceLabel = "exported_namespace"
 
 	// IPLabel is the label used to hold the machine's IP.
@@ -153,10 +153,10 @@ var (
 	// NginxICPodNameRegexp is the regular expression to match nginx ic pod name.
 	NginxICPodNameRegexp = config.MustNewRegexp(`(nginx-ingress-controller.*)`)
 
-	// KubeStateMetricsPodNameRegexp is the regular expression to match kube-state-metrics pod name..
+	// KubeStateMetricsPodNameRegexp is the regular expression to match kube-state-metrics pod name.
 	KubeStateMetricsPodNameRegexp = config.MustNewRegexp(`(kube-state-metrics.*)`)
 
-	// KubeSystemRelabelNamespaceRegexp is the regular expression to match against  metrics with empty exported_namespace and namespace kube-system.
+	// KubeSystemRelabelNamespaceRegexp is the regular expression to match against metrics with empty exported_namespace and namespace kube-system.
 	KubeSystemRelabelNamespaceRegexp = config.MustNewRegexp(`;kube-system`)
 
 	// NodeExporterRegexp is the regular expression to match against the
