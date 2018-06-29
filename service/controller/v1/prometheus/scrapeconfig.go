@@ -312,7 +312,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 			RelabelConfigs: []*config.RelabelConfig{
 				// Only keep kube-state-metrics targets.
 				{
-					SourceLabels: model.LabelNames{KubernetesSDNamespaceLabel, KubernetesSDPodNameLabel},
+					SourceLabels: model.LabelNames{KubernetesSDNamespaceLabel, KubernetesSDServiceNameLabel},
 					Regex:        WhitelistRegexp,
 					Action:       config.RelabelKeep,
 				},

@@ -110,9 +110,6 @@ const (
 	// NodeExporterPort is the path under which node-exporter metrics can be scraped.
 	NodeExporterPort = "${1}:10300"
 
-	// NginxICMetricPort is the path port under which ingress controller metrics can be scraped.
-	NginxICMetricPort = "${1}:10254"
-
 	// GroupCapture is the regular expression to match against the first capture group.
 	GroupCapture = "${1}"
 )
@@ -159,7 +156,7 @@ var (
 	NodeExporterPortRegexp = config.MustNewRegexp(`(.*):10300`)
 
 	// WhitelistRegexp is the regular expression to match workload targets to scrape.
-	WhitelistRegexp = config.MustNewRegexp(`kube-system;(kube-state-metrics|nginx-ingress-controller)(.*)`)
+	WhitelistRegexp = config.MustNewRegexp(`kube-system;(kube-state-metrics|nginx-ingress-controller)`)
 )
 
 // GetClusterID returns the value of the cluster annotation.
