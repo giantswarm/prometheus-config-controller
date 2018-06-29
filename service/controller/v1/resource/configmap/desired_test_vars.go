@@ -296,7 +296,7 @@ var (
 		},
 		RelabelConfigs: []*config.RelabelConfig{
 			{
-				SourceLabels: model.LabelNames{prometheus.KubernetesSDNamespaceLabel, prometheus.KubernetesSDServiceNameLabel},
+				SourceLabels: model.LabelNames{prometheus.KubernetesSDNamespaceLabel, prometheus.KubernetesSDPodNameLabel},
 				Regex:        prometheus.WhitelistRegexp,
 				Action:       config.RelabelKeep,
 			},

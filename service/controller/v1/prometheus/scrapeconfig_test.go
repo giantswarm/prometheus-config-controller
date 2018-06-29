@@ -450,8 +450,8 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
     namespaces:
       names: []
   relabel_configs:
-  - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name]
-    regex: kube-system;(kube-state-metrics|nginx-ingress-controller)
+  - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_pod_name]
+    regex: kube-system;(kube-state-metrics|nginx-ingress-controller)(.*)
     action: keep
   - source_labels: [__meta_kubernetes_service_name]
     target_label: app

@@ -294,7 +294,7 @@ var (
 		},
 		RelabelConfigs: []*config.RelabelConfig{
 			{
-				SourceLabels: model.LabelNames{KubernetesSDNamespaceLabel, KubernetesSDServiceNameLabel},
+				SourceLabels: model.LabelNames{KubernetesSDNamespaceLabel, KubernetesSDPodNameLabel},
 				Regex:        WhitelistRegexp,
 				Action:       config.RelabelKeep,
 			},

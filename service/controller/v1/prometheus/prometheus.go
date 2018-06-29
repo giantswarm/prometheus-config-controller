@@ -41,8 +41,6 @@ var (
 
 // Prometheus Kubernetes metrics labels.
 var (
-	// MetricAddressLabel is label for filtering by target address.
-	MetricAddressLabel = model.LabelName("__address__")
 	// MetricExportedNamespaceLabel is label for filtering by k8s namespace in kube-state-metric.
 	MetricExportedNamespaceLabel = model.LabelName("exported_namespace")
 	// MetricNamespaceLabel is label for filtering by k8s namespace
@@ -155,7 +153,7 @@ var (
 	NodeExporterPortRegexp = config.MustNewRegexp(`(.*):10300`)
 
 	// WhitelistRegexp is the regular expression to match workload targets to scrape.
-	WhitelistRegexp = config.MustNewRegexp(`kube-system;(kube-state-metrics|nginx-ingress-controller)`)
+	WhitelistRegexp = config.MustNewRegexp(`kube-system;(kube-state-metrics|nginx-ingress-controller)(.*)`)
 )
 
 // GetClusterID returns the value of the cluster annotation.
