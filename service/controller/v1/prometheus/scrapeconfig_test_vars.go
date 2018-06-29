@@ -3,9 +3,9 @@ package prometheus
 import (
 	"net/url"
 
+	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/key"
 	"github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/config"
-	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/key"
 )
 
 var (
@@ -318,7 +318,7 @@ var (
 				SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 				Regex:        NginxICPodNameRegexp,
 				TargetLabel:  AddressLabel,
-				Replacement:  key.NginxPodProxyUrlTemplate(key.MasterPrefix,"xa5ly"),
+				Replacement:  key.NginxPodProxyUrlTemplate(key.MasterPrefix, "xa5ly"),
 			},
 		},
 		MetricRelabelConfigs: []*config.RelabelConfig{
@@ -391,5 +391,5 @@ func init() {
 	TestConfigTwoWorkload.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.CertFile = crtFile
 	TestConfigTwoWorkload.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.KeyFile = keyFile
 	TestConfigTwoWorkload.RelabelConfigs[3].Replacement = clusterID
-	TestConfigTwoWorkload.RelabelConfigs[5].Replacement = key.NginxPodProxyUrlTemplate(key.MasterPrefix,clusterID)
+	TestConfigTwoWorkload.RelabelConfigs[5].Replacement = key.NginxPodProxyUrlTemplate(key.MasterPrefix, clusterID)
 }
