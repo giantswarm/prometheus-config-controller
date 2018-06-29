@@ -462,6 +462,8 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
     target_label: app
   - source_labels: [__meta_kubernetes_namespace]
     target_label: namespace
+  - source_labels: [__meta_kubernetes_pod_name]
+    target_label: pod_name
   - target_label: cluster_id
     replacement: xa5ly
   - target_label: cluster_type

@@ -83,6 +83,9 @@ var (
 	// MetricPathLabel is the label used to hold the scrape metrics path.
 	MetricPathLabel = "__metrics_path__"
 
+	// NamespaceLabel is the label used to hold the pod name.
+	PodNameLabel = "pod_name"
+
 	// RoleLabel is the label used to hold the machine's role.
 	RoleLabel = "role"
 )

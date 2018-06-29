@@ -315,6 +315,10 @@ var (
 				SourceLabels: model.LabelNames{KubernetesSDNamespaceLabel},
 			},
 			{
+				TargetLabel:  PodNameLabel,
+				SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
+			},
+			{
 				TargetLabel: ClusterIDLabel,
 				Replacement: "xa5ly",
 			},
@@ -418,6 +422,6 @@ func init() {
 	TestConfigTwoWorkload.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.CAFile = caFile
 	TestConfigTwoWorkload.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.CertFile = crtFile
 	TestConfigTwoWorkload.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.KeyFile = keyFile
-	TestConfigTwoWorkload.RelabelConfigs[3].Replacement = clusterID
-	TestConfigTwoWorkload.RelabelConfigs[5].Replacement = key.APIServiceHost(key.PrefixMaster, clusterID)
+	TestConfigTwoWorkload.RelabelConfigs[4].Replacement = clusterID
+	TestConfigTwoWorkload.RelabelConfigs[6].Replacement = key.APIServiceHost(key.PrefixMaster, clusterID)
 }

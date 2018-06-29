@@ -328,6 +328,11 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					TargetLabel:  NamespaceLabel,
 					SourceLabels: model.LabelNames{KubernetesSDNamespaceLabel},
 				},
+				// Add pod_name label.
+				{
+					TargetLabel:  PodNameLabel,
+					SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
+				},
 				// Add cluster_id label.
 				clusterIDLabelRelabelConfig,
 				// Add cluster_type label.
