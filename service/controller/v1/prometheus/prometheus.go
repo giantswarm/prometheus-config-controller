@@ -145,10 +145,10 @@ var (
 	MetricDropSystemdNameRegexp = config.MustNewRegexp(`node_systemd_unit_state;(dev-disk-by|run-docker-netns|sys-devices|sys-subsystem-net|var-lib-docker-overlay2|var-lib-docker-containers|var-lib-kubelet-pods).*`)
 
 	// NginxICPodNameRegexp is the regular expression to match nginx ic pod name.
-	NginxICPodNameRegexp = config.MustNewRegexp(`nginx-ingress-controller(.*)`)
+	NginxICPodNameRegexp = config.MustNewRegexp(`(nginx-ingress-controller.*)`)
 
 	// KubeStateMetricsPodNameRegexp is the regular expression to match kube-state-metrics pod name..
-	KubeStateMetricsPodNameRegexp = config.MustNewRegexp(`kube-state-metrics(.*)`)
+	KubeStateMetricsPodNameRegexp = config.MustNewRegexp(`(kube-state-metrics.*)`)
 
 	// NodeExporterRegexp is the regular expression to match against the
 	// node-exporter name.

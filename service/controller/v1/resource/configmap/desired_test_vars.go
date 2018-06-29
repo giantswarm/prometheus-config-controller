@@ -277,6 +277,14 @@ var (
 	TestConfigOneWorkload = config.ScrapeConfig{
 		JobName: "guest-cluster-xa5ly-workload",
 		Scheme:  "https",
+		HTTPClientConfig: config.HTTPClientConfig{
+			TLSConfig: config.TLSConfig{
+				CAFile:             "/certs/xa5ly-ca.pem",
+				CertFile:           "/certs/xa5ly-crt.pem",
+				KeyFile:            "/certs/xa5ly-key.pem",
+				InsecureSkipVerify: false,
+			},
+		},
 		ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
 			KubernetesSDConfigs: []*config.KubernetesSDConfig{
 				{
@@ -398,6 +406,9 @@ func init() {
 	TestConfigTwoNodeExporter.RelabelConfigs[3].Replacement = clusterID
 
 	TestConfigTwoWorkload.JobName = "guest-cluster-0ba9v-workload"
+	TestConfigTwoWorkload.HTTPClientConfig.TLSConfig.CAFile = caFile
+	TestConfigTwoWorkload.HTTPClientConfig.TLSConfig.CertFile = crtFile
+	TestConfigTwoWorkload.HTTPClientConfig.TLSConfig.KeyFile = keyFile
 	TestConfigTwoWorkload.ServiceDiscoveryConfig.KubernetesSDConfigs[0].APIServer.Host = apiserver
 	TestConfigTwoWorkload.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.CAFile = caFile
 	TestConfigTwoWorkload.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.CertFile = crtFile

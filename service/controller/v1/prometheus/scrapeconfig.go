@@ -306,6 +306,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 
 		{
 			JobName:                getJobName(service, WorkloadJobType),
+			HTTPClientConfig:       secureHTTPClientConfig,
 			Scheme:                 HttpsScheme,
 			ServiceDiscoveryConfig: endpointSDConfig,
 			RelabelConfigs: []*config.RelabelConfig{

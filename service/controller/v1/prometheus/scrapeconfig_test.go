@@ -449,6 +449,11 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
       insecure_skip_verify: false
     namespaces:
       names: []
+  tls_config:
+    ca_file: /certs/xa5ly-ca.pem
+    cert_file: /certs/xa5ly-crt.pem
+    key_file: /certs/xa5ly-key.pem
+    insecure_skip_verify: false
   relabel_configs:
   - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_pod_name]
     regex: kube-system;(kube-state-metrics|nginx-ingress-controller)(.*)
@@ -464,11 +469,11 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
   - target_label: __address__
     replacement: master.xa5ly:443
   - source_labels: [__meta_kubernetes_pod_name]
-    regex: kube-state-metrics(.*)
+    regex: (kube-state-metrics.*)
     target_label: __metrics_path__
     replacement: /api/v1/namespaces/kube-system/pods/${1}:10301/proxy/metrics
   - source_labels: [__meta_kubernetes_pod_name]
-    regex: nginx-ingress-controller(.*)
+    regex: (nginx-ingress-controller.*)
     target_label: __metrics_path__
     replacement: /api/v1/namespaces/kube-system/pods/${1}:10254/proxy/metrics
   metric_relabel_configs:
