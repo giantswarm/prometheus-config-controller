@@ -340,6 +340,13 @@ var (
 			},
 		},
 		MetricRelabelConfigs: []*config.RelabelConfig{
+			{
+				Action:       ActionRelabel,
+				SourceLabels: model.LabelNames{MetricExportedNamespaceLabel, MetricNamespaceLabel},
+				Regex:        KubeSystemRelabelNamespaceRegexp,
+				Replacement:  NamespaceKubeSystemLabel,
+				TargetLabel:  ExportedNamespaceLabel,
+			},
 			// keep only kube-system cadvisor metrics
 			{
 				Action:       ActionKeep,

@@ -36,6 +36,8 @@ const (
 	ActionKeep = "keep"
 	// ActionDrop is action type that drops matching metrics.
 	ActionDrop = "drop"
+	// ActionRelabel is action type that relabel metrics.
+	ActionRelabel = "replace"
 )
 
 // getJobName takes a cluster ID, and returns a suitable job name.
@@ -337,6 +339,15 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				rewriteICMetricPath,
 			},
 			MetricRelabelConfigs: []*config.RelabelConfig{
+				// relabel namespace to exported_namespace for endpoints in kube-system namespace.
+				// this keeps metrics from nginx ingress controller from being dropped by filter below
+				{
+					Action:       ActionRelabel,
+					SourceLabels: model.LabelNames{MetricExportedNamespaceLabel, MetricNamespaceLabel},
+					Regex:        KubeSystemRelabelNamespaceRegexp,
+					Replacement:  NamespaceKubeSystemLabel,
+					TargetLabel:  ExportedNamespaceLabel,
+				},
 				// keep only kube-system cadvisor metrics
 				{
 					Action:       ActionKeep,

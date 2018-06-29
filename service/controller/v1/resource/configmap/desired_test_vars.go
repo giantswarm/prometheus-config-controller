@@ -342,6 +342,13 @@ var (
 			},
 		},
 		MetricRelabelConfigs: []*config.RelabelConfig{
+			{
+				Action:       prometheus.ActionRelabel,
+				SourceLabels: model.LabelNames{prometheus.MetricExportedNamespaceLabel, prometheus.MetricNamespaceLabel},
+				Regex:        prometheus.KubeSystemRelabelNamespaceRegexp,
+				Replacement:  prometheus.NamespaceKubeSystemLabel,
+				TargetLabel:  prometheus.ExportedNamespaceLabel,
+			},
 			// keep only kube-system cadvisor metrics
 			{
 				Action:       prometheus.ActionKeep,

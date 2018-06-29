@@ -68,11 +68,17 @@ var (
 	// ClusterTypeLabel is the label used to hold the cluster's type.
 	ClusterTypeLabel = "cluster_type"
 
+	// NamespaceLabel is the label used to hold the application's namespace.
+	ExportedNamespaceLabel = "exported_namespace"
+
 	// IPLabel is the label used to hold the machine's IP.
 	IPLabel = "ip"
 
 	// NamespaceLabel is the label used to hold the application's namespace.
 	NamespaceLabel = "namespace"
+
+	// NamespaceKubeSystemLabel is the label for kube-system namespace.
+	NamespaceKubeSystemLabel = "kube-system"
 
 	// MetricPathLabel is the label used to hold the scrape metrics path.
 	MetricPathLabel = "__metrics_path__"
@@ -146,6 +152,9 @@ var (
 
 	// KubeStateMetricsPodNameRegexp is the regular expression to match kube-state-metrics pod name..
 	KubeStateMetricsPodNameRegexp = config.MustNewRegexp(`(kube-state-metrics.*)`)
+
+	// KubeSystemRelabelNamespaceRegexp is the regular expression to match against  metrics with empty exported_namespace and namespace kube-system.
+	KubeSystemRelabelNamespaceRegexp = config.MustNewRegexp(`;kube-system`)
 
 	// NodeExporterRegexp is the regular expression to match against the
 	// node-exporter name.
