@@ -36,6 +36,8 @@ const (
 	ActionKeep = "keep"
 	// ActionDrop is action type that drops matching metrics.
 	ActionDrop = "drop"
+	// ActionRelabel is action type that relabel metrics.
+	ActionRelabel = "replace"
 )
 
 // getJobName takes a cluster ID, and returns a suitable job name.
@@ -113,6 +115,23 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 		TargetLabel: ClusterTypeLabel,
 		Replacement: GuestClusterType,
 	}
+	rewriteAddress := &config.RelabelConfig{
+		TargetLabel: AddressLabel,
+		Replacement: key.APIServiceHost(key.PrefixMaster, clusterID),
+	}
+	rewriteKubeStateMetricPath := &config.RelabelConfig{
+		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
+		Regex:        KubeStateMetricsPodNameRegexp,
+		TargetLabel:  MetricPathLabel,
+		Replacement:  key.APIProxyPodMetricsPath(key.KubeStaeMetricsPort),
+	}
+	rewriteICMetricPath := &config.RelabelConfig{
+		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
+		Regex:        NginxICPodNameRegexp,
+		TargetLabel:  MetricPathLabel,
+		Replacement:  key.APIProxyPodMetricsPath(key.NginxICMetricPort),
+	}
+
 	ipLabelRelabelConfig := &config.RelabelConfig{
 		TargetLabel:  IPLabel,
 		SourceLabels: model.LabelNames{KubernetesSDNodeAddressInternalIPLabel},
@@ -289,7 +308,8 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 
 		{
 			JobName:                getJobName(service, WorkloadJobType),
-			Scheme:                 HttpScheme,
+			HTTPClientConfig:       secureHTTPClientConfig,
+			Scheme:                 HttpsScheme,
 			ServiceDiscoveryConfig: endpointSDConfig,
 			RelabelConfigs: []*config.RelabelConfig{
 				// Only keep kube-state-metrics targets.
@@ -308,12 +328,31 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					TargetLabel:  NamespaceLabel,
 					SourceLabels: model.LabelNames{KubernetesSDNamespaceLabel},
 				},
+				// Add pod_name label.
+				{
+					TargetLabel:  PodNameLabel,
+					SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
+				},
 				// Add cluster_id label.
 				clusterIDLabelRelabelConfig,
 				// Add cluster_type label.
 				clusterTypeLabelRelabelConfig,
+				// rewrite host to api proxy
+				rewriteAddress,
+				// rewrite metrics scrape path to connect pods
+				rewriteKubeStateMetricPath,
+				rewriteICMetricPath,
 			},
 			MetricRelabelConfigs: []*config.RelabelConfig{
+				// relabel namespace to exported_namespace for endpoints in kube-system namespace.
+				// this keeps metrics from nginx ingress controller from being dropped by filter below
+				{
+					Action:       ActionRelabel,
+					SourceLabels: model.LabelNames{MetricExportedNamespaceLabel, MetricNamespaceLabel},
+					Regex:        KubeSystemRelabelNamespaceRegexp,
+					Replacement:  NamespaceKubeSystemLabel,
+					TargetLabel:  ExportedNamespaceLabel,
+				},
 				// keep only kube-system cadvisor metrics
 				{
 					Action:       ActionKeep,

@@ -438,7 +438,7 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
     regex: node_systemd_unit_state;(dev-disk-by|run-docker-netns|sys-devices|sys-subsystem-net|var-lib-docker-overlay2|var-lib-docker-containers|var-lib-kubelet-pods).*
     action: drop
 - job_name: guest-cluster-xa5ly-workload
-  scheme: http
+  scheme: https
   kubernetes_sd_configs:
   - api_server: https://apiserver.xa5ly
     role: endpoints
@@ -449,19 +449,41 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
       insecure_skip_verify: false
     namespaces:
       names: []
+  tls_config:
+    ca_file: /certs/xa5ly-ca.pem
+    cert_file: /certs/xa5ly-crt.pem
+    key_file: /certs/xa5ly-key.pem
+    insecure_skip_verify: false
   relabel_configs:
   - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name]
-    regex: kube-system;kube-state-metrics|node-exporter
+    regex: kube-system;(kube-state-metrics|nginx-ingress-controller)
     action: keep
   - source_labels: [__meta_kubernetes_service_name]
     target_label: app
   - source_labels: [__meta_kubernetes_namespace]
     target_label: namespace
+  - source_labels: [__meta_kubernetes_pod_name]
+    target_label: pod_name
   - target_label: cluster_id
     replacement: xa5ly
   - target_label: cluster_type
     replacement: guest
+  - target_label: __address__
+    replacement: master.xa5ly:443
+  - source_labels: [__meta_kubernetes_pod_name]
+    regex: (kube-state-metrics.*)
+    target_label: __metrics_path__
+    replacement: /api/v1/namespaces/kube-system/pods/${1}:10301/proxy/metrics
+  - source_labels: [__meta_kubernetes_pod_name]
+    regex: (nginx-ingress-controller.*)
+    target_label: __metrics_path__
+    replacement: /api/v1/namespaces/kube-system/pods/${1}:10254/proxy/metrics
   metric_relabel_configs:
+  - source_labels: [exported_namespace, namespace]
+    regex: ;kube-system
+    target_label: exported_namespace
+    replacement: kube-system
+    action: replace
   - source_labels: [exported_namespace]
     regex: (kube-system|giantswarm)
     action: keep

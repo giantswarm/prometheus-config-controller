@@ -6,6 +6,7 @@ import (
 	"github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/config"
 
+	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/key"
 	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/prometheus"
 )
 
@@ -275,7 +276,15 @@ var (
 	}
 	TestConfigOneWorkload = config.ScrapeConfig{
 		JobName: "guest-cluster-xa5ly-workload",
-		Scheme:  "http",
+		Scheme:  "https",
+		HTTPClientConfig: config.HTTPClientConfig{
+			TLSConfig: config.TLSConfig{
+				CAFile:             "/certs/xa5ly-ca.pem",
+				CertFile:           "/certs/xa5ly-crt.pem",
+				KeyFile:            "/certs/xa5ly-key.pem",
+				InsecureSkipVerify: false,
+			},
+		},
 		ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
 			KubernetesSDConfigs: []*config.KubernetesSDConfig{
 				{
@@ -308,6 +317,10 @@ var (
 				SourceLabels: model.LabelNames{prometheus.KubernetesSDNamespaceLabel},
 			},
 			{
+				TargetLabel:  prometheus.PodNameLabel,
+				SourceLabels: model.LabelNames{prometheus.KubernetesSDPodNameLabel},
+			},
+			{
 				TargetLabel: prometheus.ClusterIDLabel,
 				Replacement: "xa5ly",
 			},
@@ -315,8 +328,31 @@ var (
 				TargetLabel: prometheus.ClusterTypeLabel,
 				Replacement: prometheus.GuestClusterType,
 			},
+			{
+				TargetLabel: prometheus.AddressLabel,
+				Replacement: key.APIServiceHost(key.PrefixMaster, "xa5ly"),
+			},
+			{
+				SourceLabels: model.LabelNames{prometheus.KubernetesSDPodNameLabel},
+				Regex:        prometheus.KubeStateMetricsPodNameRegexp,
+				TargetLabel:  prometheus.MetricPathLabel,
+				Replacement:  key.APIProxyPodMetricsPath(key.KubeStaeMetricsPort),
+			},
+			{
+				SourceLabels: model.LabelNames{prometheus.KubernetesSDPodNameLabel},
+				Regex:        prometheus.NginxICPodNameRegexp,
+				TargetLabel:  prometheus.MetricPathLabel,
+				Replacement:  key.APIProxyPodMetricsPath(key.NginxICMetricPort),
+			},
 		},
 		MetricRelabelConfigs: []*config.RelabelConfig{
+			{
+				Action:       prometheus.ActionRelabel,
+				SourceLabels: model.LabelNames{prometheus.MetricExportedNamespaceLabel, prometheus.MetricNamespaceLabel},
+				Regex:        prometheus.KubeSystemRelabelNamespaceRegexp,
+				Replacement:  prometheus.NamespaceKubeSystemLabel,
+				TargetLabel:  prometheus.ExportedNamespaceLabel,
+			},
 			// keep only kube-system cadvisor metrics
 			{
 				Action:       prometheus.ActionKeep,
@@ -381,9 +417,13 @@ func init() {
 	TestConfigTwoNodeExporter.RelabelConfigs[3].Replacement = clusterID
 
 	TestConfigTwoWorkload.JobName = "guest-cluster-0ba9v-workload"
+	TestConfigTwoWorkload.HTTPClientConfig.TLSConfig.CAFile = caFile
+	TestConfigTwoWorkload.HTTPClientConfig.TLSConfig.CertFile = crtFile
+	TestConfigTwoWorkload.HTTPClientConfig.TLSConfig.KeyFile = keyFile
 	TestConfigTwoWorkload.ServiceDiscoveryConfig.KubernetesSDConfigs[0].APIServer.Host = apiserver
 	TestConfigTwoWorkload.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.CAFile = caFile
 	TestConfigTwoWorkload.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.CertFile = crtFile
 	TestConfigTwoWorkload.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.KeyFile = keyFile
-	TestConfigTwoWorkload.RelabelConfigs[3].Replacement = clusterID
+	TestConfigTwoWorkload.RelabelConfigs[4].Replacement = clusterID
+	TestConfigTwoWorkload.RelabelConfigs[6].Replacement = key.APIServiceHost(key.PrefixMaster, clusterID)
 }

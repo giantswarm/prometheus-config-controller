@@ -30,6 +30,10 @@ var (
 	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes node role label.
 	KubernetesSDNodeLabelRole = model.LabelName("__meta_kubernetes_node_label_role")
 
+	// KubernetesSDPodNameLabel is the label applied to the target
+	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes pod name.
+	KubernetesSDPodNameLabel = model.LabelName("__meta_kubernetes_pod_name")
+
 	// KubernetesSDServiceNameLabel is the label applied to the target
 	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes service.
 	KubernetesSDServiceNameLabel = model.LabelName("__meta_kubernetes_service_name")
@@ -53,6 +57,8 @@ var (
 
 // Giant Swarm metrics schema labels.
 var (
+	// AddressLabel is the label used to hold target ip and port.
+	AddressLabel = "__address__"
 	// AppLabel is the label used to hold the application's name.
 	AppLabel = "app"
 
@@ -62,11 +68,23 @@ var (
 	// ClusterTypeLabel is the label used to hold the cluster's type.
 	ClusterTypeLabel = "cluster_type"
 
+	// ExportedNamespaceLabel is the label used to hold the application's namespace.
+	ExportedNamespaceLabel = "exported_namespace"
+
 	// IPLabel is the label used to hold the machine's IP.
 	IPLabel = "ip"
 
 	// NamespaceLabel is the label used to hold the application's namespace.
 	NamespaceLabel = "namespace"
+
+	// NamespaceKubeSystemLabel is the label for kube-system namespace.
+	NamespaceKubeSystemLabel = "kube-system"
+
+	// MetricPathLabel is the label used to hold the scrape metrics path.
+	MetricPathLabel = "__metrics_path__"
+
+	// NamespaceLabel is the label used to hold the pod name.
+	PodNameLabel = "pod_name"
 
 	// RoleLabel is the label used to hold the machine's role.
 	RoleLabel = "role"
@@ -132,6 +150,15 @@ var (
 	// MetricDropSystemdNameRegexp is the regular expression to match against not interesting systemd units(docker mounts and calico network devices).
 	MetricDropSystemdNameRegexp = config.MustNewRegexp(`node_systemd_unit_state;(dev-disk-by|run-docker-netns|sys-devices|sys-subsystem-net|var-lib-docker-overlay2|var-lib-docker-containers|var-lib-kubelet-pods).*`)
 
+	// NginxICPodNameRegexp is the regular expression to match nginx ic pod name.
+	NginxICPodNameRegexp = config.MustNewRegexp(`(nginx-ingress-controller.*)`)
+
+	// KubeStateMetricsPodNameRegexp is the regular expression to match kube-state-metrics pod name.
+	KubeStateMetricsPodNameRegexp = config.MustNewRegexp(`(kube-state-metrics.*)`)
+
+	// KubeSystemRelabelNamespaceRegexp is the regular expression to match against metrics with empty exported_namespace and namespace kube-system.
+	KubeSystemRelabelNamespaceRegexp = config.MustNewRegexp(`;kube-system`)
+
 	// NodeExporterRegexp is the regular expression to match against the
 	// node-exporter name.
 	NodeExporterRegexp = config.MustNewRegexp(`kube-system;node-exporter`)
@@ -141,7 +168,7 @@ var (
 	NodeExporterPortRegexp = config.MustNewRegexp(`(.*):10300`)
 
 	// WhitelistRegexp is the regular expression to match workload targets to scrape.
-	WhitelistRegexp = config.MustNewRegexp(`kube-system;kube-state-metrics|node-exporter`)
+	WhitelistRegexp = config.MustNewRegexp(`kube-system;(kube-state-metrics|nginx-ingress-controller)`)
 )
 
 // GetClusterID returns the value of the cluster annotation.
