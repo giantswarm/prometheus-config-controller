@@ -124,7 +124,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 		SourceLabels: model.LabelNames{KubernetesSDNodeAddressInternalIPLabel},
 	}
 	removeDuplicateICRelabelConfig := &config.RelabelConfig{
-		SourceLabels: model.LabelNames{MetricNameLabel, MetricAddressLabel},
+		SourceLabels: model.LabelNames{KubernetesSDServiceNameLabel, MetricAddressLabel},
 		Regex:        NginxICDropDuplicates,
 		Action:       ActionDrop,
 	}

@@ -316,7 +316,7 @@ var (
 				Replacement: prometheus.GuestClusterType,
 			},
 			{
-				SourceLabels: model.LabelNames{prometheus.MetricNameLabel, prometheus.MetricAddressLabel},
+				SourceLabels: model.LabelNames{prometheus.KubernetesSDServiceNameLabel, prometheus.MetricAddressLabel},
 				Regex:        prometheus.NginxICDropDuplicates,
 				Action:       prometheus.ActionDrop,
 			},

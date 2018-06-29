@@ -314,7 +314,7 @@ var (
 				Replacement: GuestClusterType,
 			},
 			{
-				SourceLabels: model.LabelNames{MetricNameLabel, MetricAddressLabel},
+				SourceLabels: model.LabelNames{KubernetesSDServiceNameLabel, MetricAddressLabel},
 				Regex:        NginxICDropDuplicates,
 				Action:       ActionDrop,
 			},

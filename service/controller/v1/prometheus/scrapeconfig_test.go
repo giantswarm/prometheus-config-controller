@@ -461,7 +461,7 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
     replacement: xa5ly
   - target_label: cluster_type
     replacement: guest
-  - source_labels: [__name__, __address__]
+  - source_labels: [__meta_kubernetes_service_name, __address__]
     regex: nginx-ingress-controller;(.*):80
     action: drop
   - source_labels: [__address__]
