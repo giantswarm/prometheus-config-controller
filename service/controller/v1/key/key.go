@@ -5,6 +5,11 @@ import (
 	"path"
 )
 
+const (
+	MasterPrefix    = "master"
+	APIServerPrefix = "apiserver"
+)
+
 func certPath(certificateDirectory, clusterID, suffix string) string {
 	return path.Join(certificateDirectory, fmt.Sprintf("%s-%s.pem", clusterID, suffix))
 }
@@ -19,4 +24,8 @@ func CrtPath(certificateDirectory, clusterID string) string {
 
 func KeyPath(certificateDirectory, clusterID string) string {
 	return certPath(certificateDirectory, clusterID, "key")
+}
+
+func NginxPodProxyUrlTemplate(masterPrefix string, clusterID string) string {
+	return fmt.Sprintf("https://%s.%s:443/api/v1/namespaces/kube-system/pods/${1}:10254/proxy/metrics", masterPrefix, clusterID)
 }

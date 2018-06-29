@@ -30,6 +30,10 @@ var (
 	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes node role label.
 	KubernetesSDNodeLabelRole = model.LabelName("__meta_kubernetes_node_label_role")
 
+	// KubernetesSDPodNameLabel is the label applied to the target
+	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes pod name.
+	KubernetesSDPodNameLabel = model.LabelName("__meta_kubernetes_pod_name")
+
 	// KubernetesSDServiceNameLabel is the label applied to the target
 	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes service.
 	KubernetesSDServiceNameLabel = model.LabelName("__meta_kubernetes_service_name")
@@ -140,10 +144,7 @@ var (
 	MetricDropSystemdNameRegexp = config.MustNewRegexp(`node_systemd_unit_state;(dev-disk-by|run-docker-netns|sys-devices|sys-subsystem-net|var-lib-docker-overlay2|var-lib-docker-containers|var-lib-kubelet-pods).*`)
 
 	// NginxICChangeScrapePort is the regular expression to match nginx ic port in order to change it scrape port.
-	NginxICChangeScrapePort = config.MustNewRegexp(`(.*):443`)
-
-	// NginxICDropDuplicates is the regular expression to match against nginx ic target endpoint with port 80.
-	NginxICDropDuplicates = config.MustNewRegexp(`nginx-ingress-controller;(.*):80`)
+	NginxICPodNameRegexp = config.MustNewRegexp(`nginx-ingress-controller(.*)`)
 
 	// NodeExporterRegexp is the regular expression to match against the
 	// node-exporter name.

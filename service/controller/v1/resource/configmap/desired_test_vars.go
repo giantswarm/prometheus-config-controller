@@ -7,6 +7,7 @@ import (
 	"github.com/prometheus/prometheus/config"
 
 	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/prometheus"
+	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/key"
 )
 
 var (
@@ -316,15 +317,10 @@ var (
 				Replacement: prometheus.GuestClusterType,
 			},
 			{
-				SourceLabels: model.LabelNames{prometheus.KubernetesSDServiceNameLabel, prometheus.MetricAddressLabel},
-				Regex:        prometheus.NginxICDropDuplicates,
-				Action:       prometheus.ActionDrop,
-			},
-			{
-				SourceLabels: model.LabelNames{prometheus.MetricAddressLabel},
-				Regex:        prometheus.NginxICChangeScrapePort,
+				SourceLabels: model.LabelNames{prometheus.KubernetesSDPodNameLabel},
+				Regex:        prometheus.NginxICPodNameRegexp,
 				TargetLabel:  prometheus.AddressLabel,
-				Replacement:  prometheus.NginxICMetricPort,
+				Replacement:  key.NginxPodProxyUrlTemplate(key.MasterPrefix,"xa5ly"),
 			},
 		},
 		MetricRelabelConfigs: []*config.RelabelConfig{
@@ -397,4 +393,5 @@ func init() {
 	TestConfigTwoWorkload.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.CertFile = crtFile
 	TestConfigTwoWorkload.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.KeyFile = keyFile
 	TestConfigTwoWorkload.RelabelConfigs[3].Replacement = clusterID
+	TestConfigTwoWorkload.RelabelConfigs[5].Replacement = key.NginxPodProxyUrlTemplate(key.MasterPrefix,clusterID)
 }

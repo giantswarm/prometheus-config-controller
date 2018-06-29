@@ -113,20 +113,15 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 		TargetLabel: ClusterTypeLabel,
 		Replacement: GuestClusterType,
 	}
-	changeICScrapePortRelabelConfig := &config.RelabelConfig{
-		SourceLabels: model.LabelNames{MetricAddressLabel},
-		Regex:        NginxICChangeScrapePort,
+	rebuildICScrapeURLRelabelConfig := &config.RelabelConfig{
+		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
+		Regex:        NginxICPodNameRegexp,
 		TargetLabel:  AddressLabel,
-		Replacement:  NginxICMetricPort,
+		Replacement:  key.NginxPodProxyUrlTemplate(key.MasterPrefix, clusterID),
 	}
 	ipLabelRelabelConfig := &config.RelabelConfig{
 		TargetLabel:  IPLabel,
 		SourceLabels: model.LabelNames{KubernetesSDNodeAddressInternalIPLabel},
-	}
-	removeDuplicateICRelabelConfig := &config.RelabelConfig{
-		SourceLabels: model.LabelNames{KubernetesSDServiceNameLabel, MetricAddressLabel},
-		Regex:        NginxICDropDuplicates,
-		Action:       ActionDrop,
 	}
 	roleLabelRelabelConfig := &config.RelabelConfig{
 		TargetLabel:  RoleLabel,
@@ -323,10 +318,8 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				clusterIDLabelRelabelConfig,
 				// Add cluster_type label.
 				clusterTypeLabelRelabelConfig,
-				// remvoe duplicate IC targets
-				removeDuplicateICRelabelConfig,
 				// change IC target port
-				changeICScrapePortRelabelConfig,
+				rebuildICScrapeURLRelabelConfig,
 			},
 			MetricRelabelConfigs: []*config.RelabelConfig{
 				// keep only kube-system cadvisor metrics

@@ -461,13 +461,10 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
     replacement: xa5ly
   - target_label: cluster_type
     replacement: guest
-  - source_labels: [__meta_kubernetes_service_name, __address__]
-    regex: nginx-ingress-controller;(.*):80
-    action: drop
-  - source_labels: [__address__]
-    regex: (.*):443
+  - source_labels: [__meta_kubernetes_pod_name]
+    regex: nginx-ingress-controller(.*)
     target_label: __address__
-    replacement: ${1}:10254
+    replacement: https://master.xa5ly:443/api/v1/namespaces/kube-system/pods/${1}:10254/proxy/metrics
   metric_relabel_configs:
   - source_labels: [exported_namespace]
     regex: (kube-system|giantswarm)
