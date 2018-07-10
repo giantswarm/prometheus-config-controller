@@ -29,7 +29,7 @@ func CrtPath(certificateDirectory, clusterID string) string {
 }
 
 func EtcdTargetUrl(etcdDomain string) string {
-	return fmt.Sprintf("https://%s:443", etcdDomain)
+	return fmt.Sprintf("%s:443", etcdDomain)
 }
 
 func KeyPath(certificateDirectory, clusterID string) string {

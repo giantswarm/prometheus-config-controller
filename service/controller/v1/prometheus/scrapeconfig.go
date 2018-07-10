@@ -373,7 +373,6 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 		},
 	}
 	// check if we can add etcd monitoring
-	fmt.Printf("cluster id %s, service labels %#v\n",clusterID, service.Labels)
 	if _, ok := service.Labels[key.LabelVersionBundle]; ok {
 		// prepare etcd static discovery config
 		etcdStaticConfig := config.ServiceDiscoveryConfig{
@@ -395,26 +394,6 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 			Scheme:                 HttpsScheme,
 			HTTPClientConfig:       secureHTTPClientConfig,
 			ServiceDiscoveryConfig: etcdStaticConfig,
-			RelabelConfigs: []*config.RelabelConfig{
-				// Only keep api server endpoints.
-				{
-					SourceLabels: model.LabelNames{
-						KubernetesSDNamespaceLabel,
-						KubernetesSDServiceNameLabel,
-					},
-					Regex:  APIServerRegexp,
-					Action: config.RelabelKeep,
-				},
-				// Add app label.
-				{
-					TargetLabel: AppLabel,
-					Replacement: KubernetesAppName,
-				},
-				// Add cluster_id label.
-				clusterIDLabelRelabelConfig,
-				// Add cluster_type label.
-				clusterTypeLabelRelabelConfig,
-			},
 		}
 		// append etcd scrape config
 		scrapeConfigs = append(scrapeConfigs, etcdScrapeConfig)
