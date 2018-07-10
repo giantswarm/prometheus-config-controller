@@ -12,8 +12,9 @@ const (
 	PrefixMaster    = "master"
 	PrefixApiServer = "apiserver"
 
-	LabelVersionBundle   = "giantswarm.io/version-bundle"
 	AnnotationEtcdDomain = "giantswarm.io/etcd-domain"
+
+	LabelVersionBundle = "giantswarm.io/version-bundle"
 )
 
 func certPath(certificateDirectory, clusterID, suffix string) string {
