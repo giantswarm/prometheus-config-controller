@@ -25,6 +25,8 @@ const (
 	APIServerJobType = "apiserver"
 	// CadvisorJobType is the job type for scraping Cadvisor.
 	CadvisorJobType = "cadvisor"
+	// EtcdJobType is the job type for scraping etcd.
+	EtcdJobType = "etcd"
 	// KubeletJobType is the job type for scraping kubelets.
 	KubeletJobType = "kubelet"
 	// NodeExporterJobType is the job type for scraping node-exporters
@@ -55,6 +57,14 @@ func getTargetHost(service v1.Service) string {
 func getTarget(service v1.Service) model.LabelSet {
 	return model.LabelSet{
 		model.AddressLabel: model.LabelValue(getTargetHost(service)),
+	}
+}
+
+// getEtcdTarget takes a etcd url, and returns a LabelSet,
+// suitable for use as a target.
+func getEtcdTarget(etcdUrl string) model.LabelSet {
+	return model.LabelSet{
+		model.AddressLabel: model.LabelValue(etcdUrl),
 	}
 }
 
@@ -361,6 +371,52 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				},
 			},
 		},
+	}
+	// check if we can add etcd monitoring
+	if _, ok := service.Labels[key.LabelVersionBundle]; ok {
+		// prepare etcd static discovery config
+		etcdStaticConfig := config.ServiceDiscoveryConfig{
+			StaticConfigs: []*config.TargetGroup{
+				{
+					Targets: []model.LabelSet{
+						getEtcdTarget(key.EtcdTargetUrl(service.Labels[key.LabelEtcdDomain])),
+					},
+					Labels: model.LabelSet{
+						model.LabelName(ClusterTypeLabel): model.LabelValue(GuestClusterType),
+						model.LabelName(ClusterIDLabel):   model.LabelValue(clusterID),
+					},
+				},
+			},
+		}
+
+		etcdScrapeConfig := config.ScrapeConfig{
+			JobName:                getJobName(service, EtcdJobType),
+			Scheme:                 HttpsScheme,
+			HTTPClientConfig:       secureHTTPClientConfig,
+			ServiceDiscoveryConfig: etcdStaticConfig,
+			RelabelConfigs: []*config.RelabelConfig{
+				// Only keep api server endpoints.
+				{
+					SourceLabels: model.LabelNames{
+						KubernetesSDNamespaceLabel,
+						KubernetesSDServiceNameLabel,
+					},
+					Regex:  APIServerRegexp,
+					Action: config.RelabelKeep,
+				},
+				// Add app label.
+				{
+					TargetLabel: AppLabel,
+					Replacement: KubernetesAppName,
+				},
+				// Add cluster_id label.
+				clusterIDLabelRelabelConfig,
+				// Add cluster_type label.
+				clusterTypeLabelRelabelConfig,
+			},
+		}
+		// append etcd scrape config
+		scrapeConfigs = append(scrapeConfigs, etcdScrapeConfig)
 	}
 
 	return scrapeConfigs

@@ -11,6 +11,9 @@ const (
 
 	PrefixMaster    = "master"
 	PrefixApiServer = "apiserver"
+
+	LabelVersionBundle = "giantswarm.io/version-bundle"
+	LabelEtcdDomain    = "giantswarm.io/etcd-domain"
 )
 
 func certPath(certificateDirectory, clusterID, suffix string) string {
@@ -23,6 +26,10 @@ func CAPath(certificateDirectory, clusterID string) string {
 
 func CrtPath(certificateDirectory, clusterID string) string {
 	return certPath(certificateDirectory, clusterID, "crt")
+}
+
+func EtcdTargetUrl(etcdDomain string) string {
+	return fmt.Sprintf("https://%s:443", etcdDomain)
 }
 
 func KeyPath(certificateDirectory, clusterID string) string {
