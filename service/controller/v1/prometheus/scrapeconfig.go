@@ -373,6 +373,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 		},
 	}
 	// check if we can add etcd monitoring
+	fmt.Printf("cluster id %s, service labels %#v\n",clusterID, service.Labels)
 	if _, ok := service.Labels[key.LabelVersionBundle]; ok {
 		// prepare etcd static discovery config
 		etcdStaticConfig := config.ServiceDiscoveryConfig{
