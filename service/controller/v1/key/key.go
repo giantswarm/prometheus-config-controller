@@ -29,10 +29,6 @@ func CrtPath(certificateDirectory, clusterID string) string {
 	return certPath(certificateDirectory, clusterID, "crt")
 }
 
-func EtcdTargetUrl(etcdDomain string) string {
-	return fmt.Sprintf("%s:443", etcdDomain)
-}
-
 func KeyPath(certificateDirectory, clusterID string) string {
 	return certPath(certificateDirectory, clusterID, "key")
 }

@@ -379,7 +379,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 			StaticConfigs: []*config.TargetGroup{
 				{
 					Targets: []model.LabelSet{
-						getEtcdTarget(key.EtcdTargetUrl(service.Annotations[key.AnnotationEtcdDomain])),
+						getEtcdTarget(service.Annotations[key.AnnotationEtcdDomain]),
 					},
 					Labels: model.LabelSet{
 						model.LabelName(ClusterTypeLabel): model.LabelValue(GuestClusterType),
