@@ -373,7 +373,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 		},
 	}
 	// check if we can add etcd monitoring
-	if _, ok := service.Labels[key.LabelVersionBundle]; ok {
+	if _, ok := service.Annotations[key.AnnotationEtcdDomain]; ok {
 		// prepare etcd static discovery config
 		etcdStaticConfig := config.ServiceDiscoveryConfig{
 			StaticConfigs: []*config.TargetGroup{
