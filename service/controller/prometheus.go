@@ -80,29 +80,15 @@ func NewPrometheus(config PrometheusConfig) (*Prometheus, error) {
 		}
 	}
 
-	var resourceRouter *controller.ResourceRouter
-	{
-		c := controller.ResourceRouterConfig{
-			Logger: config.Logger,
-
-			ResourceSets: []*controller.ResourceSet{
-				resourceSetV1,
-			},
-		}
-
-		resourceRouter, err = controller.NewResourceRouter(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var operatorkitController *controller.Controller
 	{
 		c := controller.Config{
-			Informer:       newInformer,
-			Logger:         config.Logger,
-			ResourceRouter: resourceRouter,
-			RESTClient:     config.K8sClient.CoreV1().RESTClient(),
+			Informer: newInformer,
+			Logger:   config.Logger,
+			ResourceSets: []*controller.ResourceSet{
+				resourceSetV1,
+			},
+			RESTClient: config.K8sClient.CoreV1().RESTClient(),
 
 			Name: config.ProjectName,
 		}
