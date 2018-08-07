@@ -336,13 +336,19 @@ var (
 				SourceLabels: model.LabelNames{prometheus.KubernetesSDPodNameLabel},
 				Regex:        prometheus.KubeStateMetricsPodNameRegexp,
 				TargetLabel:  prometheus.MetricPathLabel,
-				Replacement:  key.APIProxyPodMetricsPath(key.KubeStaeMetricsPort),
+				Replacement:  key.APIProxyPodMetricsPath(key.KubeStateMetricsPort),
 			},
 			{
 				SourceLabels: model.LabelNames{prometheus.KubernetesSDPodNameLabel},
 				Regex:        prometheus.NginxICPodNameRegexp,
 				TargetLabel:  prometheus.MetricPathLabel,
 				Replacement:  key.APIProxyPodMetricsPath(key.NginxICMetricPort),
+			},
+			{
+				SourceLabels: model.LabelNames{prometheus.KubernetesSDPodNameLabel},
+				Regex:        prometheus.ChartOperatorPodNameRegexp,
+				TargetLabel:  prometheus.MetricPathLabel,
+				Replacement:  key.APIProxyPodMetricsPath(key.ChartOperatorMetricPort),
 			},
 		},
 		MetricRelabelConfigs: []*config.RelabelConfig{

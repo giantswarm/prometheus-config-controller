@@ -6,8 +6,9 @@ import (
 )
 
 const (
-	NginxICMetricPort   = "10254"
-	KubeStaeMetricsPort = "10301"
+	NginxICMetricPort       = "10254"
+	KubeStateMetricsPort    = "10301"
+	ChartOperatorMetricPort = "8000"
 
 	PrefixMaster    = "master"
 	PrefixApiServer = "apiserver"

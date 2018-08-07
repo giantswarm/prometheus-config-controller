@@ -156,6 +156,9 @@ var (
 	// KubeStateMetricsPodNameRegexp is the regular expression to match kube-state-metrics pod name.
 	KubeStateMetricsPodNameRegexp = config.MustNewRegexp(`(kube-state-metrics.*)`)
 
+	// ChartOperatorPodNameRegexp is the regular expression to match chart-operator pod name.
+	ChartOperatorPodNameRegexp = config.MustNewRegexp(`(chart-operator.*)`)
+
 	// KubeSystemRelabelNamespaceRegexp is the regular expression to match against metrics with empty exported_namespace and namespace kube-system.
 	KubeSystemRelabelNamespaceRegexp = config.MustNewRegexp(`;kube-system`)
 
@@ -168,7 +171,7 @@ var (
 	NodeExporterPortRegexp = config.MustNewRegexp(`(.*):10300`)
 
 	// WhitelistRegexp is the regular expression to match workload targets to scrape.
-	WhitelistRegexp = config.MustNewRegexp(`kube-system;(kube-state-metrics|nginx-ingress-controller)`)
+	WhitelistRegexp = config.MustNewRegexp(`kube-system;(kube-state-metrics|nginx-ingress-controller|chart-operator)`)
 )
 
 // GetClusterID returns the value of the cluster annotation.

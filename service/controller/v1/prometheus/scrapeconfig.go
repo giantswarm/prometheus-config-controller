@@ -133,13 +133,19 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 		Regex:        KubeStateMetricsPodNameRegexp,
 		TargetLabel:  MetricPathLabel,
-		Replacement:  key.APIProxyPodMetricsPath(key.KubeStaeMetricsPort),
+		Replacement:  key.APIProxyPodMetricsPath(key.KubeStateMetricsPort),
 	}
 	rewriteICMetricPath := &config.RelabelConfig{
 		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 		Regex:        NginxICPodNameRegexp,
 		TargetLabel:  MetricPathLabel,
 		Replacement:  key.APIProxyPodMetricsPath(key.NginxICMetricPort),
+	}
+	rewriteChartOperatorPath := &config.RelabelConfig{
+		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
+		Regex:        ChartOperatorPodNameRegexp,
+		TargetLabel:  MetricPathLabel,
+		Replacement:  key.APIProxyPodMetricsPath(key.ChartOperatorMetricPort),
 	}
 
 	ipLabelRelabelConfig := &config.RelabelConfig{
@@ -352,6 +358,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				// rewrite metrics scrape path to connect pods
 				rewriteKubeStateMetricPath,
 				rewriteICMetricPath,
+				rewriteChartOperatorPath,
 			},
 			MetricRelabelConfigs: []*config.RelabelConfig{
 				// relabel namespace to exported_namespace for endpoints in kube-system namespace.

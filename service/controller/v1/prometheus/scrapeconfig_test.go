@@ -456,7 +456,7 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
     insecure_skip_verify: false
   relabel_configs:
   - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name]
-    regex: kube-system;(kube-state-metrics|nginx-ingress-controller)
+    regex: kube-system;(kube-state-metrics|nginx-ingress-controller|chart-operator)
     action: keep
   - source_labels: [__meta_kubernetes_service_name]
     target_label: app
@@ -478,6 +478,10 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
     regex: (nginx-ingress-controller.*)
     target_label: __metrics_path__
     replacement: /api/v1/namespaces/kube-system/pods/${1}:10254/proxy/metrics
+  - source_labels: [__meta_kubernetes_pod_name]
+    regex: (chart-operator.*)
+    target_label: __metrics_path__
+    replacement: /api/v1/namespaces/kube-system/pods/${1}:8000/proxy/metrics
   metric_relabel_configs:
   - source_labels: [exported_namespace, namespace]
     regex: ;kube-system
