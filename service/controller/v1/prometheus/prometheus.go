@@ -171,7 +171,7 @@ var (
 	NodeExporterPortRegexp = config.MustNewRegexp(`(.*):10300`)
 
 	// WhitelistRegexp is the regular expression to match workload targets to scrape.
-	WhitelistRegexp = config.MustNewRegexp(`kube-system;(kube-state-metrics|nginx-ingress-controller|chart-operator)`)
+	WhitelistRegexp = config.MustNewRegexp(`(kube-system;(kube-state-metrics|nginx-ingress-controller))|(giantswarm;chart-operator)`)
 )
 
 // GetClusterID returns the value of the cluster annotation.
