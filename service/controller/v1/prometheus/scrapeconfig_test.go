@@ -456,7 +456,7 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
     insecure_skip_verify: false
   relabel_configs:
   - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name]
-    regex: kube-system;(kube-state-metrics|nginx-ingress-controller|chart-operator)
+    regex: (kube-system;(kube-state-metrics|nginx-ingress-controller))|(giantswarm;chart-operator)
     action: keep
   - source_labels: [__meta_kubernetes_service_name]
     target_label: app
