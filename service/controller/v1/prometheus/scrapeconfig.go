@@ -133,19 +133,19 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 		Regex:        KubeStateMetricsPodNameRegexp,
 		TargetLabel:  MetricPathLabel,
-		Replacement:  key.APIProxyPodMetricsPath(key.KubeStateMetricsPort),
+		Replacement:  key.APIProxyPodMetricsPath(key.KubeStateMetricsNamespace, key.KubeStateMetricsPort),
 	}
 	rewriteICMetricPath := &config.RelabelConfig{
 		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 		Regex:        NginxICPodNameRegexp,
 		TargetLabel:  MetricPathLabel,
-		Replacement:  key.APIProxyPodMetricsPath(key.NginxICMetricPort),
+		Replacement:  key.APIProxyPodMetricsPath(key.NginxICNamespace, key.NginxICMetricPort),
 	}
 	rewriteChartOperatorPath := &config.RelabelConfig{
 		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 		Regex:        ChartOperatorPodNameRegexp,
 		TargetLabel:  MetricPathLabel,
-		Replacement:  key.APIProxyPodMetricsPath(key.ChartOperatorMetricPort),
+		Replacement:  key.APIProxyPodMetricsPath(key.ChartOperatorNamespace, key.ChartOperatorMetricPort),
 	}
 
 	ipLabelRelabelConfig := &config.RelabelConfig{

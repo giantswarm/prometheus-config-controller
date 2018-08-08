@@ -481,7 +481,7 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
   - source_labels: [__meta_kubernetes_pod_name]
     regex: (chart-operator.*)
     target_label: __metrics_path__
-    replacement: /api/v1/namespaces/kube-system/pods/${1}:8000/proxy/metrics
+    replacement: /api/v1/namespaces/giantswarm/pods/${1}:8000/proxy/metrics
   metric_relabel_configs:
   - source_labels: [exported_namespace, namespace]
     regex: ;kube-system
