@@ -340,9 +340,9 @@ var (
 			},
 			{
 				SourceLabels: model.LabelNames{prometheus.KubernetesSDPodNameLabel},
-				Regex:        prometheus.NginxICPodNameRegexp,
+				Regex:        prometheus.NginxIngressControllerPodNameRegexp,
 				TargetLabel:  prometheus.MetricPathLabel,
-				Replacement:  key.APIProxyPodMetricsPath(key.NginxICNamespace, key.NginxICMetricPort),
+				Replacement:  key.APIProxyPodMetricsPath(key.NginxIngressControllerNamespace, key.NginxIngressControllerMetricPort),
 			},
 			{
 				SourceLabels: model.LabelNames{prometheus.KubernetesSDPodNameLabel},

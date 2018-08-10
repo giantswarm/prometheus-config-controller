@@ -6,13 +6,13 @@ import (
 )
 
 const (
-	NginxICMetricPort       = "10254"
-	KubeStateMetricsPort    = "10301"
-	ChartOperatorMetricPort = "8000"
+	NginxIngressControllerMetricPort = "10254"
+	KubeStateMetricsPort             = "10301"
+	ChartOperatorMetricPort          = "8000"
 
-	NginxICNamespace          = "kube-system"
-	KubeStateMetricsNamespace = "kube-system"
-	ChartOperatorNamespace    = "giantswarm"
+	NginxIngressControllerNamespace = "kube-system"
+	KubeStateMetricsNamespace       = "kube-system"
+	ChartOperatorNamespace          = "giantswarm"
 
 	PrefixMaster    = "master"
 	PrefixApiServer = "apiserver"

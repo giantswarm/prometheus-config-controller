@@ -150,8 +150,8 @@ var (
 	// MetricDropSystemdNameRegexp is the regular expression to match against not interesting systemd units(docker mounts and calico network devices).
 	MetricDropSystemdNameRegexp = config.MustNewRegexp(`node_systemd_unit_state;(dev-disk-by|run-docker-netns|sys-devices|sys-subsystem-net|var-lib-docker-overlay2|var-lib-docker-containers|var-lib-kubelet-pods).*`)
 
-	// NginxICPodNameRegexp is the regular expression to match nginx ic pod name.
-	NginxICPodNameRegexp = config.MustNewRegexp(`(nginx-ingress-controller.*)`)
+	// NginxIngressControllerPodNameRegexp is the regular expression to match nginx ic pod name.
+	NginxIngressControllerPodNameRegexp = config.MustNewRegexp(`(nginx-ingress-controller.*)`)
 
 	// KubeStateMetricsPodNameRegexp is the regular expression to match kube-state-metrics pod name.
 	KubeStateMetricsPodNameRegexp = config.MustNewRegexp(`(kube-state-metrics.*)`)

@@ -338,9 +338,9 @@ var (
 			},
 			{
 				SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
-				Regex:        NginxICPodNameRegexp,
+				Regex:        NginxIngressControllerPodNameRegexp,
 				TargetLabel:  MetricPathLabel,
-				Replacement:  key.APIProxyPodMetricsPath(key.NginxICNamespace, key.NginxICMetricPort),
+				Replacement:  key.APIProxyPodMetricsPath(key.NginxIngressControllerNamespace, key.NginxIngressControllerMetricPort),
 			},
 			{
 				SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
