@@ -6,8 +6,13 @@ import (
 )
 
 const (
-	NginxICMetricPort   = "10254"
-	KubeStaeMetricsPort = "10301"
+	NginxIngressControllerMetricPort = "10254"
+	KubeStateMetricsPort             = "10301"
+	ChartOperatorMetricPort          = "8000"
+
+	NginxIngressControllerNamespace = "kube-system"
+	KubeStateMetricsNamespace       = "kube-system"
+	ChartOperatorNamespace          = "giantswarm"
 
 	PrefixMaster    = "master"
 	PrefixApiServer = "apiserver"
@@ -33,8 +38,8 @@ func KeyPath(certificateDirectory, clusterID string) string {
 	return certPath(certificateDirectory, clusterID, "key")
 }
 
-func APIProxyPodMetricsPath(port string) string {
-	return fmt.Sprintf("/api/v1/namespaces/kube-system/pods/${1}:%s/proxy/metrics", port)
+func APIProxyPodMetricsPath(namespace, port string) string {
+	return fmt.Sprintf("/api/v1/namespaces/%s/pods/${1}:%s/proxy/metrics", namespace, port)
 }
 
 func APIServiceHost(prefix string, clusterID string) string {

@@ -334,13 +334,19 @@ var (
 				SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 				Regex:        KubeStateMetricsPodNameRegexp,
 				TargetLabel:  MetricPathLabel,
-				Replacement:  key.APIProxyPodMetricsPath(key.KubeStaeMetricsPort),
+				Replacement:  key.APIProxyPodMetricsPath(key.KubeStateMetricsNamespace, key.KubeStateMetricsPort),
 			},
 			{
 				SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
-				Regex:        NginxICPodNameRegexp,
+				Regex:        NginxIngressControllerPodNameRegexp,
 				TargetLabel:  MetricPathLabel,
-				Replacement:  key.APIProxyPodMetricsPath(key.NginxICMetricPort),
+				Replacement:  key.APIProxyPodMetricsPath(key.NginxIngressControllerNamespace, key.NginxIngressControllerMetricPort),
+			},
+			{
+				SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
+				Regex:        ChartOperatorPodNameRegexp,
+				TargetLabel:  MetricPathLabel,
+				Replacement:  key.APIProxyPodMetricsPath(key.ChartOperatorNamespace, key.ChartOperatorMetricPort),
 			},
 		},
 		MetricRelabelConfigs: []*config.RelabelConfig{
