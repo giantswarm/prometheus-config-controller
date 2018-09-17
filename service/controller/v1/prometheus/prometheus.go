@@ -139,7 +139,7 @@ var (
 	KubeSystemGiantswarmNSRegexp = config.MustNewRegexp(`(kube-system|giantswarm)`)
 
 	// MetricDropBucketLatencies is the regular expression to match against the several bucket latencies metrics.
-	MetricDropBucketLatencies = config.MustNewRegexp(`(apiserver_admission_controller_admission_latencies_seconds_bucket|rest_client_request_latency_seconds_bucket|rest_client_request_latency_seconds_bucket)`)
+	MetricDropBucketLatencies = config.MustNewRegexp(`(apiserver_admission_controller_admission_latencies_seconds_bucket|apiserver_admission_step_admission_latencies_seconds_bucket|apiserver_response_sizes_bucket|rest_client_request_latency_seconds_bucket|rest_client_request_latency_seconds_bucket)`)
 
 	// MetricDropContainerNetworkRegexp is the regular expression to match againts cadvisor container network metrics.
 	MetricDropContainerNetworkRegexp = config.MustNewRegexp(`container_network_.*`)
