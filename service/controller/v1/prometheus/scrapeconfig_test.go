@@ -321,6 +321,10 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
     replacement: xa5ly
   - target_label: cluster_type
     replacement: guest
+  metric_relabel_configs:
+  - source_labels: [__name__]
+    regex: (apiserver_admission_controller_admission_latencies_seconds_bucket|apiserver_admission_step_admission_latencies_seconds_bucket|apiserver_response_sizes_bucket|rest_client_request_latency_seconds_bucket|rest_client_request_latency_seconds_bucket)
+    action: drop
 - job_name: guest-cluster-xa5ly-cadvisor
   scheme: https
   kubernetes_sd_configs:
@@ -501,9 +505,6 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
     action: keep
   - source_labels: [__name__]
     regex: (ingress_controller_ssl_expire_time_seconds|nginx.*)
-    action: drop
-  - source_labels: [__name__]
-    regex: (apiserver_admission_controller_admission_latencies_seconds_bucket|apiserver_admission_step_admission_latencies_seconds_bucket|apiserver_response_sizes_bucket|rest_client_request_latency_seconds_bucket|rest_client_request_latency_seconds_bucket)
     action: drop
 `,
 		},

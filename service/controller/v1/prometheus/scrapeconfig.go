@@ -201,6 +201,14 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				// Add cluster_type label.
 				clusterTypeLabelRelabelConfig,
 			},
+			MetricRelabelConfigs: []*config.RelabelConfig{
+				// drop several bucket latency metric
+				{
+					Action:       ActionDrop,
+					SourceLabels: model.LabelNames{MetricNameLabel},
+					Regex:        MetricDropBucketLatencies,
+				},
+			},
 		},
 
 		{
@@ -395,12 +403,6 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					Action:       ActionDrop,
 					SourceLabels: model.LabelNames{MetricNameLabel},
 					Regex:        MetricDropICRegexp,
-				},
-				// drop several bucket latency metric
-				{
-					Action:       ActionDrop,
-					SourceLabels: model.LabelNames{MetricNameLabel},
-					Regex:        MetricDropBucketLatencies,
 				},
 			},
 		},
