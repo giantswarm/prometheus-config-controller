@@ -375,6 +375,12 @@ var (
 				SourceLabels: model.LabelNames{MetricExportedNamespaceLabel},
 				Regex:        KubeSystemGiantswarmNSRegexp,
 			},
+			// drop useless IC metrics
+			{
+				Action:       ActionDrop,
+				SourceLabels: model.LabelNames{MetricNameLabel},
+				Regex:        MetricDropICRegexp,
+			},
 		},
 	}
 )

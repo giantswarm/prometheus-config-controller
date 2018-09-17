@@ -499,6 +499,12 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
   - source_labels: [exported_namespace]
     regex: (kube-system|giantswarm)
     action: keep
+  - source_labels: [__name__]
+    regex: (ingress_controller_ssl_expire_time_seconds|nginx.*)
+    action: drop
+  - source_labels: [__name__]
+    regex: apiserver_admission_controller_admission_latencies_seconds_bucket
+    action: drop
 `,
 		},
 	}

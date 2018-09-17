@@ -390,6 +390,18 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					SourceLabels: model.LabelNames{MetricExportedNamespaceLabel},
 					Regex:        KubeSystemGiantswarmNSRegexp,
 				},
+				// drop useless IC metrics
+				{
+					Action:       ActionDrop,
+					SourceLabels: model.LabelNames{MetricNameLabel},
+					Regex:        MetricDropICRegexp,
+				},
+				// drop APi admission bucket latency metric
+				{
+					Action:       ActionDrop,
+					SourceLabels: model.LabelNames{MetricNameLabel},
+					Regex:        MetricDropApiServerAdmissionControllerBucket,
+				},
 			},
 		},
 	}
