@@ -503,7 +503,7 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
     regex: (ingress_controller_ssl_expire_time_seconds|nginx.*)
     action: drop
   - source_labels: [__name__]
-    regex: apiserver_admission_controller_admission_latencies_seconds_bucket
+    regex: (apiserver_admission_controller_admission_latencies_seconds_bucket|rest_client_request_latency_seconds_bucket|rest_client_request_latency_seconds_bucket)
     action: drop
 `,
 		},

@@ -383,11 +383,11 @@ var (
 				SourceLabels: model.LabelNames{prometheus.MetricNameLabel},
 				Regex:        prometheus.MetricDropICRegexp,
 			},
-			// drop APi admission bucket latency metric
+			// drop several bucket latency metric
 			{
 				Action:       prometheus.ActionDrop,
 				SourceLabels: model.LabelNames{prometheus.MetricNameLabel},
-				Regex:        prometheus.MetricDropApiServerAdmissionControllerBucket,
+				Regex:        prometheus.MetricDropBucketLatencies,
 			},
 		},
 	}

@@ -381,6 +381,12 @@ var (
 				SourceLabels: model.LabelNames{MetricNameLabel},
 				Regex:        MetricDropICRegexp,
 			},
+			// drop several bucket latency metric
+			{
+				Action:       ActionDrop,
+				SourceLabels: model.LabelNames{MetricNameLabel},
+				Regex:        MetricDropBucketLatencies,
+			},
 		},
 	}
 )
