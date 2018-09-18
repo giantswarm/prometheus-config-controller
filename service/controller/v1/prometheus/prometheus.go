@@ -138,11 +138,17 @@ var (
 	// KubeSystemGiantswarmNSRegexp is the regular expression to match against the kube-system and giantswarm namespace.
 	KubeSystemGiantswarmNSRegexp = config.MustNewRegexp(`(kube-system|giantswarm)`)
 
+	// MetricDropBucketLatencies is the regular expression to match against the several bucket latencies metrics.
+	MetricDropBucketLatencies = config.MustNewRegexp(`(apiserver_admission_controller_admission_latencies_seconds_bucket|apiserver_admission_step_admission_latencies_seconds_bucket|apiserver_response_sizes_bucket|rest_client_request_latency_seconds_bucket|rest_client_request_latency_seconds_bucket)`)
+
 	// MetricDropContainerNetworkRegexp is the regular expression to match againts cadvisor container network metrics.
 	MetricDropContainerNetworkRegexp = config.MustNewRegexp(`container_network_.*`)
 
 	// MetricDropFStypeRegexp is the regular expression to match againts not interesting filesystem (for node exporter metrics).
 	MetricDropFStypeRegexp = config.MustNewRegexp(`(cgroup|devpts|mqueue|nsfs|overlay|tmpfs)`)
+
+	// MetricDropICRegexp is the regular expression to match against useless metric exposed by IC.
+	MetricDropICRegexp = config.MustNewRegexp(`(ingress_controller_ssl_expire_time_seconds|nginx.*)`)
 
 	// MetricDropSystemdStateRegexp is the regular expression to match againts not interesting systemd unit (for node exporter metrics).
 	MetricDropSystemdStateRegexp = config.MustNewRegexp(`node_systemd_unit_state;(active|activating|deactivating|inactive)`)

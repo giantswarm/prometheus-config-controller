@@ -59,6 +59,14 @@ var (
 				Replacement: GuestClusterType,
 			},
 		},
+		MetricRelabelConfigs: []*config.RelabelConfig{
+			// drop several bucket latency metric
+			{
+				Action:       ActionDrop,
+				SourceLabels: model.LabelNames{MetricNameLabel},
+				Regex:        MetricDropBucketLatencies,
+			},
+		},
 	}
 	TestConfigOneCadvisor = config.ScrapeConfig{
 		JobName: "guest-cluster-xa5ly-cadvisor",
@@ -374,6 +382,12 @@ var (
 				Action:       ActionKeep,
 				SourceLabels: model.LabelNames{MetricExportedNamespaceLabel},
 				Regex:        KubeSystemGiantswarmNSRegexp,
+			},
+			// drop useless IC metrics
+			{
+				Action:       ActionDrop,
+				SourceLabels: model.LabelNames{MetricNameLabel},
+				Regex:        MetricDropICRegexp,
 			},
 		},
 	}

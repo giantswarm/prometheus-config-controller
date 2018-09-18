@@ -61,6 +61,14 @@ var (
 				Replacement: prometheus.GuestClusterType,
 			},
 		},
+		MetricRelabelConfigs: []*config.RelabelConfig{
+			// drop several bucket latency metric
+			{
+				Action:       prometheus.ActionDrop,
+				SourceLabels: model.LabelNames{prometheus.MetricNameLabel},
+				Regex:        prometheus.MetricDropBucketLatencies,
+			},
+		},
 	}
 	TestConfigOneCadvisor = config.ScrapeConfig{
 		JobName: "guest-cluster-xa5ly-cadvisor",
@@ -376,6 +384,12 @@ var (
 				Action:       prometheus.ActionKeep,
 				SourceLabels: model.LabelNames{prometheus.MetricExportedNamespaceLabel},
 				Regex:        prometheus.KubeSystemGiantswarmNSRegexp,
+			},
+			// drop useless IC metrics
+			{
+				Action:       prometheus.ActionDrop,
+				SourceLabels: model.LabelNames{prometheus.MetricNameLabel},
+				Regex:        prometheus.MetricDropICRegexp,
 			},
 		},
 	}
