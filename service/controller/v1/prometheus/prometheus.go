@@ -114,7 +114,7 @@ const (
 // Path replacements.
 const (
 	// CadvisorMetricsPath is the path under which cadvisor metrics can be scraped.
-	CadvisorMetricsPath = "/api/v1/nodes/${1}:4194/proxy/metrics"
+	CadvisorMetricsPath = "/api/v1/nodes/${1}:10250/proxy/metrics/cadvisor"
 
 	// NodeExporterPort is the path under which node-exporter metrics can be scraped.
 	NodeExporterPort = "${1}:10300"

@@ -347,7 +347,7 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
     replacement: apiserver.xa5ly
   - source_labels: [__meta_kubernetes_node_name]
     target_label: __metrics_path__
-    replacement: /api/v1/nodes/${1}:4194/proxy/metrics
+    replacement: /api/v1/nodes/${1}:10250/proxy/metrics/cadvisor
   - target_label: app
     replacement: cadvisor
   - target_label: cluster_id
