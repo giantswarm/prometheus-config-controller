@@ -47,7 +47,7 @@
   name = "github.com/giantswarm/micrologger"
 
 [[constraint]]
-  branch = "master"
+  branch = "fix-collector"
   name = "github.com/giantswarm/operatorkit"
 
 [[constraint]]
