@@ -5,15 +5,15 @@ import (
 	"os"
 	"os/signal"
 	"sync"
+	"syscall"
 
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/micrologger"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-
 	"github.com/giantswarm/microkit/command/daemon/flag"
 	microflag "github.com/giantswarm/microkit/flag"
 	"github.com/giantswarm/microkit/server"
+	"github.com/giantswarm/micrologger"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -58,7 +58,7 @@ func New(config Config) (Command, error) {
 
 	newCommand.cobraCommand.PersistentFlags().StringSlice(f.Config.Dirs, []string{"."}, "List of config file directories.")
 	newCommand.cobraCommand.PersistentFlags().StringSlice(f.Config.Files, []string{"config"}, "List of the config file names. All viper supported extensions can be used.")
-
+	newCommand.cobraCommand.PersistentFlags().Bool(f.Server.Enable.Debug.Server, false, "Enable debug server at http://127.0.0.1:6060/debug.")
 	newCommand.cobraCommand.PersistentFlags().String(f.Server.Listen.Address, "http://127.0.0.1:8000", "Address used to make the server listen to.")
 	newCommand.cobraCommand.PersistentFlags().String(f.Server.Listen.MetricsAddress, "", "Optional alternate address to expose metrics on at /metrics. Leave blank to use the default server (listen address above).")
 	newCommand.cobraCommand.PersistentFlags().Bool(f.Server.Log.Access, false, "Whether to emit logs for each requested route.")
@@ -103,6 +103,7 @@ func (c *command) Execute(cmd *cobra.Command, args []string) {
 	{
 		serverConfig := c.serverFactory(c.viper).Config()
 
+		serverConfig.EnableDebugServer = c.viper.GetBool(f.Server.Enable.Debug.Server)
 		serverConfig.LogAccess = c.viper.GetBool(f.Server.Log.Access)
 		if serverConfig.ListenAddress == "" {
 			serverConfig.ListenAddress = c.viper.GetString(f.Server.Listen.Address)
@@ -127,9 +128,11 @@ func (c *command) Execute(cmd *cobra.Command, args []string) {
 		go newServer.Boot()
 	}
 
-	// Listen to OS signals.
+	// Listen to OS signals. Pressing Ctrl+C produces SIGINT. SIGTERM handled
+	// here for graceful HTTP server shutdown and return of successful exit
+	// status.
 	listener := make(chan os.Signal, 2)
-	signal.Notify(listener, os.Interrupt, os.Kill)
+	signal.Notify(listener, syscall.SIGINT, syscall.SIGTERM)
 
 	<-listener
 
@@ -141,6 +144,7 @@ func (c *command) Execute(cmd *cobra.Command, args []string) {
 			newServer.Shutdown()
 		}()
 
+		wg.Wait()
 		os.Exit(0)
 	}()
 
