@@ -10,12 +10,14 @@ const (
 	KubeStateMetricsPort             = "10301"
 	ChartOperatorMetricPort          = "8000"
 	CertExporterMetricPort           = "9005"
+	CoreDNSMetricPort                = "9153"
 	NetExporterMetricPort            = "8000"
 
 	NginxIngressControllerNamespace = "kube-system"
 	KubeStateMetricsNamespace       = "kube-system"
 	ChartOperatorNamespace          = "giantswarm"
 	CertExporterNamespace           = "kube-system"
+	CoreDNSNamespace                = "kube-system"
 	NetExporterNamespace            = "kube-system"
 
 	PrefixMaster    = "master"
