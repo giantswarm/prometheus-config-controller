@@ -168,6 +168,9 @@ var (
 	// CertExporterPodNameRegexp is the regular expression to match cert-exporter pod name.
 	CertExporterPodNameRegexp = config.MustNewRegexp(`(cert-exporter.*)`)
 
+	// CoreDNSPodNameRegexp is the regular expression to match coredns pod name.
+	CoreDNSPodNameRegexp = config.MustNewRegexp(`(coredns.*)`)
+
 	// NetExporterPodNameRegexp is the regular expression to match net-exporter pod name.
 	NetExporterPodNameRegexp = config.MustNewRegexp(`(net-exporter.*)`)
 
@@ -183,7 +186,7 @@ var (
 	NodeExporterPortRegexp = config.MustNewRegexp(`(.*):10300`)
 
 	// WhitelistRegexp is the regular expression to match workload targets to scrape.
-	WhitelistRegexp = config.MustNewRegexp(`(kube-system;(cert-exporter|kube-state-metrics|net-exporter|nginx-ingress-controller))|(giantswarm;chart-operator)`)
+	WhitelistRegexp = config.MustNewRegexp(`(kube-system;(cert-exporter|coredns|kube-state-metrics|net-exporter|nginx-ingress-controller))|(giantswarm;chart-operator)`)
 )
 
 // GetClusterID returns the value of the cluster annotation.
