@@ -25,11 +25,12 @@ import (
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/informer/collector"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/tools/cache"
+
+	"github.com/giantswarm/operatorkit/informer/collector"
 )
 
 const (
@@ -384,6 +385,7 @@ func (i *Informer) sendCachedEvents(ctx context.Context, deleteChan, updateChan 
 		return true
 	})
 
+	cacheLastUpdatedGauge.Set(float64(time.Now().Unix()))
 	cacheSizeGauge.Set(float64(count))
 }
 
