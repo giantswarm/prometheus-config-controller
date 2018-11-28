@@ -95,10 +95,12 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 	endpointSDConfig := config.ServiceDiscoveryConfig{
 		KubernetesSDConfigs: []*config.KubernetesSDConfig{
 			{
-				APIServer: config.URL{&url.URL{
-					Scheme: HttpsScheme,
-					Host:   getTargetHost(service),
-				}},
+				APIServer: config.URL{
+					URL: &url.URL{
+						Scheme: HttpsScheme,
+						Host:   getTargetHost(service),
+					},
+				},
 				Role:      config.KubernetesRoleEndpoint,
 				TLSConfig: secureTLSConfig,
 			},
@@ -107,10 +109,12 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 	nodeSDConfig := config.ServiceDiscoveryConfig{
 		KubernetesSDConfigs: []*config.KubernetesSDConfig{
 			{
-				APIServer: config.URL{&url.URL{
-					Scheme: HttpsScheme,
-					Host:   getTargetHost(service),
-				}},
+				APIServer: config.URL{
+					URL: &url.URL{
+						Scheme: HttpsScheme,
+						Host:   getTargetHost(service),
+					},
+				},
 				Role:      config.KubernetesRoleNode,
 				TLSConfig: secureTLSConfig,
 			},
