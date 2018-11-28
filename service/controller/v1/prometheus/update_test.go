@@ -28,7 +28,7 @@ func Test_Prometheus_isManaged(t *testing.T) {
 					StaticConfigs: []*config.TargetGroup{
 						{
 							Targets: []model.LabelSet{
-								model.LabelSet{"apiserver.xa5ly": ""},
+								{"apiserver.xa5ly": ""},
 							},
 						},
 					},
@@ -52,10 +52,12 @@ func Test_Prometheus_isManaged(t *testing.T) {
 				ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
 					KubernetesSDConfigs: []*config.KubernetesSDConfig{
 						{
-							APIServer: config.URL{&url.URL{
-								Scheme: "https",
-								Host:   "apiserver.xa5ly",
-							}},
+							APIServer: config.URL{
+								URL: &url.URL{
+									Scheme: "https",
+									Host:   "apiserver.xa5ly",
+								},
+							},
 							Role: config.KubernetesRoleEndpoint,
 							TLSConfig: config.TLSConfig{
 								CAFile:             "/certs/xa5ly-ca.pem",
@@ -65,10 +67,12 @@ func Test_Prometheus_isManaged(t *testing.T) {
 							},
 						},
 						{
-							APIServer: config.URL{&url.URL{
-								Scheme: "https",
-								Host:   "apiserver.xa5ly",
-							}},
+							APIServer: config.URL{
+								URL: &url.URL{
+									Scheme: "https",
+									Host:   "apiserver.xa5ly",
+								},
+							},
 							Role: config.KubernetesRoleNode,
 							TLSConfig: config.TLSConfig{
 								CAFile:             "/certs/xa5ly-ca.pem",
@@ -159,10 +163,12 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 					ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
 						KubernetesSDConfigs: []*config.KubernetesSDConfig{
 							{
-								APIServer: config.URL{&url.URL{
-									Scheme: "https",
-									Host:   "apiserver.xa5ly",
-								}},
+								APIServer: config.URL{
+									URL: &url.URL{
+										Scheme: "https",
+										Host:   "apiserver.xa5ly",
+									},
+								},
 								Role: config.KubernetesRoleEndpoint,
 							},
 						},
@@ -183,10 +189,12 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
 							KubernetesSDConfigs: []*config.KubernetesSDConfig{
 								{
-									APIServer: config.URL{&url.URL{
-										Scheme: "https",
-										Host:   "apiserver.xa5ly",
-									}},
+									APIServer: config.URL{
+										URL: &url.URL{
+											Scheme: "https",
+											Host:   "apiserver.xa5ly",
+										},
+									},
 									Role: config.KubernetesRoleEndpoint,
 								},
 							},
@@ -213,10 +221,12 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
 							KubernetesSDConfigs: []*config.KubernetesSDConfig{
 								{
-									APIServer: config.URL{&url.URL{
-										Scheme: "https",
-										Host:   "apiserver.xa5ly",
-									}},
+									APIServer: config.URL{
+										URL: &url.URL{
+											Scheme: "https",
+											Host:   "apiserver.xa5ly",
+										},
+									},
 									Role: config.KubernetesRoleEndpoint,
 								},
 							},
@@ -236,10 +246,12 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 					ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
 						KubernetesSDConfigs: []*config.KubernetesSDConfig{
 							{
-								APIServer: config.URL{&url.URL{
-									Scheme: "https",
-									Host:   "apiserver.xa5ly",
-								}},
+								APIServer: config.URL{
+									URL: &url.URL{
+										Scheme: "https",
+										Host:   "apiserver.xa5ly",
+									},
+								},
 								Role: config.KubernetesRoleEndpoint,
 							},
 						},
@@ -260,10 +272,12 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
 							KubernetesSDConfigs: []*config.KubernetesSDConfig{
 								{
-									APIServer: config.URL{&url.URL{
-										Scheme: "https",
-										Host:   "apiserver.xa5ly",
-									}},
+									APIServer: config.URL{
+										URL: &url.URL{
+											Scheme: "https",
+											Host:   "apiserver.xa5ly",
+										},
+									},
 									Role: config.KubernetesRoleEndpoint,
 								},
 							},
@@ -290,10 +304,12 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
 							KubernetesSDConfigs: []*config.KubernetesSDConfig{
 								{
-									APIServer: config.URL{&url.URL{
-										Scheme: "https",
-										Host:   "apiserver.xa5ly",
-									}},
+									APIServer: config.URL{
+										URL: &url.URL{
+											Scheme: "https",
+											Host:   "apiserver.xa5ly",
+										},
+									},
 									Role: config.KubernetesRoleEndpoint,
 								},
 							},
@@ -313,10 +329,12 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 					ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
 						KubernetesSDConfigs: []*config.KubernetesSDConfig{
 							{
-								APIServer: config.URL{&url.URL{
-									Scheme: "https",
-									Host:   "apiserver.xa5ly",
-								}},
+								APIServer: config.URL{
+									URL: &url.URL{
+										Scheme: "https",
+										Host:   "apiserver.xa5ly",
+									},
+								},
 								Role: config.KubernetesRoleEndpoint,
 							},
 						},
@@ -333,10 +351,12 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 					ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
 						KubernetesSDConfigs: []*config.KubernetesSDConfig{
 							{
-								APIServer: config.URL{&url.URL{
-									Scheme: "https",
-									Host:   "apiserver.jf02j",
-								}},
+								APIServer: config.URL{
+									URL: &url.URL{
+										Scheme: "https",
+										Host:   "apiserver.jf02j",
+									},
+								},
 								Role: config.KubernetesRoleEndpoint,
 							},
 						},
@@ -357,10 +377,12 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
 							KubernetesSDConfigs: []*config.KubernetesSDConfig{
 								{
-									APIServer: config.URL{&url.URL{
-										Scheme: "https",
-										Host:   "apiserver.xa5ly",
-									}},
+									APIServer: config.URL{
+										URL: &url.URL{
+											Scheme: "https",
+											Host:   "apiserver.xa5ly",
+										},
+									},
 									Role: config.KubernetesRoleEndpoint,
 								},
 							},
@@ -377,10 +399,12 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
 							KubernetesSDConfigs: []*config.KubernetesSDConfig{
 								{
-									APIServer: config.URL{&url.URL{
-										Scheme: "https",
-										Host:   "apiserver.jf02j",
-									}},
+									APIServer: config.URL{
+										URL: &url.URL{
+											Scheme: "https",
+											Host:   "apiserver.jf02j",
+										},
+									},
 									Role: config.KubernetesRoleEndpoint,
 								},
 							},
@@ -411,10 +435,12 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 					ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
 						KubernetesSDConfigs: []*config.KubernetesSDConfig{
 							{
-								APIServer: config.URL{&url.URL{
-									Scheme: "https",
-									Host:   "apiserver.xa5ly",
-								}},
+								APIServer: config.URL{
+									URL: &url.URL{
+										Scheme: "https",
+										Host:   "apiserver.xa5ly",
+									},
+								},
 								Role: config.KubernetesRoleEndpoint,
 							},
 						},
@@ -438,10 +464,12 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
 							KubernetesSDConfigs: []*config.KubernetesSDConfig{
 								{
-									APIServer: config.URL{&url.URL{
-										Scheme: "https",
-										Host:   "apiserver.xa5ly",
-									}},
+									APIServer: config.URL{
+										URL: &url.URL{
+											Scheme: "https",
+											Host:   "apiserver.xa5ly",
+										},
+									},
 									Role: config.KubernetesRoleEndpoint,
 								},
 							},
@@ -468,10 +496,12 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
 							KubernetesSDConfigs: []*config.KubernetesSDConfig{
 								{
-									APIServer: config.URL{&url.URL{
-										Scheme: "https",
-										Host:   "apiserver.xa5ly",
-									}},
+									APIServer: config.URL{
+										URL: &url.URL{
+											Scheme: "https",
+											Host:   "apiserver.xa5ly",
+										},
+									},
 									Role: config.KubernetesRoleEndpoint,
 								},
 							},

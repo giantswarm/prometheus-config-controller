@@ -23,10 +23,12 @@ var (
 		ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
 			KubernetesSDConfigs: []*config.KubernetesSDConfig{
 				{
-					APIServer: config.URL{&url.URL{
-						Scheme: "https",
-						Host:   "apiserver.xa5ly",
-					}},
+					APIServer: config.URL{
+						URL: &url.URL{
+							Scheme: "https",
+							Host:   "apiserver.xa5ly",
+						},
+					},
 					Role: config.KubernetesRoleEndpoint,
 					TLSConfig: config.TLSConfig{
 						CAFile:             "/certs/xa5ly-ca.pem",
@@ -82,10 +84,12 @@ var (
 		ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
 			KubernetesSDConfigs: []*config.KubernetesSDConfig{
 				{
-					APIServer: config.URL{&url.URL{
-						Scheme: "https",
-						Host:   "apiserver.xa5ly",
-					}},
+					APIServer: config.URL{
+						URL: &url.URL{
+							Scheme: "https",
+							Host:   "apiserver.xa5ly",
+						},
+					},
 					Role: config.KubernetesRoleNode,
 					TLSConfig: config.TLSConfig{
 						CAFile:             "/certs/xa5ly-ca.pem",
@@ -162,10 +166,12 @@ var (
 		ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
 			KubernetesSDConfigs: []*config.KubernetesSDConfig{
 				{
-					APIServer: config.URL{&url.URL{
-						Scheme: "https",
-						Host:   "apiserver.xa5ly",
-					}},
+					APIServer: config.URL{
+						URL: &url.URL{
+							Scheme: "https",
+							Host:   "apiserver.xa5ly",
+						},
+					},
 					Role: config.KubernetesRoleNode,
 					TLSConfig: config.TLSConfig{
 						CAFile:             "/certs/xa5ly-ca.pem",
@@ -211,10 +217,12 @@ var (
 		ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
 			KubernetesSDConfigs: []*config.KubernetesSDConfig{
 				{
-					APIServer: config.URL{&url.URL{
-						Scheme: "https",
-						Host:   "apiserver.xa5ly",
-					}},
+					APIServer: config.URL{
+						URL: &url.URL{
+							Scheme: "https",
+							Host:   "apiserver.xa5ly",
+						},
+					},
 					Role: config.KubernetesRoleEndpoint,
 					TLSConfig: config.TLSConfig{
 						CAFile:             "/certs/xa5ly-ca.pem",
@@ -294,10 +302,12 @@ var (
 		ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
 			KubernetesSDConfigs: []*config.KubernetesSDConfig{
 				{
-					APIServer: config.URL{&url.URL{
-						Scheme: "https",
-						Host:   "apiserver.xa5ly",
-					}},
+					APIServer: config.URL{
+						URL: &url.URL{
+							Scheme: "https",
+							Host:   "apiserver.xa5ly",
+						},
+					},
 					Role: config.KubernetesRoleEndpoint,
 					TLSConfig: config.TLSConfig{
 						CAFile:             "/certs/xa5ly-ca.pem",
