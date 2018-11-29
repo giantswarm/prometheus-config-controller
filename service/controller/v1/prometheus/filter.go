@@ -10,8 +10,18 @@ func FilterInvalidServices(services []v1.Service) []v1.Service {
 	filteredServices := []v1.Service{}
 
 	for _, service := range services {
-		if _, ok := service.ObjectMeta.Annotations[ClusterAnnotation]; !ok {
-			continue
+		{
+			isDeleted := service.GetDeletionTimestamp() != nil
+			if isDeleted {
+				continue
+			}
+		}
+
+		{
+			_, hasAnnotation := service.ObjectMeta.Annotations[ClusterAnnotation]
+			if !hasAnnotation {
+				continue
+			}
 		}
 
 		filteredServices = append(filteredServices, service)
