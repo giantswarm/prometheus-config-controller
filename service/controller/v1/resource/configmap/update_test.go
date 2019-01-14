@@ -11,7 +11,7 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/giantswarm/micrologger/microloggertest"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
@@ -451,13 +451,13 @@ func Test_Resource_ConfigMap_Reload(t *testing.T) {
 	reloadRequestCount := 0
 
 	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/config" {
+		if r.URL.Path == prometheus.ConfigPath {
 			configRequestCount++
 
-			io.WriteString(w, "<html><pre>foo</pre></html>")
+			io.WriteString(w, "{ \"status\": \"success\", \"data\": { \"yaml\": \"foo\" }}")
 			return
 		}
-		if r.URL.Path == "/-/reload" {
+		if r.URL.Path == prometheus.ReloadPath {
 			receivedReloadMessage = r
 			reloadRequestCount++
 
