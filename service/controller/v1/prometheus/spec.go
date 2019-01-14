@@ -1,12 +1,12 @@
 package prometheus
 
 const (
-	// prometheusConfigPath is the Prometheus route that returns the current
-	// configuration webpage.
-	prometheusConfigPath = "/config"
-	// prometheusReloadPath is the Prometheus API route that reloads the configuration
+	// ConfigPath is the Prometheus route that returns the current
+	// configuration.
+	ConfigPath = "/api/v1/status/config"
+	// ReloadPath is the Prometheus API route that reloads the configuration
 	// when POSTed to.
-	prometheusReloadPath = "/-/reload"
+	ReloadPath = "/-/reload"
 )
 
 // PrometheusReloader represents a service that can reload Prometheus configuration.

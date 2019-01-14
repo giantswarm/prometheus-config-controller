@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/giantswarm/micrologger/microloggertest"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 )
@@ -245,8 +245,8 @@ func Test_Prometheus_Reload(t *testing.T) {
 				},
 			},
 			handler: func(w http.ResponseWriter, r *http.Request) {
-				if r.URL.Path == prometheusConfigPath {
-					io.WriteString(w, "<html><pre>foobar</pre></html>")
+				if r.URL.Path == ConfigPath {
+					io.WriteString(w, "{ \"status\": \"success\", \"data\": { \"yaml\": \"foobar\" }}")
 					return
 				}
 				t.Fatalf("unexpected http request, reload is not required")
@@ -268,11 +268,11 @@ func Test_Prometheus_Reload(t *testing.T) {
 				},
 			},
 			handler: func(w http.ResponseWriter, r *http.Request) {
-				if r.URL.Path == prometheusConfigPath {
-					io.WriteString(w, "<html><pre>foo</pre></html>")
+				if r.URL.Path == ConfigPath {
+					io.WriteString(w, "{ \"status\": \"success\", \"data\": { \"yaml\": \"foo\" }}")
 					return
 				}
-				if r.URL.Path != prometheusReloadPath {
+				if r.URL.Path != ReloadPath {
 					t.Fatalf("unexpected http request, reload is required")
 				}
 			},
@@ -292,7 +292,7 @@ func Test_Prometheus_Reload(t *testing.T) {
 				},
 			},
 			handler: func(w http.ResponseWriter, r *http.Request) {
-				if r.URL.Path == prometheusConfigPath {
+				if r.URL.Path == ConfigPath {
 					http.Error(w, fmt.Sprintf("error getting prometheus config"), http.StatusInternalServerError)
 					return
 				}
@@ -314,7 +314,7 @@ func Test_Prometheus_Reload(t *testing.T) {
 				},
 			},
 			handler: func(w http.ResponseWriter, r *http.Request) {
-				if r.URL.Path == prometheusConfigPath {
+				if r.URL.Path == ConfigPath {
 					io.WriteString(w, "lwnefknfiefnpeijfpqofjqpwofjqpwofjqpwofjpofjwpofjwpeofj")
 					return
 				}
@@ -335,7 +335,7 @@ func Test_Prometheus_Reload(t *testing.T) {
 				},
 			},
 			handler: func(w http.ResponseWriter, r *http.Request) {
-				if r.URL.Path == prometheusConfigPath {
+				if r.URL.Path == ConfigPath {
 					io.WriteString(w, "")
 					return
 				}
@@ -356,11 +356,11 @@ func Test_Prometheus_Reload(t *testing.T) {
 				},
 			},
 			handler: func(w http.ResponseWriter, r *http.Request) {
-				if r.URL.Path == prometheusConfigPath {
+				if r.URL.Path == ConfigPath {
 					io.WriteString(w, "<html><pre>foo</pre></html>")
 					return
 				}
-				if r.URL.Path == prometheusReloadPath {
+				if r.URL.Path == ReloadPath {
 					http.Error(w, fmt.Sprintf("error reloading prometheus"), http.StatusInternalServerError)
 					return
 				}

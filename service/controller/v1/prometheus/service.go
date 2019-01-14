@@ -1,13 +1,11 @@
 package prometheus
 
 import (
+	"encoding/json"
 	"fmt"
-	"html"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"path"
-	"strings"
 	"sync"
 	"time"
 
@@ -220,28 +218,32 @@ func (s *Service) getConfigFromPrometheus() (string, error) {
 	}
 
 	if res.StatusCode != http.StatusOK {
-		return "", microerror.Maskf(reloadError, "a non-200 status code was returned: %d", res.StatusCode)
+		return "", microerror.Maskf(reloadError, "a non-200 HTTP status code was returned: %d", res.StatusCode)
 	}
 
-	buf, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return "", microerror.Mask(err)
+	var config string
+	{
+		decoder := json.NewDecoder(res.Body)
+		defer res.Body.Close()
+
+		resp := struct {
+			Status string `json:"status"`
+			Data   struct {
+				YAML string `json:"yaml"`
+			} `json:"data"`
+		}{}
+
+		err = decoder.Decode(&resp)
+		if err != nil {
+			return "", microerror.Mask(err)
+		}
+
+		if resp.Status != "success" {
+			return "", microerror.Maskf(reloadError, "prometheus returned non-success response status when reloding config: %s", resp.Status)
+		}
+
+		config = resp.Data.YAML
 	}
-	defer res.Body.Close()
-
-	configPage := html.UnescapeString(string(buf))
-
-	startAnchor := "<pre>"
-	endAnchor := "</pre>"
-
-	if !strings.Contains(configPage, startAnchor) && !strings.Contains(configPage, endAnchor) {
-		return "", microerror.Maskf(reloadError, "required start and end anchors not found in configpage")
-	}
-
-	i := strings.Split(configPage, startAnchor)
-	j := strings.Split(i[1], endAnchor)
-
-	config := j[0]
 
 	return config, nil
 }
@@ -271,12 +273,12 @@ func (s *Service) reload() error {
 
 // configUrl returns the url to fetch the current Prometheus configuration.
 func (s *Service) configUrl() (string, error) {
-	return s.getUrl(s.address, prometheusConfigPath)
+	return s.getUrl(s.address, ConfigPath)
 }
 
 // reloadUrl returns the url to reload the Prometheus configuration.
 func (s *Service) reloadUrl() (string, error) {
-	return s.getUrl(s.address, prometheusReloadPath)
+	return s.getUrl(s.address, ReloadPath)
 }
 
 // getUrl appends the given route to the address.
