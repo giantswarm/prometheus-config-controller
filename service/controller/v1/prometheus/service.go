@@ -239,6 +239,11 @@ func (s *Service) getConfigFromPrometheus() (string, error) {
 	}
 
 	i := strings.Split(configPage, startAnchor)
+	if len(i) < 2 {
+		s.logger.Log("debug", fmt.Sprintf("when parsing prom configPage, len(i): %d; config response body:\n%s\n\n", len(i), buf)
+		return "", microerror.Maskf(reloadError, "len(i): %d", len(i))
+	}
+		
 	j := strings.Split(i[1], endAnchor)
 
 	config := j[0]
