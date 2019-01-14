@@ -2,12 +2,10 @@ package prometheus
 
 import (
 	"fmt"
-	"html"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"path"
-	"strings"
 	"sync"
 	"time"
 
@@ -229,26 +227,28 @@ func (s *Service) getConfigFromPrometheus() (string, error) {
 	}
 	defer res.Body.Close()
 
-	configPage := html.UnescapeString(string(buf))
+	/*
+		configPage := html.UnescapeString(string(buf))
 
-	startAnchor := "<pre>"
-	endAnchor := "</pre>"
+		startAnchor := "<pre>"
+		endAnchor := "</pre>"
 
-	if !strings.Contains(configPage, startAnchor) && !strings.Contains(configPage, endAnchor) {
-		return "", microerror.Maskf(reloadError, "required start and end anchors not found in configpage")
-	}
+		if !strings.Contains(configPage, startAnchor) && !strings.Contains(configPage, endAnchor) {
+			return "", microerror.Maskf(reloadError, "required start and end anchors not found in configpage")
+		}
 
-	i := strings.Split(configPage, startAnchor)
-	if len(i) < 2 {
-		s.logger.Log("debug", fmt.Sprintf("when parsing prom configPage, len(i): %d; config response body:\n%s\n\n", len(i), buf))
-		return "", microerror.Maskf(reloadError, "len(i): %d", len(i))
-	}
+		i := strings.Split(configPage, startAnchor)
+		if len(i) < 2 {
+			s.logger.Log("debug", fmt.Sprintf("when parsing prom configPage, len(i): %d; config response body:\n%s\n\n", len(i), buf))
+			return "", microerror.Maskf(reloadError, "len(i): %d", len(i))
+		}
 
-	j := strings.Split(i[1], endAnchor)
+		j := strings.Split(i[1], endAnchor)
 
-	config := j[0]
+		config := j[0]
+	*/
 
-	return config, nil
+	return string(buf), nil
 }
 
 func (s *Service) reload() error {
