@@ -1,6 +1,7 @@
 package prometheus
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -227,6 +228,24 @@ func (s *Service) getConfigFromPrometheus() (string, error) {
 	}
 	defer res.Body.Close()
 
+	resp := struct {
+		Status string `json:"status"`
+		Data   struct {
+			YAML string `json:"yaml"`
+		} `json:"data"`
+	}{}
+
+	err = json.Unmarshal(buf, &resp)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	if resp.Status != "success" {
+		return "", microerror.Maskf(reloadError, "prometheus returned non-success response status when realoding config: %s", resp.Status)
+	}
+
+	return resp.Data.YAML, nil
+
 	/*
 		configPage := html.UnescapeString(string(buf))
 
@@ -247,8 +266,6 @@ func (s *Service) getConfigFromPrometheus() (string, error) {
 
 		config := j[0]
 	*/
-
-	return string(buf), nil
 }
 
 func (s *Service) reload() error {

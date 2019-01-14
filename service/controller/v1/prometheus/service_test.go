@@ -247,7 +247,7 @@ func Test_Prometheus_Reload(t *testing.T) {
 			handler: func(w http.ResponseWriter, r *http.Request) {
 				if r.URL.Path == prometheusConfigPath {
 					//io.WriteString(w, "<html><pre>foobar</pre></html>")
-					io.WriteString(w, "foobar")
+					io.WriteString(w, "{ \"status\": \"success\", \"data\": { \"yaml\": \"foobar\" }}")
 					return
 				}
 				t.Fatalf("unexpected http request, reload is not required")
@@ -270,7 +270,7 @@ func Test_Prometheus_Reload(t *testing.T) {
 			},
 			handler: func(w http.ResponseWriter, r *http.Request) {
 				if r.URL.Path == prometheusConfigPath {
-					io.WriteString(w, "<html><pre>foo</pre></html>")
+					io.WriteString(w, "{ \"status\": \"success\", \"data\": { \"yaml\": \"foo\" }}")
 					return
 				}
 				if r.URL.Path != prometheusReloadPath {
