@@ -3,3 +3,8 @@
 # prometheus-config-controller
 
 Prometheus service discovery for Kubernetes clusters on Kubernetes
+
+## License
+
+prometheus-config-controller is under the Apache 2.0 license. See the [LICENSE](/giantswarm/
+prometheus-config-controller/blob/master/LICENSE) file for details.
