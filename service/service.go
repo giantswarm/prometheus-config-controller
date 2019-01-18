@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"sync"
 
 	"github.com/giantswarm/microendpoint/service/version"
@@ -137,6 +138,6 @@ func New(config Config) (*Service, error) {
 
 func (s *Service) Boot() {
 	s.bootOnce.Do(func() {
-		go s.prometheusController.Boot()
+		go s.prometheusController.Boot(context.Background())
 	})
 }
