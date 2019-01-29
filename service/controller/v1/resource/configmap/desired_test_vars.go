@@ -180,6 +180,11 @@ var (
 		},
 		RelabelConfigs: []*config.RelabelConfig{
 			{
+				Action:       prometheus.ActionDrop,
+				SourceLabels: model.LabelNames{prometheus.MetricNameLabel},
+				Regex:        prometheus.MetricsDropReflectorRegexp,
+			},
+			{
 				TargetLabel: prometheus.AppLabel,
 				Replacement: prometheus.KubeletAppName,
 			},

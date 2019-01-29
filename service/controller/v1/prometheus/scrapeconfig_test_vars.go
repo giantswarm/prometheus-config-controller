@@ -184,6 +184,11 @@ var (
 		},
 		RelabelConfigs: []*config.RelabelConfig{
 			{
+				Action:       ActionDrop,
+				SourceLabels: model.LabelNames{MetricNameLabel},
+				Regex:        MetricsDropReflectorRegexp,
+			},
+			{
 				TargetLabel: AppLabel,
 				Replacement: KubeletAppName,
 			},

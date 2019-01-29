@@ -387,6 +387,9 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
     key_file: /certs/xa5ly-key.pem
     insecure_skip_verify: true
   relabel_configs:
+  - source_labels: [__name__]
+    regex: ^reflector.+
+    action: drop
   - target_label: app
     replacement: kubelet
   - target_label: cluster_id
