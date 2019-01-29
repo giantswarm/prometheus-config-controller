@@ -366,6 +366,12 @@ var (
 			},
 			{
 				SourceLabels: model.LabelNames{prometheus.KubernetesSDPodNameLabel},
+				Regex:        prometheus.ClusterAutoscalerPodNameRegexp,
+				TargetLabel:  prometheus.MetricPathLabel,
+				Replacement:  key.APIProxyPodMetricsPath(key.ClusterAutoscalerNamespace, key.ClusterAutoscalerMetricPort),
+			},
+			{
+				SourceLabels: model.LabelNames{prometheus.KubernetesSDPodNameLabel},
 				Regex:        prometheus.CoreDNSPodNameRegexp,
 				TargetLabel:  prometheus.MetricPathLabel,
 				Replacement:  key.APIProxyPodMetricsPath(key.CoreDNSNamespace, key.CoreDNSMetricPort),

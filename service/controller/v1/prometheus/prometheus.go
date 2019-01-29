@@ -3,7 +3,7 @@ package prometheus
 import (
 	"github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/config"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 )
 
 const (
@@ -168,6 +168,9 @@ var (
 	// CertExporterPodNameRegexp is the regular expression to match cert-exporter pod name.
 	CertExporterPodNameRegexp = config.MustNewRegexp(`(cert-exporter.*)`)
 
+	// ClusterAutoscalerPodNameRegexp is the regular expression to match cluster-autoscaler pod name.
+	ClusterAutoscalerPodNameRegexp = config.MustNewRegexp(`(cluster-autoscaler.*)`)
+
 	// CoreDNSPodNameRegexp is the regular expression to match coredns pod name.
 	CoreDNSPodNameRegexp = config.MustNewRegexp(`(coredns.*)`)
 
@@ -186,7 +189,7 @@ var (
 	NodeExporterPortRegexp = config.MustNewRegexp(`(.*):10300`)
 
 	// WhitelistRegexp is the regular expression to match workload targets to scrape.
-	WhitelistRegexp = config.MustNewRegexp(`(kube-system;(cert-exporter|coredns|kube-state-metrics|net-exporter|nginx-ingress-controller))|(giantswarm;chart-operator)`)
+	WhitelistRegexp = config.MustNewRegexp(`(kube-system;(cert-exporter|cluster-autoscaler|coredns|kube-state-metrics|net-exporter|nginx-ingress-controller))|(giantswarm;chart-operator)`)
 )
 
 // GetClusterID returns the value of the cluster annotation.

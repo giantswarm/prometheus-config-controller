@@ -7,7 +7,7 @@ import (
 
 	"github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/config"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 
 	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/key"
 )
@@ -156,6 +156,12 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 		Regex:        CertExporterPodNameRegexp,
 		TargetLabel:  MetricPathLabel,
 		Replacement:  key.APIProxyPodMetricsPath(key.CertExporterNamespace, key.CertExporterMetricPort),
+	}
+	rewriteClusterAutoscalerPath := &config.RelabelConfig{
+		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
+		Regex:        ClusterAutoscalerPodNameRegexp,
+		TargetLabel:  MetricPathLabel,
+		Replacement:  key.APIProxyPodMetricsPath(key.ClusterAutoscalerNamespace, key.ClusterAutoscalerMetricPort),
 	}
 	rewriteCoreDNSPath := &config.RelabelConfig{
 		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
@@ -390,6 +396,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				rewriteICMetricPath,
 				rewriteChartOperatorPath,
 				rewriteCertExporterPath,
+				rewriteClusterAutoscalerPath,
 				rewriteCoreDNSPath,
 				rewriteNetExporterPath,
 			},
