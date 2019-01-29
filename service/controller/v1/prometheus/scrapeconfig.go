@@ -129,6 +129,11 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 		TargetLabel: ClusterTypeLabel,
 		Replacement: GuestClusterType,
 	}
+	reflectorRelabelConfig := &config.RelabelConfig{
+		Action:       ActionDrop,
+		SourceLabels: model.LabelNames{MetricNameLabel},
+		Regex:        MetricsDropReflectorRegexp,
+	}
 	rewriteAddress := &config.RelabelConfig{
 		TargetLabel: AddressLabel,
 		Replacement: key.APIServiceHost(key.PrefixMaster, clusterID),
@@ -275,6 +280,8 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 			HTTPClientConfig:       insecureHTTPClientConfig,
 			ServiceDiscoveryConfig: nodeSDConfig,
 			RelabelConfigs: []*config.RelabelConfig{
+				// Exclude reflector metrics.
+				reflectorRelabelConfig,
 				// Add app label.
 				{
 					TargetLabel: AppLabel,
