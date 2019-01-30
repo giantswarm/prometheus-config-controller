@@ -210,6 +210,13 @@ var (
 				TargetLabel:  RoleLabel,
 			},
 		},
+		MetricRelabelConfigs: []*config.RelabelConfig{
+			{
+				Action:       ActionDrop,
+				SourceLabels: model.LabelNames{MetricNameLabel},
+				Regex:        MetricsDropReflectorRegexp,
+			},
+		},
 	}
 	TestConfigOneNodeExporter = config.ScrapeConfig{
 		JobName: "guest-cluster-xa5ly-node-exporter",

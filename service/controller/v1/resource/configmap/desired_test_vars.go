@@ -206,6 +206,13 @@ var (
 				TargetLabel:  prometheus.RoleLabel,
 			},
 		},
+		MetricRelabelConfigs: []*config.RelabelConfig{
+			{
+				Action:       prometheus.ActionDrop,
+				SourceLabels: model.LabelNames{prometheus.MetricNameLabel},
+				Regex:        prometheus.MetricsDropReflectorRegexp,
+			},
+		},
 	}
 	TestConfigOneNodeExporter = config.ScrapeConfig{
 		JobName: "guest-cluster-xa5ly-node-exporter",
