@@ -150,11 +150,14 @@ var (
 	// MetricDropICRegexp is the regular expression to match against useless metric exposed by IC.
 	MetricDropICRegexp = config.MustNewRegexp(`(ingress_controller_ssl_expire_time_seconds|nginx.*)`)
 
-	// MetricDropSystemdStateRegexp is the regular expression to match againts not interesting systemd unit (for node exporter metrics).
+	// MetricDropSystemdStateRegexp is the regular expression to match against not interesting systemd unit (for node exporter metrics).
 	MetricDropSystemdStateRegexp = config.MustNewRegexp(`node_systemd_unit_state;(active|activating|deactivating|inactive)`)
 
 	// MetricDropSystemdNameRegexp is the regular expression to match against not interesting systemd units(docker mounts and calico network devices).
 	MetricDropSystemdNameRegexp = config.MustNewRegexp(`node_systemd_unit_state;(dev-disk-by|run-docker-netns|sys-devices|sys-subsystem-net|var-lib-docker-overlay2|var-lib-docker-containers|var-lib-kubelet-pods).*`)
+
+	// MetricsDropReflectorRegexp is the regular expression to match against spammy reflector metrics returned by the Kubelet.
+	MetricsDropReflectorRegexp = config.MustNewRegexp(`(reflector.*)`)
 
 	// NginxIngressControllerPodNameRegexp is the regular expression to match nginx ic pod name.
 	NginxIngressControllerPodNameRegexp = config.MustNewRegexp(`(nginx-ingress-controller.*)`)
