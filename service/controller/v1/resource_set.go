@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/giantswarm/operatorkit/controller/resource/metricsresource"
 	"github.com/giantswarm/operatorkit/controller/resource/retryresource"
 	"github.com/spf13/afero"
+	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/prometheus"
@@ -129,7 +131,24 @@ func NewResourceSet(config ResourceSetConfig) (*controller.ResourceSet, error) {
 	}
 
 	handlesFunc := func(obj interface{}) bool {
-		return true
+		// The controller's informer is configured to watch services in all
+		// namespaces because tenant cluster namespaces can be any random string. We
+		// do not want to monitor kube-system specific services here, as this had
+		// ugly side effects in the past.
+		//
+		//     https://github.com/giantswarm/giantswarm/issues/5168
+		//
+		{
+			m, err := meta.Accessor(obj)
+			if err != nil {
+				config.Logger.Log("level", "error", "message", "failed parsing object meta", "stack", fmt.Sprintf("%#v", err))
+			}
+			if m.GetNamespace() != "kube-system" {
+				return true
+			}
+		}
+
+		return false
 	}
 
 	var resourceSet *controller.ResourceSet
