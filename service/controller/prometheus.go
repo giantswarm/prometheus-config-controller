@@ -7,6 +7,7 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/operatorkit/informer"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/giantswarm/prometheus-config-controller/service/controller/v1"
@@ -46,6 +47,9 @@ func NewPrometheus(config PrometheusConfig) (*Prometheus, error) {
 			Logger:  config.Logger,
 			Watcher: config.K8sClient.CoreV1().Services(""),
 
+			ListOptions: metav1.ListOptions{
+				LabelSelector: "giantswarm.io/cluster",
+			},
 			RateWait:     informer.DefaultRateWait,
 			ResyncPeriod: config.ResyncPeriod,
 		}
