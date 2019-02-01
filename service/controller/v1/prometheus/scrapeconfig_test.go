@@ -9,7 +9,7 @@ import (
 	"github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/config"
 	yaml "gopkg.in/yaml.v2"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -464,7 +464,7 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
     insecure_skip_verify: false
   relabel_configs:
   - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name]
-    regex: (kube-system;(cert-exporter|coredns|kube-state-metrics|net-exporter|nginx-ingress-controller))|(giantswarm;chart-operator)
+    regex: (kube-system;(cert-exporter|cluster-autoscaler|coredns|kube-state-metrics|net-exporter|nginx-ingress-controller))|(giantswarm;chart-operator)
     action: keep
   - source_labels: [__meta_kubernetes_service_name]
     target_label: app
@@ -494,6 +494,10 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
     regex: (cert-exporter.*)
     target_label: __metrics_path__
     replacement: /api/v1/namespaces/kube-system/pods/${1}:9005/proxy/metrics
+  - source_labels: [__meta_kubernetes_pod_name]
+    regex: (cluster-autoscaler.*)
+    target_label: __metrics_path__
+    replacement: /api/v1/namespaces/kube-system/pods/${1}:8085/proxy/metrics
   - source_labels: [__meta_kubernetes_pod_name]
     regex: (coredns.*)
     target_label: __metrics_path__
