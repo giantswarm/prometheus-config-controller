@@ -209,8 +209,6 @@ var (
 				Replacement:  WorkerRole,
 				TargetLabel:  RoleLabel,
 			},
-		},
-		MetricRelabelConfigs: []*config.RelabelConfig{
 			{
 				Action:       ActionDrop,
 				SourceLabels: model.LabelNames{MetricNameLabel},

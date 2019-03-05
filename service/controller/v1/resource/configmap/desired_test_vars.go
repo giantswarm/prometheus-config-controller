@@ -205,8 +205,6 @@ var (
 				Replacement:  prometheus.WorkerRole,
 				TargetLabel:  prometheus.RoleLabel,
 			},
-		},
-		MetricRelabelConfigs: []*config.RelabelConfig{
 			{
 				Action:       prometheus.ActionDrop,
 				SourceLabels: model.LabelNames{prometheus.MetricNameLabel},

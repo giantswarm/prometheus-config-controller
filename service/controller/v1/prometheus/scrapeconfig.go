@@ -300,8 +300,6 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				// Add role label.
 				roleLabelRelabelConfig,
 				missingRoleLabelRelabelConfig,
-			},
-			MetricRelabelConfigs: []*config.RelabelConfig{
 				reflectorRelabelConfig,
 			},
 		},

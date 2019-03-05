@@ -401,7 +401,6 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
     regex: null
     target_label: role
     replacement: worker
-  metric_relabel_configs:
   - source_labels: [__name__]
     regex: (reflector.*)
     action: drop
