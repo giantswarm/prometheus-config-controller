@@ -140,7 +140,7 @@
   revision = "9e733616eec2897b81d28d6c41161a8f410158d6"
 
 [[projects]]
-  branch = "master"
+  branch = "kubeconfig"
   name = "github.com/giantswarm/operatorkit"
   packages = [
     "client/k8scrdclient",
@@ -153,10 +153,13 @@
     "controller/resource/internal",
     "controller/resource/metricsresource",
     "controller/resource/retryresource",
+    "flag/service/kubernetes",
+    "flag/service/kubernetes/tls",
+    "flag/service/kubernetes/watch",
     "informer",
     "informer/collector"
   ]
-  revision = "204721021837676ee3e6ee110ae58ec2e2b0d0c0"
+  revision = "031a73d98e0a1d566b231919c97cbd823a5d3729"
 
 [[projects]]
   branch = "master"
@@ -281,6 +284,12 @@
   ]
   revision = "8cb6e5b959231cc1119e43259c4a608f9c51a241"
   version = "v1.0.0"
+
+[[projects]]
+  name = "github.com/imdario/mergo"
+  packages = ["."]
+  revision = "7c29201646fa3de8506f701213473dd407f19646"
+  version = "v0.3.7"
 
 [[projects]]
   name = "github.com/inconshreveable/mousetrap"
@@ -724,8 +733,12 @@
     "rest",
     "rest/watch",
     "testing",
+    "tools/auth",
     "tools/cache",
+    "tools/clientcmd",
     "tools/clientcmd/api",
+    "tools/clientcmd/api/latest",
+    "tools/clientcmd/api/v1",
     "tools/metrics",
     "tools/pager",
     "tools/reference",
@@ -734,6 +747,7 @@
     "util/cert",
     "util/connrotation",
     "util/flowcontrol",
+    "util/homedir",
     "util/integer",
     "util/retry"
   ]
@@ -761,6 +775,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "63bd5a3439d6c4ac1bb665c0c0ed951090f45a8fd870031c399286628f14cfe7"
+  inputs-digest = "e7ef2ec274b823b4d2733014acd1ab60691f08f2a957222f15099337066c071f"
   solver-name = "gps-cdcl"
   solver-version = 1
