@@ -6,11 +6,9 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
-	"github.com/giantswarm/operatorkit/informer"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/giantswarm/prometheus-config-controller/service/controller/v1"
+	v1 "github.com/giantswarm/prometheus-config-controller/service/controller/v1"
 )
 
 type PrometheusConfig struct {
@@ -41,20 +39,13 @@ func NewPrometheus(config PrometheusConfig) (*Prometheus, error) {
 
 	var err error
 
-	var newInformer *informer.Informer
+	var newInformer *artificialInformer
 	{
-		c := informer.Config{
-			Logger:  config.Logger,
-			Watcher: config.K8sClient.CoreV1().Services(""),
-
-			ListOptions: metav1.ListOptions{
-				LabelSelector: "giantswarm.io/cluster",
-			},
-			RateWait:     informer.DefaultRateWait,
+		c := artificialInformerConfig{
 			ResyncPeriod: config.ResyncPeriod,
 		}
 
-		newInformer, err = informer.New(c)
+		newInformer, err = newArtificialInformer(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
