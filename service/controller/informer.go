@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/giantswarm/microerror"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
 )
 
@@ -41,8 +43,22 @@ func (i *artificialInformer) Boot(ctx context.Context) error {
 			return nil
 		}
 
+		artificialObj := corev1.Service{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: "v1",
+				Kind:       "Service",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "non-existing",
+				Namespace: "non-existing",
+				SelfLink:  "/v1/namespace/non-existing/services/non-existing",
+			},
+		}
+
 		e := watch.Event{
 			Type: watch.Added,
+
+			Object: artificialObj,
 		}
 		i.updateCh <- e
 
