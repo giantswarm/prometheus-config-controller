@@ -325,6 +325,9 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
   - source_labels: [__name__]
     regex: (apiserver_admission_controller_admission_latencies_seconds_bucket|apiserver_admission_step_admission_latencies_seconds_bucket|apiserver_response_sizes_bucket|rest_client_request_latency_seconds_bucket|rest_client_request_latency_seconds_bucket)
     action: drop
+  - source_labels: [__name__]
+    regex: (reflector.*)
+    action: drop
 - job_name: guest-cluster-xa5ly-cadvisor
   scheme: https
   kubernetes_sd_configs:

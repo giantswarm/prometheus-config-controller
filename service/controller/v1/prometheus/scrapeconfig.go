@@ -229,6 +229,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					SourceLabels: model.LabelNames{MetricNameLabel},
 					Regex:        MetricDropBucketLatencies,
 				},
+				reflectorRelabelConfig,
 			},
 		},
 
