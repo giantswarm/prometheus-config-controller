@@ -68,6 +68,11 @@ var (
 				SourceLabels: model.LabelNames{MetricNameLabel},
 				Regex:        MetricDropBucketLatencies,
 			},
+			{
+				Action:       ActionDrop,
+				SourceLabels: model.LabelNames{MetricNameLabel},
+				Regex:        MetricsDropReflectorRegexp,
+			},
 		},
 	}
 	TestConfigOneCadvisor = config.ScrapeConfig{

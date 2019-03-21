@@ -68,6 +68,11 @@ var (
 				SourceLabels: model.LabelNames{prometheus.MetricNameLabel},
 				Regex:        prometheus.MetricDropBucketLatencies,
 			},
+			{
+				Action:       prometheus.ActionDrop,
+				SourceLabels: model.LabelNames{prometheus.MetricNameLabel},
+				Regex:        prometheus.MetricsDropReflectorRegexp,
+			},
 		},
 	}
 	TestConfigOneCadvisor = config.ScrapeConfig{
