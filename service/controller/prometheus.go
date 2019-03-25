@@ -10,7 +10,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
-	v1 "github.com/giantswarm/prometheus-config-controller/service/controller/v1"
+	"github.com/giantswarm/prometheus-config-controller/service/controller/v1"
 )
 
 type PrometheusConfig struct {
@@ -45,10 +45,10 @@ func NewPrometheus(config PrometheusConfig) (*Prometheus, error) {
 	{
 		c := informer.Config{
 			Logger:  config.Logger,
-			Watcher: config.K8sClient.CoreV1().Pods("monitoring"),
+			Watcher: config.K8sClient.CoreV1().Services(""),
 
 			ListOptions: metav1.ListOptions{
-				LabelSelector: "app=prometheus",
+				LabelSelector: "giantswarm.io/cluster",
 			},
 			RateWait:     informer.DefaultRateWait,
 			ResyncPeriod: config.ResyncPeriod,
