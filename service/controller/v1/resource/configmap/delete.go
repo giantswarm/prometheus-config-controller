@@ -23,9 +23,9 @@ func (r *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desire
 // with removed cluster. This is important when the last cluster in the
 // installation is removed.
 func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
-	err := r.ApplyUpdateChange(ctx, obj, desiredState)
+	err := r.ApplyUpdateChange(ctx, obj, deleteChange)
 	if err != nil {
-		return nil, microerror.Mask(err)
+		return microerror.Mask(err)
 	}
 
 	return nil

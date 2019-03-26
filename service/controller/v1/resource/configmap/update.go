@@ -114,7 +114,7 @@ func toConfigMap(v interface{}) (*v1.ConfigMap, error) {
 
 	configMap, ok := v.(*v1.ConfigMap)
 	if !ok {
-		return nil, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", v1.ConfigMap{}, v)
+		return nil, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", configMap, v)
 	}
 
 	return configMap, nil
