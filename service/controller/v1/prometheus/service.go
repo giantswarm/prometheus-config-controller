@@ -136,13 +136,6 @@ func (s *Service) RequestReload(ctx context.Context) {
 	s.isReloadRequested = true
 }
 
-func (s *Service) IsReloadRequested() bool {
-	s.isReloadRequestedMutex.Lock()
-	defer s.isReloadRequestedMutex.Unlock()
-
-	return s.isReloadRequested
-}
-
 func (s *Service) isReloadRequired(ctx context.Context) (bool, error) {
 	s.logger.LogCtx(ctx, "debug", "checking if reload is required")
 
@@ -152,7 +145,11 @@ func (s *Service) isReloadRequired(ctx context.Context) (bool, error) {
 		return false, nil
 	}
 
-	if s.IsReloadRequested() {
+	s.isReloadRequestedMutex.Lock()
+	isReloadRequested := s.isReloadRequested
+	s.isReloadRequestedMutex.Unlock()
+
+	if isReloadRequested {
 		s.logger.LogCtx(ctx, "debug", "reload was requested previously")
 
 		configurationReloadRequiredCount.Inc()
