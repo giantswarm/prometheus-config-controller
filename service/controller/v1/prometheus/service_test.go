@@ -213,7 +213,7 @@ func Test_Prometheus_Reload(t *testing.T) {
 				t.Fatalf("unexpected http request, configmap does not exist")
 			},
 
-			expectedErrorHandler: IsReloadError,
+			expectedErrorHandler: IsExecutionFailed,
 		},
 
 		// Test that an error is returned if the configmap does not contain
@@ -230,7 +230,7 @@ func Test_Prometheus_Reload(t *testing.T) {
 				t.Fatalf("unexpected http request, configmap key does not exist")
 			},
 
-			expectedErrorHandler: IsReloadError,
+			expectedErrorHandler: IsExecutionFailed,
 		},
 
 		// Test that if the current Prometheus configuration matches the configmap,
@@ -300,7 +300,7 @@ func Test_Prometheus_Reload(t *testing.T) {
 				t.Fatalf("unexpected http request, should only access erroring config route")
 			},
 
-			expectedErrorHandler: IsReloadError,
+			expectedErrorHandler: IsExecutionFailed,
 		},
 
 		// Test that an error is returned if the config route returns garbage.
@@ -321,7 +321,7 @@ func Test_Prometheus_Reload(t *testing.T) {
 				}
 			},
 
-			expectedErrorHandler: IsReloadError,
+			expectedErrorHandler: IsExecutionFailed,
 		},
 
 		// Test that an error is returned if the config route returns an empty string.
@@ -342,7 +342,7 @@ func Test_Prometheus_Reload(t *testing.T) {
 				}
 			},
 
-			expectedErrorHandler: IsReloadError,
+			expectedErrorHandler: IsExecutionFailed,
 		},
 
 		// Test that an error is returned if the reload route returns an error.
@@ -367,7 +367,7 @@ func Test_Prometheus_Reload(t *testing.T) {
 				}
 			},
 
-			expectedErrorHandler: IsReloadError,
+			expectedErrorHandler: IsExecutionFailed,
 		},
 	}
 
@@ -404,10 +404,10 @@ func Test_Prometheus_Reload(t *testing.T) {
 		reloadErr := service.Reload(ctx)
 
 		if reloadErr != nil && test.expectedErrorHandler == nil {
-			t.Fatalf("%d: unexpected error returned reloading prometheus: %s\n", index, reloadErr)
+			t.Fatalf("%d: unexpected error returned reloading prometheus: %#v\n", index, reloadErr)
 		}
 		if reloadErr != nil && !test.expectedErrorHandler(reloadErr) {
-			t.Fatalf("%d: incorrect error returned reloading prometheus: %s\n", index, reloadErr)
+			t.Fatalf("%d: incorrect error returned reloading prometheus: %#v\n", index, reloadErr)
 		}
 		if reloadErr == nil && test.expectedErrorHandler != nil {
 			t.Fatalf("%d: expected error not returned reloading prometheus\n", index)

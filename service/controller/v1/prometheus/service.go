@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"path"
 	"sync"
 	"time"
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
@@ -20,6 +20,7 @@ type Config struct {
 	K8sClient kubernetes.Interface
 	Logger    micrologger.Logger
 
+	// Address is the address of the Prometheus instance to manage.
 	Address string
 	// ConfigMapKey is the key in the configmap under which the prometheus configuration is held.
 	ConfigMapKey       string
@@ -45,8 +46,6 @@ type Service struct {
 	k8sClient kubernetes.Interface
 	logger    micrologger.Logger
 
-	// address is the address of the Prometheus instance we manage.
-	address            string
 	configMapKey       string
 	configMapName      string
 	configMapNamespace string
@@ -55,6 +54,8 @@ type Service struct {
 	isReloadRequested      bool
 	isReloadRequestedMutex sync.Mutex
 	lastReloadTime         time.Time
+	urlConfig              *url.URL
+	urlReload              *url.URL
 }
 
 func New(config Config) (*Service, error) {
@@ -81,11 +82,25 @@ func New(config Config) (*Service, error) {
 		return nil, microerror.Maskf(invalidConfigError, "config.MinimumReloadTime must not be zero")
 	}
 
+	urlBase, err := url.ParseRequestURI(config.Address)
+	if err != nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.Address must be a valid URI but got %#q", config.Address)
+	}
+
+	urlConfigRelative, err := url.Parse(ConfigPath)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	urlReloadRelative, err := url.Parse(ReloadPath)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
 	service := &Service{
 		k8sClient: config.K8sClient,
 		logger:    config.Logger,
 
-		address:            config.Address,
 		configMapKey:       config.ConfigMapKey,
 		configMapName:      config.ConfigMapName,
 		configMapNamespace: config.ConfigMapNamespace,
@@ -94,6 +109,8 @@ func New(config Config) (*Service, error) {
 		isReloadRequested:      false,
 		isReloadRequestedMutex: sync.Mutex{},
 		lastReloadTime:         time.Time{},
+		urlConfig:              urlBase.ResolveReference(urlConfigRelative),
+		urlReload:              urlBase.ResolveReference(urlReloadRelative),
 	}
 
 	return service, nil
@@ -102,7 +119,7 @@ func New(config Config) (*Service, error) {
 func (s *Service) Reload(ctx context.Context) error {
 	reloadRequired, err := s.isReloadRequired(ctx)
 	if err != nil {
-		return microerror.Maskf(reloadError, err.Error())
+		return microerror.Mask(err)
 	}
 
 	if reloadRequired {
@@ -112,6 +129,15 @@ func (s *Service) Reload(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func (s *Service) RequestReload(ctx context.Context) {
+	s.logger.LogCtx(ctx, "debug", "reload requested")
+
+	s.isReloadRequestedMutex.Lock()
+	defer s.isReloadRequestedMutex.Unlock()
+
+	s.isReloadRequested = true
 }
 
 func (s *Service) isReloadRateLimited(ctx context.Context) bool {
@@ -125,15 +151,6 @@ func (s *Service) isReloadRateLimited(ctx context.Context) bool {
 	}
 
 	return false
-}
-
-func (s *Service) RequestReload(ctx context.Context) {
-	s.logger.LogCtx(ctx, "debug", "reload requested")
-
-	s.isReloadRequestedMutex.Lock()
-	defer s.isReloadRequestedMutex.Unlock()
-
-	s.isReloadRequested = true
 }
 
 func (s *Service) isReloadRequired(ctx context.Context) (bool, error) {
@@ -186,16 +203,16 @@ func (s *Service) isReloadRequired(ctx context.Context) (bool, error) {
 func (s *Service) getConfigFromKubernetes(ctx context.Context) (string, error) {
 	s.logger.LogCtx(ctx, "debug", fmt.Sprintf("fetching configmap: %s/%s", s.configMapNamespace, s.configMapName))
 
-	configMap, err := s.k8sClient.CoreV1().ConfigMaps(s.configMapNamespace).Get(
-		s.configMapName, metav1.GetOptions{},
-	)
-	if err != nil {
-		return "", microerror.Maskf(reloadError, err.Error())
+	configMap, err := s.k8sClient.CoreV1().ConfigMaps(s.configMapNamespace).Get(s.configMapName, metav1.GetOptions{})
+	if apierrors.IsNotFound(err) {
+		return "", microerror.Maskf(executionFailedError, "configmap %#q in namespace %#q does not exist", s.configMapName, s.configMapNamespace)
+	} else if err != nil {
+		return "", microerror.Mask(err)
 	}
 
 	val, ok := configMap.Data[s.configMapKey]
 	if !ok {
-		return "", microerror.Maskf(reloadError, "configmap key not present")
+		return "", microerror.Maskf(executionFailedError, "configmap key not present")
 	}
 
 	return val, nil
@@ -205,18 +222,13 @@ func (s *Service) getConfigFromKubernetes(ctx context.Context) (string, error) {
 func (s *Service) getConfigFromPrometheus(ctx context.Context) (string, error) {
 	s.logger.LogCtx(ctx, "debug", "fetching current prometheus config")
 
-	configUrl, err := s.configUrl()
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-
-	res, err := http.Get(configUrl)
+	res, err := http.Get(s.urlConfig.String())
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
 
 	if res.StatusCode != http.StatusOK {
-		return "", microerror.Maskf(reloadError, "a non-200 HTTP status code was returned: %d", res.StatusCode)
+		return "", microerror.Maskf(executionFailedError, "non-200 HTTP status code was returned: %d", res.StatusCode)
 	}
 
 	var config string
@@ -233,11 +245,11 @@ func (s *Service) getConfigFromPrometheus(ctx context.Context) (string, error) {
 
 		err = decoder.Decode(&resp)
 		if err != nil {
-			return "", microerror.Mask(err)
+			return "", microerror.Maskf(executionFailedError, "decode prometheus config response with error: %s", err.Error())
 		}
 
 		if resp.Status != "success" {
-			return "", microerror.Maskf(reloadError, "prometheus returned non-success response status when reloding config: %s", resp.Status)
+			return "", microerror.Maskf(executionFailedError, "prometheus returned non-success response status when reloding config: %s", resp.Status)
 		}
 
 		config = resp.Data.YAML
@@ -249,17 +261,12 @@ func (s *Service) getConfigFromPrometheus(ctx context.Context) (string, error) {
 func (s *Service) reload(ctx context.Context) error {
 	s.logger.LogCtx(ctx, "debug", "reloading prometheus config")
 
-	reloadUrl, err := s.reloadUrl()
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	res, err := http.Post(reloadUrl, "", nil)
+	res, err := http.Post(s.urlReload.String(), "", nil)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 	if res.StatusCode != http.StatusOK {
-		return microerror.Maskf(reloadError, "a non-200 status code was returned: %d", res.StatusCode)
+		return microerror.Maskf(executionFailedError, "non-200 status code was returned: %d", res.StatusCode)
 	}
 
 	configurationReloadCount.Inc()
@@ -267,25 +274,4 @@ func (s *Service) reload(ctx context.Context) error {
 	s.lastReloadTime = time.Now()
 
 	return nil
-}
-
-// configUrl returns the url to fetch the current Prometheus configuration.
-func (s *Service) configUrl() (string, error) {
-	return s.getUrl(s.address, ConfigPath)
-}
-
-// reloadUrl returns the url to reload the Prometheus configuration.
-func (s *Service) reloadUrl() (string, error) {
-	return s.getUrl(s.address, ReloadPath)
-}
-
-// getUrl appends the given route to the address.
-func (s *Service) getUrl(address, route string) (string, error) {
-	u, err := url.ParseRequestURI(s.address)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-	u.Path = path.Join(u.Path, route)
-
-	return u.String(), nil
 }
