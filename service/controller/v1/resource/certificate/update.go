@@ -39,11 +39,11 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 	}
 
 	if !reflect.DeepEqual(currentCertificateFiles, desiredCertificateFiles) {
-		r.logger.Log("debug", "current certificates do not match desired certificates, need to update")
+		r.logger.LogCtx(ctx, "debug", "current certificates do not match desired certificates, need to update")
 		return desiredCertificateFiles, nil
 	}
 
-	r.logger.Log("debug", "current certificates match desired certificates, no update needed")
+	r.logger.LogCtx(ctx, "debug", "current certificates match desired certificates, no update needed")
 
 	return nil, nil
 }
@@ -61,7 +61,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 
 	// Write the update state certificate files.
 	for _, fileToWrite := range updateCertificateFiles {
-		r.logger.Log("debug", fmt.Sprintf("writing certificate: %s", fileToWrite.path))
+		r.logger.LogCtx(ctx, "debug", fmt.Sprintf("writing certificate: %s", fileToWrite.path))
 		if err := afero.WriteFile(r.fs, fileToWrite.path, []byte(fileToWrite.data), r.certPermission); err != nil {
 			return microerror.Mask(err)
 		}
@@ -84,15 +84,15 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 		}
 
 		if !fileDesired {
-			r.logger.Log("debug", fmt.Sprintf("removing certificate: %s", filePath))
+			r.logger.LogCtx(ctx, "debug", fmt.Sprintf("removing certificate: %s", filePath))
 			if err := r.fs.Remove(filePath); err != nil {
 				return microerror.Mask(err)
 			}
 		}
 	}
 
-	r.logger.Log("debug", "certificates have been updated, requesting reload")
-	r.prometheusReloader.RequestReload()
+	r.logger.LogCtx(ctx, "debug", "certificates have been updated, requesting reload")
+	r.prometheusReloader.RequestReload(ctx)
 
 	return nil
 }

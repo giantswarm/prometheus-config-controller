@@ -1,6 +1,7 @@
 package prometheus
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -371,6 +372,8 @@ func Test_Prometheus_Reload(t *testing.T) {
 	}
 
 	for index, test := range tests {
+		ctx := context.Background()
+
 		fakeK8sClient := fake.NewSimpleClientset()
 
 		if test.configMap != nil {
@@ -398,7 +401,7 @@ func Test_Prometheus_Reload(t *testing.T) {
 			t.Fatalf("error returned creating service: %s\n", err)
 		}
 
-		reloadErr := service.Reload()
+		reloadErr := service.Reload(ctx)
 
 		if reloadErr != nil && test.expectedErrorHandler == nil {
 			t.Fatalf("%d: unexpected error returned reloading prometheus: %s\n", index, reloadErr)

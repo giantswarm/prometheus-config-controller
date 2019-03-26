@@ -1,5 +1,7 @@
 package prometheus
 
+import "context"
+
 const (
 	// ConfigPath is the Prometheus route that returns the current
 	// configuration.
@@ -13,10 +15,10 @@ const (
 type PrometheusReloader interface {
 	// Reload should reload the Prometheus configuration, possibly taking
 	// rate limiting into account.
-	Reload() error
+	Reload(ctx context.Context) error
 
 	// RequestReload should specify that the next call to Reload should force
 	// the reload to happen. Rate-limiting is allowed, but a reload must happen
 	// eventually.
-	RequestReload()
+	RequestReload(ctx context.Context)
 }
