@@ -1,6 +1,7 @@
 package prometheus
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -98,14 +99,14 @@ func New(config Config) (*Service, error) {
 	return service, nil
 }
 
-func (s *Service) Reload() error {
-	reloadRequired, err := s.isReloadRequired()
+func (s *Service) Reload(ctx context.Context) error {
+	reloadRequired, err := s.isReloadRequired(ctx)
 	if err != nil {
 		return microerror.Maskf(reloadError, err.Error())
 	}
 
 	if reloadRequired {
-		if err := s.reload(); err != nil {
+		if err := s.reload(ctx); err != nil {
 			return microerror.Mask(err)
 		}
 	}
@@ -113,11 +114,11 @@ func (s *Service) Reload() error {
 	return nil
 }
 
-func (s *Service) isReloadRateLimited() bool {
+func (s *Service) isReloadRateLimited(ctx context.Context) bool {
 	timeSinceLastReload := time.Since(s.lastReloadTime)
 
 	if timeSinceLastReload < s.minimumReloadTime {
-		s.logger.Log("debug", fmt.Sprintf("ignoring reload request, only %s since last reload, minimum time between is %s", timeSinceLastReload, s.minimumReloadTime))
+		s.logger.LogCtx(ctx, "debug", fmt.Sprintf("ignoring reload request, only %s since last reload, minimum time between is %s", timeSinceLastReload, s.minimumReloadTime))
 		configurationReloadIgnoredCount.Inc()
 
 		return true
@@ -126,8 +127,8 @@ func (s *Service) isReloadRateLimited() bool {
 	return false
 }
 
-func (s *Service) RequestReload() {
-	s.logger.Log("debug", "reload requested")
+func (s *Service) RequestReload(ctx context.Context) {
+	s.logger.LogCtx(ctx, "debug", "reload requested")
 
 	s.isReloadRequestedMutex.Lock()
 	defer s.isReloadRequestedMutex.Unlock()
@@ -142,17 +143,17 @@ func (s *Service) IsReloadRequested() bool {
 	return s.isReloadRequested
 }
 
-func (s *Service) isReloadRequired() (bool, error) {
-	s.logger.Log("debug", "checking if reload is required")
+func (s *Service) isReloadRequired(ctx context.Context) (bool, error) {
+	s.logger.LogCtx(ctx, "debug", "checking if reload is required")
 
 	configurationReloadCheckCount.Inc()
 
-	if s.isReloadRateLimited() {
+	if s.isReloadRateLimited(ctx) {
 		return false, nil
 	}
 
 	if s.IsReloadRequested() {
-		s.logger.Log("debug", "reload was requested previously")
+		s.logger.LogCtx(ctx, "debug", "reload was requested previously")
 
 		configurationReloadRequiredCount.Inc()
 
@@ -163,12 +164,12 @@ func (s *Service) isReloadRequired() (bool, error) {
 		return true, nil
 	}
 
-	kubernetesConfiguration, err := s.getConfigFromKubernetes()
+	kubernetesConfiguration, err := s.getConfigFromKubernetes(ctx)
 	if err != nil {
 		return false, microerror.Mask(err)
 	}
 
-	prometheusConfiguration, err := s.getConfigFromPrometheus()
+	prometheusConfiguration, err := s.getConfigFromPrometheus(ctx)
 	if err != nil {
 		return false, microerror.Mask(err)
 	}
@@ -176,17 +177,17 @@ func (s *Service) isReloadRequired() (bool, error) {
 	if kubernetesConfiguration != prometheusConfiguration {
 		configurationReloadRequiredCount.Inc()
 
-		s.logger.Log("debug", "kubernetes and prometheus configuration do not match, reload required")
+		s.logger.LogCtx(ctx, "debug", "kubernetes and prometheus configuration do not match, reload required")
 		return true, nil
 	}
 
-	s.logger.Log("debug", "kubernetes and prometheus configuration match, reload not required")
+	s.logger.LogCtx(ctx, "debug", "kubernetes and prometheus configuration match, reload not required")
 	return false, nil
 }
 
 // getConfigFromKubernetes returns the configuration that is in the configmap.
-func (s *Service) getConfigFromKubernetes() (string, error) {
-	s.logger.Log("debug", fmt.Sprintf("fetching configmap: %s/%s", s.configMapNamespace, s.configMapName))
+func (s *Service) getConfigFromKubernetes(ctx context.Context) (string, error) {
+	s.logger.LogCtx(ctx, "debug", fmt.Sprintf("fetching configmap: %s/%s", s.configMapNamespace, s.configMapName))
 
 	configMap, err := s.k8sClient.CoreV1().ConfigMaps(s.configMapNamespace).Get(
 		s.configMapName, metav1.GetOptions{},
@@ -204,8 +205,8 @@ func (s *Service) getConfigFromKubernetes() (string, error) {
 }
 
 // getConfigFromPrometheus returns the configuration that is currently loaded in Prometheus.
-func (s *Service) getConfigFromPrometheus() (string, error) {
-	s.logger.Log("debug", "fetching current prometheus config")
+func (s *Service) getConfigFromPrometheus(ctx context.Context) (string, error) {
+	s.logger.LogCtx(ctx, "debug", "fetching current prometheus config")
 
 	configUrl, err := s.configUrl()
 	if err != nil {
@@ -248,8 +249,8 @@ func (s *Service) getConfigFromPrometheus() (string, error) {
 	return config, nil
 }
 
-func (s *Service) reload() error {
-	s.logger.Log("debug", "reloading prometheus config")
+func (s *Service) reload(ctx context.Context) error {
+	s.logger.LogCtx(ctx, "debug", "reloading prometheus config")
 
 	reloadUrl, err := s.reloadUrl()
 	if err != nil {

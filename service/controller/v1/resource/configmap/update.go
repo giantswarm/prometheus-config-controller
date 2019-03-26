@@ -6,7 +6,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller"
 	prometheusclient "github.com/prometheus/client_golang/prometheus"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 )
 
@@ -53,11 +53,11 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 	// If the current state does not match the desired state,
 	// set the desired state as update.
 	if currentConfigMap.Data[r.configMapKey] != desiredConfigMap.Data[r.configMapKey] {
-		r.logger.Log("debug", "current configmap does not match desired configmap, need to update")
+		r.logger.LogCtx(ctx, "debug", "current configmap does not match desired configmap, need to update")
 		return desiredConfigMap, nil
 	}
 
-	r.logger.Log("debug", "current configmap matches desired configmap, no update needed")
+	r.logger.LogCtx(ctx, "debug", "current configmap matches desired configmap, no update needed")
 
 	return nil, nil
 }
@@ -69,7 +69,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 	}
 
 	if configMapToUpdate != nil {
-		r.logger.Log("debug", "updating configmap")
+		r.logger.LogCtx(ctx, "debug", "updating configmap")
 
 		timer := prometheusclient.NewTimer(kubernetesResource.WithLabelValues("configmap", "update"))
 		_, err := r.k8sClient.CoreV1().ConfigMaps(r.configMapNamespace).Update(configMapToUpdate)
@@ -86,7 +86,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 
 	// We attempt to reload Prometheus even if the configmap hasn't updated,
 	// as the PrometheusReloader takes care that we don't reload too often.
-	if err := r.prometheusReloader.Reload(); err != nil {
+	if err := r.prometheusReloader.Reload(ctx); err != nil {
 		return microerror.Mask(err)
 	}
 

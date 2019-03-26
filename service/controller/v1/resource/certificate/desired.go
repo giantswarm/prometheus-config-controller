@@ -22,7 +22,7 @@ const (
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
-	r.logger.Log("debug", "fetching all services")
+	r.logger.LogCtx(ctx, "debug", "fetching all services")
 
 	servicesTimer := prometheusclient.NewTimer(kubernetesResource.WithLabelValues("services", "list"))
 	services, err := r.k8sClient.CoreV1().Services("").List(metav1.ListOptions{
@@ -34,10 +34,10 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Maskf(err, "an error occurred listing all services")
 	}
 
-	r.logger.Log("debug", "filtering services")
+	r.logger.LogCtx(ctx, "debug", "filtering services")
 	validServices := prometheus.FilterInvalidServices(services.Items)
 
-	r.logger.Log("debug", "fetching certificates")
+	r.logger.LogCtx(ctx, "debug", "fetching certificates")
 	certificateFiles := []certificateFile{}
 
 	for _, service := range validServices {
@@ -62,7 +62,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			// It's possible that the certificate just hasn't been created yet.
 			// If the certificate is consistently missing, we'll be notified
 			// about the cluster not being scrapeable.
-			r.logger.Log("warning", fmt.Sprintf("certificate for cluster '%s' is missing, continuing", clusterID))
+			r.logger.LogCtx(ctx, "warning", fmt.Sprintf("certificate for cluster '%s' is missing, continuing", clusterID))
 			continue
 		}
 		certificate := certificates.Items[0]
@@ -87,7 +87,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		}
 	}
 
-	r.logger.Log("debug", "certificates fetched")
+	r.logger.LogCtx(ctx, "debug", "certificates fetched")
 
 	return certificateFiles, nil
 }

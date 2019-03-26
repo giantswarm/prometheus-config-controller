@@ -10,7 +10,7 @@ import (
 )
 
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
-	r.logger.Log("debug", fmt.Sprintf("reading certificate directory: %s", r.certDirectory))
+	r.logger.LogCtx(ctx, "debug", fmt.Sprintf("reading certificate directory: %s", r.certDirectory))
 
 	fileInfos, err := afero.ReadDir(r.fs, r.certDirectory)
 	if err != nil {

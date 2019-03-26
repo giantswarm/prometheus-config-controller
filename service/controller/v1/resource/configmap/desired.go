@@ -20,7 +20,7 @@ const (
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
-	r.logger.Log("debug", fmt.Sprintf("fetching configmap: %s/%s", r.configMapNamespace, r.configMapName))
+	r.logger.LogCtx(ctx, "debug", fmt.Sprintf("fetching configmap: %s/%s", r.configMapNamespace, r.configMapName))
 
 	configMapTimer := prometheusclient.NewTimer(kubernetesResource.WithLabelValues("configmap", "get"))
 	configMap, err := r.k8sClient.CoreV1().ConfigMaps(r.configMapNamespace).Get(
@@ -44,7 +44,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Maskf(invalidConfigMapError, err.Error())
 	}
 
-	r.logger.Log("debug", fmt.Sprintf("fetching all services"))
+	r.logger.LogCtx(ctx, "debug", fmt.Sprintf("fetching all services"))
 
 	servicesTimer := prometheusclient.NewTimer(kubernetesResource.WithLabelValues("services", "list"))
 	services, err := r.k8sClient.CoreV1().Services("").List(metav1.ListOptions{
@@ -56,7 +56,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Maskf(err, "an error occurred listing all services")
 	}
 
-	r.logger.Log("debug", fmt.Sprintf("computing desired state of configmap"))
+	r.logger.LogCtx(ctx, "debug", fmt.Sprintf("computing desired state of configmap"))
 	scrapeConfigs, err := prometheus.GetScrapeConfigs(services.Items, r.certDirectory)
 	if err != nil {
 		return nil, microerror.Maskf(err, "an error occurred creating scrape configs")
