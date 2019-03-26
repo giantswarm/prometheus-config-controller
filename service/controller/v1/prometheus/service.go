@@ -140,65 +140,6 @@ func (s *Service) RequestReload(ctx context.Context) {
 	s.isReloadRequested = true
 }
 
-func (s *Service) isReloadRateLimited(ctx context.Context) bool {
-	timeSinceLastReload := time.Since(s.lastReloadTime)
-
-	if timeSinceLastReload < s.minimumReloadTime {
-		s.logger.LogCtx(ctx, "debug", fmt.Sprintf("ignoring reload request, only %s since last reload, minimum time between is %s", timeSinceLastReload, s.minimumReloadTime))
-		configurationReloadIgnoredCount.Inc()
-
-		return true
-	}
-
-	return false
-}
-
-func (s *Service) isReloadRequired(ctx context.Context) (bool, error) {
-	s.logger.LogCtx(ctx, "debug", "checking if reload is required")
-
-	configurationReloadCheckCount.Inc()
-
-	if s.isReloadRateLimited(ctx) {
-		return false, nil
-	}
-
-	s.isReloadRequestedMutex.Lock()
-	isReloadRequested := s.isReloadRequested
-	s.isReloadRequestedMutex.Unlock()
-
-	if isReloadRequested {
-		s.logger.LogCtx(ctx, "debug", "reload was requested previously")
-
-		configurationReloadRequiredCount.Inc()
-
-		s.isReloadRequestedMutex.Lock()
-		s.isReloadRequested = false
-		s.isReloadRequestedMutex.Unlock()
-
-		return true, nil
-	}
-
-	kubernetesConfiguration, err := s.getConfigFromKubernetes(ctx)
-	if err != nil {
-		return false, microerror.Mask(err)
-	}
-
-	prometheusConfiguration, err := s.getConfigFromPrometheus(ctx)
-	if err != nil {
-		return false, microerror.Mask(err)
-	}
-
-	if kubernetesConfiguration != prometheusConfiguration {
-		configurationReloadRequiredCount.Inc()
-
-		s.logger.LogCtx(ctx, "debug", "kubernetes and prometheus configuration do not match, reload required")
-		return true, nil
-	}
-
-	s.logger.LogCtx(ctx, "debug", "kubernetes and prometheus configuration match, reload not required")
-	return false, nil
-}
-
 // getConfigFromKubernetes returns the configuration that is in the configmap.
 func (s *Service) getConfigFromKubernetes(ctx context.Context) (string, error) {
 	s.logger.LogCtx(ctx, "debug", fmt.Sprintf("fetching configmap: %s/%s", s.configMapNamespace, s.configMapName))
@@ -256,6 +197,65 @@ func (s *Service) getConfigFromPrometheus(ctx context.Context) (string, error) {
 	}
 
 	return config, nil
+}
+
+func (s *Service) isReloadRateLimited(ctx context.Context) bool {
+	timeSinceLastReload := time.Since(s.lastReloadTime)
+
+	if timeSinceLastReload < s.minimumReloadTime {
+		s.logger.LogCtx(ctx, "debug", fmt.Sprintf("ignoring reload request, only %s since last reload, minimum time between is %s", timeSinceLastReload, s.minimumReloadTime))
+		configurationReloadIgnoredCount.Inc()
+
+		return true
+	}
+
+	return false
+}
+
+func (s *Service) isReloadRequired(ctx context.Context) (bool, error) {
+	s.logger.LogCtx(ctx, "debug", "checking if reload is required")
+
+	configurationReloadCheckCount.Inc()
+
+	if s.isReloadRateLimited(ctx) {
+		return false, nil
+	}
+
+	s.isReloadRequestedMutex.Lock()
+	isReloadRequested := s.isReloadRequested
+	s.isReloadRequestedMutex.Unlock()
+
+	if isReloadRequested {
+		s.logger.LogCtx(ctx, "debug", "reload was requested previously")
+
+		configurationReloadRequiredCount.Inc()
+
+		s.isReloadRequestedMutex.Lock()
+		s.isReloadRequested = false
+		s.isReloadRequestedMutex.Unlock()
+
+		return true, nil
+	}
+
+	kubernetesConfiguration, err := s.getConfigFromKubernetes(ctx)
+	if err != nil {
+		return false, microerror.Mask(err)
+	}
+
+	prometheusConfiguration, err := s.getConfigFromPrometheus(ctx)
+	if err != nil {
+		return false, microerror.Mask(err)
+	}
+
+	if kubernetesConfiguration != prometheusConfiguration {
+		configurationReloadRequiredCount.Inc()
+
+		s.logger.LogCtx(ctx, "debug", "kubernetes and prometheus configuration do not match, reload required")
+		return true, nil
+	}
+
+	s.logger.LogCtx(ctx, "debug", "kubernetes and prometheus configuration match, reload not required")
+	return false, nil
 }
 
 func (s *Service) reload(ctx context.Context) error {
