@@ -21,3 +21,12 @@ var invalidConfigError = &microerror.Error{
 func IsInvalidConfig(err error) bool {
 	return microerror.Cause(err) == invalidConfigError
 }
+
+var reloadThrottleError = &microerror.Error{
+	Kind: "reloadThrottleError",
+}
+
+// IsReloadThrottle asserts reloadThrottleError.
+func IsReloadThrottle(err error) bool {
+	return microerror.Cause(err) == reloadThrottleError
+}
