@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"net/url"
 	"sort"
+	"time"
 
 	"github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/config"
 	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/key"
 )
@@ -435,30 +437,36 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 		},
 	}
 	// check if we can add etcd monitoring
-	if _, ok := service.Annotations[key.AnnotationEtcdDomain]; ok {
-		// prepare etcd static discovery config
-		etcdStaticConfig := config.ServiceDiscoveryConfig{
-			StaticConfigs: []*config.TargetGroup{
-				{
-					Targets: []model.LabelSet{
-						getEtcdTarget(service.Annotations[key.AnnotationEtcdDomain]),
-					},
-					Labels: model.LabelSet{
-						model.LabelName(ClusterTypeLabel): model.LabelValue(GuestClusterType),
-						model.LabelName(ClusterIDLabel):   model.LabelValue(clusterID),
+
+	//  to ensure all components in cloud are ready we delay creation of etcd scrape config by 30 minutes
+	etcdScrapeDelay := metav1.Time{Time:time.Now().Add(-time.Minute*30)}
+	if service.CreationTimestamp.Before(&etcdScrapeDelay) {
+
+		if _, ok := service.Annotations[key.AnnotationEtcdDomain]; ok {
+			// prepare etcd static discovery config
+			etcdStaticConfig := config.ServiceDiscoveryConfig{
+				StaticConfigs: []*config.TargetGroup{
+					{
+						Targets: []model.LabelSet{
+							getEtcdTarget(service.Annotations[key.AnnotationEtcdDomain]),
+						},
+						Labels: model.LabelSet{
+							model.LabelName(ClusterTypeLabel): model.LabelValue(GuestClusterType),
+							model.LabelName(ClusterIDLabel):   model.LabelValue(clusterID),
+						},
 					},
 				},
-			},
-		}
+			}
 
-		etcdScrapeConfig := config.ScrapeConfig{
-			JobName:                getJobName(service, EtcdJobType),
-			Scheme:                 HttpsScheme,
-			HTTPClientConfig:       secureHTTPClientConfig,
-			ServiceDiscoveryConfig: etcdStaticConfig,
+			etcdScrapeConfig := config.ScrapeConfig{
+				JobName:                getJobName(service, EtcdJobType),
+				Scheme:                 HttpsScheme,
+				HTTPClientConfig:       secureHTTPClientConfig,
+				ServiceDiscoveryConfig: etcdStaticConfig,
+			}
+			// append etcd scrape config
+			scrapeConfigs = append(scrapeConfigs, etcdScrapeConfig)
 		}
-		// append etcd scrape config
-		scrapeConfigs = append(scrapeConfigs, etcdScrapeConfig)
 	}
 
 	return scrapeConfigs
