@@ -440,8 +440,8 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 
 	//  to ensure all components in cloud are ready we delay creation of etcd scrape config by 30 minutes
 	etcdScrapeDelay := metav1.Time{Time: time.Now().Add(-time.Minute * 30)}
-	if service.CreationTimestamp.Before(&etcdScrapeDelay) {
 
+	if service.CreationTimestamp.Before(&etcdScrapeDelay) {
 		if _, ok := service.Annotations[key.AnnotationEtcdDomain]; ok {
 			// prepare etcd static discovery config
 			etcdStaticConfig := config.ServiceDiscoveryConfig{
