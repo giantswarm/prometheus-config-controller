@@ -165,6 +165,10 @@ func (s *Service) boot(ctx context.Context) error {
 	{
 		s.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for Prometheus to be up"))
 
+		// Prometheus won't start in 90 seconds anyway so let's not
+		// spam with logs and wait for it.
+		time.Sleep(90 * time.Second)
+
 		url := key.PrometheusURLConfig(s.prometheusAddress)
 
 		o := func() error {
@@ -181,10 +185,6 @@ func (s *Service) boot(ctx context.Context) error {
 		}
 		b := backoff.NewMaxRetries(10, 60*time.Second)
 		n := backoff.NewNotifier(s.logger, ctx)
-
-		// Prometheus won't start in 90 seconds anyway so let's not
-		// spam with logs and wait for it.
-		time.Sleep(90 * time.Second)
 
 		err := backoff.RetryNotify(o, b, n)
 		if err != nil {
