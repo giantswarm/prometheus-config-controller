@@ -3,6 +3,7 @@ package key
 import (
 	"fmt"
 	"path"
+	"strings"
 )
 
 const (
@@ -52,4 +53,18 @@ func APIProxyPodMetricsPath(namespace, port string) string {
 
 func APIServiceHost(prefix string, clusterID string) string {
 	return fmt.Sprintf("%s.%s:443", prefix, clusterID)
+}
+
+// PrometheusURLConfig returns the Prometheus API URL that returns the current
+// configuration. It assumes that address is a valid HTTP URL.
+func PrometheusURLConfig(address string) string {
+	u := strings.TrimSuffix(address, "/")
+	return u + "/api/v1/status/config"
+}
+
+// PrometheusURLReload returns the Prometheus API URL that reloads the
+// configuration. It assumes that address is a valid HTTP URL.
+func PrometheusURLReload(address string) string {
+	u := strings.TrimSuffix(address, "/")
+	return u + "/-/reload"
 }

@@ -451,13 +451,13 @@ func Test_Resource_ConfigMap_Reload(t *testing.T) {
 	reloadRequestCount := 0
 
 	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == prometheus.ConfigPath {
+		if r.URL.Path == "/api/v1/status/config" {
 			configRequestCount++
 
 			io.WriteString(w, "{ \"status\": \"success\", \"data\": { \"yaml\": \"foo\" }}")
 			return
 		}
-		if r.URL.Path == prometheus.ReloadPath {
+		if r.URL.Path == "/-/reload" {
 			receivedReloadMessage = r
 			reloadRequestCount++
 

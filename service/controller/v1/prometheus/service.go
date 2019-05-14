@@ -11,6 +11,7 @@ import (
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/key"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -54,8 +55,8 @@ type Service struct {
 	isReloadRequested      bool
 	isReloadRequestedMutex sync.Mutex
 	lastReloadTime         time.Time
-	urlConfig              *url.URL
-	urlReload              *url.URL
+	urlConfig              string
+	urlReload              string
 }
 
 func New(config Config) (*Service, error) {
@@ -68,6 +69,10 @@ func New(config Config) (*Service, error) {
 
 	if config.Address == "" {
 		return nil, microerror.Maskf(invalidConfigError, "config.Address must not be empty")
+	}
+	_, err := url.ParseRequestURI(config.Address)
+	if err != nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.Address must be a valid URI but got %#q", config.Address)
 	}
 	if config.ConfigMapKey == "" {
 		return nil, microerror.Maskf(invalidConfigError, "config.ConfigMapKey must not be empty")
@@ -82,21 +87,6 @@ func New(config Config) (*Service, error) {
 		return nil, microerror.Maskf(invalidConfigError, "config.MinimumReloadTime must not be zero")
 	}
 
-	urlBase, err := url.ParseRequestURI(config.Address)
-	if err != nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.Address must be a valid URI but got %#q", config.Address)
-	}
-
-	urlConfigRelative, err := url.Parse(ConfigPath)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	urlReloadRelative, err := url.Parse(ReloadPath)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
 	service := &Service{
 		k8sClient: config.K8sClient,
 		logger:    config.Logger,
@@ -109,8 +99,8 @@ func New(config Config) (*Service, error) {
 		isReloadRequested:      false,
 		isReloadRequestedMutex: sync.Mutex{},
 		lastReloadTime:         time.Time{},
-		urlConfig:              urlBase.ResolveReference(urlConfigRelative),
-		urlReload:              urlBase.ResolveReference(urlReloadRelative),
+		urlConfig:              key.PrometheusURLConfig(config.Address),
+		urlReload:              key.PrometheusURLReload(config.Address),
 	}
 
 	return service, nil
@@ -168,7 +158,7 @@ func (s *Service) getConfigFromKubernetes(ctx context.Context) (string, error) {
 func (s *Service) getConfigFromPrometheus(ctx context.Context) (string, error) {
 	s.logger.LogCtx(ctx, "debug", "fetching current prometheus config")
 
-	res, err := http.Get(s.urlConfig.String())
+	res, err := http.Get(s.urlConfig)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
@@ -249,7 +239,7 @@ func (s *Service) isReloadRequired(ctx context.Context) (bool, error) {
 func (s *Service) reload(ctx context.Context) error {
 	s.logger.LogCtx(ctx, "debug", "reloading prometheus config")
 
-	res, err := http.Post(s.urlReload.String(), "", nil)
+	res, err := http.Post(s.urlReload, "", nil)
 	if err != nil {
 		return microerror.Mask(err)
 	}

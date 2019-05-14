@@ -246,7 +246,7 @@ func Test_Prometheus_Reload(t *testing.T) {
 				},
 			},
 			handler: func(w http.ResponseWriter, r *http.Request) {
-				if r.URL.Path == ConfigPath {
+				if r.URL.Path == "/api/v1/status/config" {
 					io.WriteString(w, "{ \"status\": \"success\", \"data\": { \"yaml\": \"foobar\" }}")
 					return
 				}
@@ -269,11 +269,11 @@ func Test_Prometheus_Reload(t *testing.T) {
 				},
 			},
 			handler: func(w http.ResponseWriter, r *http.Request) {
-				if r.URL.Path == ConfigPath {
+				if r.URL.Path == "/api/v1/status/config" {
 					io.WriteString(w, "{ \"status\": \"success\", \"data\": { \"yaml\": \"foo\" }}")
 					return
 				}
-				if r.URL.Path != ReloadPath {
+				if r.URL.Path != "/-/reload" {
 					t.Fatalf("unexpected http request, reload is required")
 				}
 			},
@@ -293,7 +293,7 @@ func Test_Prometheus_Reload(t *testing.T) {
 				},
 			},
 			handler: func(w http.ResponseWriter, r *http.Request) {
-				if r.URL.Path == ConfigPath {
+				if r.URL.Path == "/api/v1/status/config" {
 					http.Error(w, fmt.Sprintf("error getting prometheus config"), http.StatusInternalServerError)
 					return
 				}
@@ -315,7 +315,7 @@ func Test_Prometheus_Reload(t *testing.T) {
 				},
 			},
 			handler: func(w http.ResponseWriter, r *http.Request) {
-				if r.URL.Path == ConfigPath {
+				if r.URL.Path == "/api/v1/status/config" {
 					io.WriteString(w, "lwnefknfiefnpeijfpqofjqpwofjqpwofjqpwofjpofjwpofjwpeofj")
 					return
 				}
@@ -336,7 +336,7 @@ func Test_Prometheus_Reload(t *testing.T) {
 				},
 			},
 			handler: func(w http.ResponseWriter, r *http.Request) {
-				if r.URL.Path == ConfigPath {
+				if r.URL.Path == "/api/v1/status/config" {
 					io.WriteString(w, "")
 					return
 				}
@@ -357,11 +357,11 @@ func Test_Prometheus_Reload(t *testing.T) {
 				},
 			},
 			handler: func(w http.ResponseWriter, r *http.Request) {
-				if r.URL.Path == ConfigPath {
+				if r.URL.Path == "/api/v1/status/config" {
 					io.WriteString(w, "<html><pre>foo</pre></html>")
 					return
 				}
-				if r.URL.Path == ReloadPath {
+				if r.URL.Path == "/-/reload" {
 					http.Error(w, fmt.Sprintf("error reloading prometheus"), http.StatusInternalServerError)
 					return
 				}
