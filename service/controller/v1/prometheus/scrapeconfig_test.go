@@ -367,7 +367,7 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
     replacement: worker
   metric_relabel_configs:
   - source_labels: [namespace]
-    regex: (kube-system|giantswarm)
+    regex: (kube-system|giantswarm.*)
     action: keep
   - source_labels: [__name__]
     regex: container_network_.*
@@ -520,7 +520,7 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
     replacement: kube-system
     action: replace
   - source_labels: [exported_namespace]
-    regex: (kube-system|giantswarm)
+    regex: (kube-system|giantswarm.*)
     action: keep
   - source_labels: [__name__]
     regex: (ingress_controller_ssl_expire_time_seconds|nginx.*)
