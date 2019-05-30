@@ -136,7 +136,7 @@ var (
 	KubeletPortRegexp = config.MustNewRegexp(`(.*):10250`)
 
 	// KubeSystemGiantswarmNSRegexp is the regular expression to match against the kube-system and giantswarm* namespaces.
-	KubeSystemGiantswarmNSRegexp = config.MustNewRegexp(`(kube-system|giantswarm)`)
+	KubeSystemGiantswarmNSRegexp = config.MustNewRegexp(`(kube-system|giantswarm.*)`)
 
 	// MetricDropBucketLatencies is the regular expression to match against the several bucket latencies metrics.
 	MetricDropBucketLatencies = config.MustNewRegexp(`(apiserver_admission_controller_admission_latencies_seconds_bucket|apiserver_admission_step_admission_latencies_seconds_bucket|apiserver_response_sizes_bucket|rest_client_request_latency_seconds_bucket|rest_client_request_latency_seconds_bucket)`)
