@@ -135,7 +135,7 @@ var (
 	// Kubelet IP (including port), and capture the IP.
 	KubeletPortRegexp = config.MustNewRegexp(`(.*):10250`)
 
-	// KubeSystemGiantswarmNSRegexp is the regular expression to match against the kube-system and giantswarm namespace.
+	// KubeSystemGiantswarmNSRegexp is the regular expression to match against the kube-system and giantswarm* namespaces.
 	KubeSystemGiantswarmNSRegexp = config.MustNewRegexp(`(kube-system|giantswarm)`)
 
 	// MetricDropBucketLatencies is the regular expression to match against the several bucket latencies metrics.
@@ -158,6 +158,9 @@ var (
 
 	// MetricsDropReflectorRegexp is the regular expression to match against spammy reflector metrics returned by the Kubelet.
 	MetricsDropReflectorRegexp = config.MustNewRegexp(`(reflector.*)`)
+
+	// ElasticLoggingPodNameRegexp is the regular expression to match elastic-logging-elasticsearch-exporter pod name.
+	ElasticLoggingPodNameRegexp = config.MustNewRegexp(`(elastic-logging-elasticsearch-exporter.*)`)
 
 	// NginxIngressControllerPodNameRegexp is the regular expression to match nginx ic pod name.
 	NginxIngressControllerPodNameRegexp = config.MustNewRegexp(`(nginx-ingress-controller.*)`)
@@ -192,7 +195,7 @@ var (
 	NodeExporterPortRegexp = config.MustNewRegexp(`(.*):10300`)
 
 	// WhitelistRegexp is the regular expression to match workload targets to scrape.
-	WhitelistRegexp = config.MustNewRegexp(`(kube-system;(cert-exporter|cluster-autoscaler|coredns|kube-state-metrics|net-exporter|nginx-ingress-controller))|(giantswarm;chart-operator)`)
+	WhitelistRegexp = config.MustNewRegexp(`(kube-system;(cert-exporter|cluster-autoscaler|coredns|kube-state-metrics|net-exporter|nginx-ingress-controller))|(giantswarm;chart-operator)|(giantswarm-elastic-logging;elastic-logging-elasticsearch-exporter)`)
 )
 
 // GetClusterID returns the value of the cluster annotation.

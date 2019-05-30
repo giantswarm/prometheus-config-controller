@@ -7,6 +7,7 @@ import (
 )
 
 const (
+	ElasticLoggingMetricPort         = "9108"
 	NginxIngressControllerMetricPort = "10254"
 	KubeStateMetricsPort             = "10301"
 	ChartOperatorMetricPort          = "8000"
@@ -15,6 +16,7 @@ const (
 	CoreDNSMetricPort                = "9153"
 	NetExporterMetricPort            = "8000"
 
+	ElasticLoggingNamespace         = "giantswarm-elastic-logging"
 	NginxIngressControllerNamespace = "kube-system"
 	KubeStateMetricsNamespace       = "kube-system"
 	ChartOperatorNamespace          = "giantswarm"
