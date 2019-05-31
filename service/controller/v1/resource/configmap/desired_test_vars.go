@@ -390,6 +390,12 @@ var (
 			},
 			{
 				SourceLabels: model.LabelNames{prometheus.KubernetesSDPodNameLabel},
+				Regex:        prometheus.ElasticLoggingPodNameRegexp,
+				TargetLabel:  prometheus.MetricPathLabel,
+				Replacement:  key.APIProxyPodMetricsPath(key.ElasticLoggingNamespace, key.ElasticLoggingMetricPort),
+			},
+			{
+				SourceLabels: model.LabelNames{prometheus.KubernetesSDPodNameLabel},
 				Regex:        prometheus.NetExporterPodNameRegexp,
 				TargetLabel:  prometheus.MetricPathLabel,
 				Replacement:  key.APIProxyPodMetricsPath(key.NetExporterNamespace, key.NetExporterMetricPort),
@@ -399,8 +405,8 @@ var (
 			{
 				Action:       prometheus.ActionRelabel,
 				SourceLabels: model.LabelNames{prometheus.MetricExportedNamespaceLabel, prometheus.MetricNamespaceLabel},
-				Regex:        prometheus.KubeSystemRelabelNamespaceRegexp,
-				Replacement:  prometheus.NamespaceKubeSystemLabel,
+				Regex:        prometheus.RelabelNamespaceRegexp,
+				Replacement:  prometheus.GroupCapture,
 				TargetLabel:  prometheus.ExportedNamespaceLabel,
 			},
 			// keep only kube-system cadvisor metrics
