@@ -405,8 +405,8 @@ var (
 			{
 				Action:       prometheus.ActionRelabel,
 				SourceLabels: model.LabelNames{prometheus.MetricExportedNamespaceLabel, prometheus.MetricNamespaceLabel},
-				Regex:        prometheus.KubeSystemRelabelNamespaceRegexp,
-				Replacement:  prometheus.NamespaceKubeSystemLabel,
+				Regex:        prometheus.RelabelNamespaceRegexp,
+				Replacement:  prometheus.GroupCapture,
 				TargetLabel:  prometheus.ExportedNamespaceLabel,
 			},
 			// keep only kube-system cadvisor metrics

@@ -183,8 +183,8 @@ var (
 	// NetExporterPodNameRegexp is the regular expression to match net-exporter pod name.
 	NetExporterPodNameRegexp = config.MustNewRegexp(`(net-exporter.*)`)
 
-	// KubeSystemRelabelNamespaceRegexp is the regular expression to match against metrics with empty exported_namespace and namespace kube-system.
-	KubeSystemRelabelNamespaceRegexp = config.MustNewRegexp(`;kube-system`)
+	// RelabelNamespaceRegexp is the regular expression to match against metrics with empty exported_namespace and namespace kube-system.
+	RelabelNamespaceRegexp = config.MustNewRegexp(`;(kube-system|giantswarm.*)`)
 
 	// NodeExporterRegexp is the regular expression to match against the
 	// node-exporter name.

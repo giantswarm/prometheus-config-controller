@@ -413,8 +413,8 @@ var (
 			{
 				Action:       ActionRelabel,
 				SourceLabels: model.LabelNames{MetricExportedNamespaceLabel, MetricNamespaceLabel},
-				Regex:        KubeSystemRelabelNamespaceRegexp,
-				Replacement:  NamespaceKubeSystemLabel,
+				Regex:        RelabelNamespaceRegexp,
+				Replacement:  GroupCapture,
 				TargetLabel:  ExportedNamespaceLabel,
 			},
 			// keep only kube-system cadvisor metrics
