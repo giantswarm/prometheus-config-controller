@@ -15,6 +15,7 @@ import (
 	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/prometheus"
 	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/resource/certificate"
 	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/resource/configmap"
+	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/resource/patchfinalizer"
 )
 
 type ResourceSetConfig struct {
@@ -104,9 +105,23 @@ func NewResourceSet(config ResourceSetConfig) (*controller.ResourceSet, error) {
 		}
 	}
 
+	var patchFinalizerResource controller.Resource
+	{
+		c := patchfinalizer.Config{
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
+		}
+
+		patchFinalizerResource, err = patchfinalizer.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	resources := []controller.Resource{
 		certificateResource,
 		configMapResource,
+		patchFinalizerResource,
 	}
 
 	{
