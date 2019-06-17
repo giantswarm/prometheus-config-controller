@@ -25,7 +25,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		for _, s := range list.Items {
-			if !hasLabel(s.Labels) {
+			if hasLabel(s.Labels) {
 				continue
 			}
 
