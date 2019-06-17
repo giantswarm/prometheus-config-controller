@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"context"
 	"os"
 	"time"
 
@@ -116,12 +117,16 @@ func NewResourceSet(config ResourceSetConfig) (*controller.ResourceSet, error) {
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
+
+		err := patchFinalizerResource.EnsureCreated(context.Background(), nil)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 	}
 
 	resources := []controller.Resource{
 		certificateResource,
 		configMapResource,
-		patchFinalizerResource,
 	}
 
 	{
