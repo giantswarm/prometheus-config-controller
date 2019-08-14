@@ -145,7 +145,7 @@ var (
 			{
 				Action:       prometheus.ActionKeep,
 				SourceLabels: model.LabelNames{prometheus.MetricNamespaceLabel},
-				Regex:        prometheus.KubeSystemGiantswarmNSRegexp,
+				Regex:        prometheus.NSRegexp,
 			},
 			// drop cadvisor metrics about container network statistics
 			{
@@ -406,6 +406,12 @@ var (
 				TargetLabel:  prometheus.MetricPathLabel,
 				Replacement:  key.APIProxyPodMetricsPath(key.NicExporterNamespace, key.NicExporterMetricPort),
 			},
+			{
+				SourceLabels: model.LabelNames{prometheus.KubernetesSDPodNameLabel},
+				Regex:        prometheus.VaultExporterPodNameRegexp,
+				TargetLabel:  prometheus.MetricPathLabel,
+				Replacement:  key.APIProxyPodMetricsPath(key.VaultExporterNamespace, key.VaultExporterMetricPort),
+			},
 		},
 		MetricRelabelConfigs: []*config.RelabelConfig{
 			{
@@ -419,7 +425,7 @@ var (
 			{
 				Action:       prometheus.ActionKeep,
 				SourceLabels: model.LabelNames{prometheus.MetricExportedNamespaceLabel},
-				Regex:        prometheus.KubeSystemGiantswarmNSRegexp,
+				Regex:        prometheus.NSRegexp,
 			},
 			// drop useless IC metrics
 			{

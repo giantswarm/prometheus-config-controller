@@ -194,6 +194,12 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 		TargetLabel:  MetricPathLabel,
 		Replacement:  key.APIProxyPodMetricsPath(key.NicExporterNamespace, key.NicExporterMetricPort),
 	}
+	rewriteVaultExporterPath := &config.RelabelConfig{
+		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
+		Regex:        VaultExporterPodNameRegexp,
+		TargetLabel:  MetricPathLabel,
+		Replacement:  key.APIProxyPodMetricsPath(key.VaultExporterNamespace, key.VaultExporterMetricPort),
+	}
 
 	ipLabelRelabelConfig := &config.RelabelConfig{
 		TargetLabel:  IPLabel,
@@ -284,7 +290,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				{
 					Action:       ActionKeep,
 					SourceLabels: model.LabelNames{MetricNamespaceLabel},
-					Regex:        KubeSystemGiantswarmNSRegexp,
+					Regex:        NSRegexp,
 				},
 				// drop cadvisor metrics about container network statistics
 				{
@@ -424,6 +430,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				rewriteElasticLoggingMetricPath,
 				rewriteNetExporterPath,
 				rewriteNicExporterPath,
+				rewriteVaultExporterPath,
 			},
 			MetricRelabelConfigs: []*config.RelabelConfig{
 				// relabel namespace to exported_namespace for endpoints in kube-system namespace.
@@ -439,7 +446,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				{
 					Action:       ActionKeep,
 					SourceLabels: model.LabelNames{MetricExportedNamespaceLabel},
-					Regex:        KubeSystemGiantswarmNSRegexp,
+					Regex:        NSRegexp,
 				},
 				// drop useless IC metrics
 				{

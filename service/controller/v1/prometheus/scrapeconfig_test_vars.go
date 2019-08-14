@@ -147,7 +147,7 @@ var (
 			{
 				Action:       ActionKeep,
 				SourceLabels: model.LabelNames{MetricNamespaceLabel},
-				Regex:        KubeSystemGiantswarmNSRegexp,
+				Regex:        NSRegexp,
 			},
 			// drop cadvisor metrics about container network statistics
 			{
@@ -414,6 +414,12 @@ var (
 				TargetLabel:  MetricPathLabel,
 				Replacement:  key.APIProxyPodMetricsPath(key.NicExporterNamespace, key.NicExporterMetricPort),
 			},
+			{
+				SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
+				Regex:        VaultExporterPodNameRegexp,
+				TargetLabel:  MetricPathLabel,
+				Replacement:  key.APIProxyPodMetricsPath(key.VaultExporterNamespace, key.VaultExporterMetricPort),
+			},
 		},
 		MetricRelabelConfigs: []*config.RelabelConfig{
 			{
@@ -427,7 +433,7 @@ var (
 			{
 				Action:       ActionKeep,
 				SourceLabels: model.LabelNames{MetricExportedNamespaceLabel},
-				Regex:        KubeSystemGiantswarmNSRegexp,
+				Regex:        NSRegexp,
 			},
 			// drop useless IC metrics
 			{

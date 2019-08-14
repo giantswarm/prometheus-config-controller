@@ -135,8 +135,8 @@ var (
 	// Kubelet IP (including port), and capture the IP.
 	KubeletPortRegexp = config.MustNewRegexp(`(.*):10250`)
 
-	// KubeSystemGiantswarmNSRegexp is the regular expression to match against the kube-system and giantswarm* namespaces.
-	KubeSystemGiantswarmNSRegexp = config.MustNewRegexp(`(kube-system|giantswarm.*)`)
+	// NSRegexp is the regular expression to match against the specified namespaces.
+	NSRegexp = config.MustNewRegexp(`(kube-system|giantswarm.*|vault-exporter)`)
 
 	// MetricDropBucketLatencies is the regular expression to match against the several bucket latencies metrics.
 	MetricDropBucketLatencies = config.MustNewRegexp(`(apiserver_admission_controller_admission_latencies_seconds_bucket|apiserver_admission_step_admission_latencies_seconds_bucket|apiserver_response_sizes_bucket|rest_client_request_latency_seconds_bucket|rest_client_request_latency_seconds_bucket)`)
@@ -186,8 +186,12 @@ var (
 	// NicExporterPodNameRegexp is the regular expression to match nic-exporter pod name.
 	NicExporterPodNameRegexp = config.MustNewRegexp(`(nic-exporter.*)`)
 
+	// VaultExporterPodNameRegexp is the regular expression to match against the
+	// vault-exporter name.
+	VaultExporterPodNameRegexp = config.MustNewRegexp(`(vault-exporter.*)`)
+
 	// RelabelNamespaceRegexp is the regular expression to match against metrics with empty exported_namespace and namespace kube-system.
-	RelabelNamespaceRegexp = config.MustNewRegexp(`;(kube-system|giantswarm.*)`)
+	RelabelNamespaceRegexp = config.MustNewRegexp(`;(kube-system|giantswarm.*|vault-exporter)`)
 
 	// NodeExporterRegexp is the regular expression to match against the
 	// node-exporter name.
@@ -198,7 +202,7 @@ var (
 	NodeExporterPortRegexp = config.MustNewRegexp(`(.*):10300`)
 
 	// WhitelistRegexp is the regular expression to match workload targets to scrape.
-	WhitelistRegexp = config.MustNewRegexp(`(kube-system;(cert-exporter|cluster-autoscaler|coredns|kube-state-metrics|net-exporter|nic-exporter|nginx-ingress-controller))|(giantswarm;chart-operator)|(giantswarm-elastic-logging;elastic-logging-elasticsearch-exporter)`)
+	WhitelistRegexp = config.MustNewRegexp(`(kube-system;(cert-exporter|cluster-autoscaler|coredns|kube-state-metrics|net-exporter|nic-exporter|nginx-ingress-controller))|(giantswarm;chart-operator)|(giantswarm-elastic-logging;elastic-logging-elasticsearch-exporter)|(vault-exporter;vault-exporter)`)
 )
 
 // GetClusterID returns the value of the cluster annotation.
