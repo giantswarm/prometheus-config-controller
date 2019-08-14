@@ -367,7 +367,7 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
     replacement: worker
   metric_relabel_configs:
   - source_labels: [namespace]
-    regex: (kube-system|giantswarm.*)
+    regex: (kube-system|giantswarm.*|vault-exporter)
     action: keep
   - source_labels: [__name__]
     regex: container_network_.*
@@ -467,7 +467,7 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
     insecure_skip_verify: false
   relabel_configs:
   - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name]
-    regex: (kube-system;(cert-exporter|cluster-autoscaler|coredns|kube-state-metrics|net-exporter|nic-exporter|nginx-ingress-controller))|(giantswarm;chart-operator)|(giantswarm-elastic-logging;elastic-logging-elasticsearch-exporter)
+    regex: (kube-system;(cert-exporter|cluster-autoscaler|coredns|kube-state-metrics|net-exporter|nic-exporter|nginx-ingress-controller))|(giantswarm;chart-operator)|(giantswarm-elastic-logging;elastic-logging-elasticsearch-exporter)|(vault-exporter;vault-exporter)
     action: keep
   - source_labels: [__meta_kubernetes_service_name]
     target_label: app
@@ -517,14 +517,18 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
     regex: (nic-exporter.*)
     target_label: __metrics_path__
     replacement: /api/v1/namespaces/kube-system/pods/${1}:10800/proxy/metrics
+  - source_labels: [__meta_kubernetes_pod_name]
+    regex: (vault-exporter.*)
+    target_label: __metrics_path__
+    replacement: /api/v1/namespaces/vault-exporter/pods/${1}:9410/proxy/metrics
   metric_relabel_configs:
   - source_labels: [exported_namespace, namespace]
-    regex: ;(kube-system|giantswarm.*)
+    regex: ;(kube-system|giantswarm.*|vault-exporter)
     target_label: exported_namespace
     replacement: ${1}
     action: replace
   - source_labels: [exported_namespace]
-    regex: (kube-system|giantswarm.*)
+    regex: (kube-system|giantswarm.*|vault-exporter)
     action: keep
   - source_labels: [__name__]
     regex: (ingress_controller_ssl_expire_time_seconds|nginx.*)
