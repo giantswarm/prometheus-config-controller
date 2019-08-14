@@ -183,6 +183,9 @@ var (
 	// NetExporterPodNameRegexp is the regular expression to match net-exporter pod name.
 	NetExporterPodNameRegexp = config.MustNewRegexp(`(net-exporter.*)`)
 
+	// NicExporterPodNameRegexp is the regular expression to match nic-exporter pod name.
+	NicExporterPodNameRegexp = config.MustNewRegexp(`(nic-exporter.*)`)
+
 	// RelabelNamespaceRegexp is the regular expression to match against metrics with empty exported_namespace and namespace kube-system.
 	RelabelNamespaceRegexp = config.MustNewRegexp(`;(kube-system|giantswarm.*)`)
 
@@ -195,7 +198,7 @@ var (
 	NodeExporterPortRegexp = config.MustNewRegexp(`(.*):10300`)
 
 	// WhitelistRegexp is the regular expression to match workload targets to scrape.
-	WhitelistRegexp = config.MustNewRegexp(`(kube-system;(cert-exporter|cluster-autoscaler|coredns|kube-state-metrics|net-exporter|nginx-ingress-controller))|(giantswarm;chart-operator)|(giantswarm-elastic-logging;elastic-logging-elasticsearch-exporter)`)
+	WhitelistRegexp = config.MustNewRegexp(`(kube-system;(cert-exporter|cluster-autoscaler|coredns|kube-state-metrics|net-exporter|nic-exporter|nginx-ingress-controller))|(giantswarm;chart-operator)|(giantswarm-elastic-logging;elastic-logging-elasticsearch-exporter)`)
 )
 
 // GetClusterID returns the value of the cluster annotation.

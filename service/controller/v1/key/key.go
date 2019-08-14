@@ -15,6 +15,7 @@ const (
 	CertExporterMetricPort           = "9005"
 	CoreDNSMetricPort                = "9153"
 	NetExporterMetricPort            = "8000"
+	NicExporterMetricPort            = "10800"
 
 	ElasticLoggingNamespace         = "giantswarm-elastic-logging"
 	NginxIngressControllerNamespace = "kube-system"
@@ -24,6 +25,7 @@ const (
 	CertExporterNamespace           = "kube-system"
 	CoreDNSNamespace                = "kube-system"
 	NetExporterNamespace            = "kube-system"
+	NicExporterNamespace            = "kube-system"
 
 	PrefixMaster    = "master"
 	PrefixApiServer = "apiserver"
