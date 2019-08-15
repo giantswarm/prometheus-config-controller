@@ -7,10 +7,11 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/giantswarm/micrologger/microloggertest"
+	"github.com/google/go-cmp/cmp"
 	"github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/config"
 	"gopkg.in/yaml.v2"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 
@@ -482,10 +483,9 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 
 			if expectedPrometheusConfiguration != returnedPrometheusConfiguration {
 				t.Fatalf(
-					"%d: expected configmap does not match returned desired state.\nexpected:\n%s\nreturned:\n%s\n",
+					"%d: expected configmap does not match returned desired state.\ndiff:\n%s\n",
 					index,
-					expectedPrometheusConfiguration,
-					returnedPrometheusConfiguration,
+					cmp.Diff(expectedPrometheusConfiguration, returnedPrometheusConfiguration),
 				)
 			}
 		}

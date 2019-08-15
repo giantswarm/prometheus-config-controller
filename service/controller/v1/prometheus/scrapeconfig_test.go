@@ -467,7 +467,7 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
     insecure_skip_verify: false
   relabel_configs:
   - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name]
-    regex: (kube-system;(cert-exporter|cluster-autoscaler|coredns|kube-state-metrics|net-exporter|nic-exporter|nginx-ingress-controller))|(giantswarm;chart-operator)|(giantswarm-elastic-logging;elastic-logging-elasticsearch-exporter)|(vault-exporter;vault-exporter)
+    regex: (kube-system;(calico-node|cert-exporter|cluster-autoscaler|coredns|kube-state-metrics|net-exporter|nic-exporter|nginx-ingress-controller))|(giantswarm;chart-operator)|(giantswarm-elastic-logging;elastic-logging-elasticsearch-exporter)|(vault-exporter;vault-exporter)
     action: keep
   - source_labels: [__meta_kubernetes_service_name]
     target_label: app
@@ -489,6 +489,10 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
     regex: (nginx-ingress-controller.*)
     target_label: __metrics_path__
     replacement: /api/v1/namespaces/kube-system/pods/${1}:10254/proxy/metrics
+  - source_labels: [__meta_kubernetes_pod_name]
+    regex: (calico-node.*)
+    target_label: __metrics_path__
+    replacement: /api/v1/namespaces/kube-system/pods/${1}:9091/proxy/metrics
   - source_labels: [__meta_kubernetes_pod_name]
     regex: (chart-operator.*)
     target_label: __metrics_path__

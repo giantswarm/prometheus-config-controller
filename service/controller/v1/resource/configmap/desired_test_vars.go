@@ -366,6 +366,12 @@ var (
 			},
 			{
 				SourceLabels: model.LabelNames{prometheus.KubernetesSDPodNameLabel},
+				Regex:        prometheus.CalicoNodePodNameRegexp,
+				TargetLabel:  prometheus.MetricPathLabel,
+				Replacement:  key.APIProxyPodMetricsPath(key.CalicoNodeNamespace, key.CalicoNodeMetricPort),
+			},
+			{
+				SourceLabels: model.LabelNames{prometheus.KubernetesSDPodNameLabel},
 				Regex:        prometheus.ChartOperatorPodNameRegexp,
 				TargetLabel:  prometheus.MetricPathLabel,
 				Replacement:  key.APIProxyPodMetricsPath(key.ChartOperatorNamespace, key.ChartOperatorMetricPort),

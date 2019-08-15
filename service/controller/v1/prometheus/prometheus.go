@@ -128,6 +128,9 @@ var (
 	// APIServerRegexp is the regular expression to match against Kubernetes API servers.
 	APIServerRegexp = config.MustNewRegexp(`default;kubernetes`)
 
+	// CalicoNodePodNameRegexp is the regular expression to match calico-node pod name.
+	CalicoNodePodNameRegexp = config.MustNewRegexp(`(calico-node.*)`)
+
 	// EmptyRegexp is the regular expression to match against the empty string.
 	EmptyRegexp = config.MustNewRegexp(``)
 
@@ -202,7 +205,7 @@ var (
 	NodeExporterPortRegexp = config.MustNewRegexp(`(.*):10300`)
 
 	// WhitelistRegexp is the regular expression to match workload targets to scrape.
-	WhitelistRegexp = config.MustNewRegexp(`(kube-system;(cert-exporter|cluster-autoscaler|coredns|kube-state-metrics|net-exporter|nic-exporter|nginx-ingress-controller))|(giantswarm;chart-operator)|(giantswarm-elastic-logging;elastic-logging-elasticsearch-exporter)|(vault-exporter;vault-exporter)`)
+	WhitelistRegexp = config.MustNewRegexp(`(kube-system;(calico-node|cert-exporter|cluster-autoscaler|coredns|kube-state-metrics|net-exporter|nic-exporter|nginx-ingress-controller))|(giantswarm;chart-operator)|(giantswarm-elastic-logging;elastic-logging-elasticsearch-exporter)|(vault-exporter;vault-exporter)`)
 )
 
 // GetClusterID returns the value of the cluster annotation.

@@ -152,6 +152,12 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 		TargetLabel:  MetricPathLabel,
 		Replacement:  key.APIProxyPodMetricsPath(key.NginxIngressControllerNamespace, key.NginxIngressControllerMetricPort),
 	}
+	rewriteCalicoNodePath := &config.RelabelConfig{
+		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
+		Regex:        CalicoNodePodNameRegexp,
+		TargetLabel:  MetricPathLabel,
+		Replacement:  key.APIProxyPodMetricsPath(key.CalicoNodeNamespace, key.CalicoNodeMetricPort),
+	}
 	rewriteChartOperatorPath := &config.RelabelConfig{
 		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 		Regex:        ChartOperatorPodNameRegexp,
@@ -423,6 +429,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				// rewrite metrics scrape path to connect pods
 				rewriteKubeStateMetricPath,
 				rewriteICMetricPath,
+				rewriteCalicoNodePath,
 				rewriteChartOperatorPath,
 				rewriteCertExporterPath,
 				rewriteClusterAutoscalerPath,
