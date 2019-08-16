@@ -2,6 +2,7 @@ package prometheus
 
 import (
 	"net/url"
+	"strings"
 
 	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/key"
 	"github.com/prometheus/common/model"
@@ -446,66 +447,134 @@ var (
 )
 
 var (
-	TestConfigTwoApiserver    config.ScrapeConfig = TestConfigOneApiserver
-	TestConfigTwoCadvisor     config.ScrapeConfig = TestConfigOneCadvisor
-	TestConfigTwoKubelet      config.ScrapeConfig = TestConfigOneKubelet
-	TestConfigTwoNodeExporter config.ScrapeConfig = TestConfigOneNodeExporter
-	TestConfigTwoWorkload     config.ScrapeConfig = TestConfigOneWorkload
+	TestConfigTwoApiserver    config.ScrapeConfig
+	TestConfigTwoCadvisor     config.ScrapeConfig
+	TestConfigTwoKubelet      config.ScrapeConfig
+	TestConfigTwoNodeExporter config.ScrapeConfig
+	TestConfigTwoWorkload     config.ScrapeConfig
 )
 
 func init() {
-	apiserver := "apiserver.0ba9v"
+	// Copy base of test data structures. Deep copying of required fields is
+	// done further below.
+	TestConfigTwoApiserver = TestConfigOneApiserver
+	TestConfigTwoCadvisor = TestConfigOneCadvisor
+	TestConfigTwoKubelet = TestConfigOneKubelet
+	TestConfigTwoNodeExporter = TestConfigOneNodeExporter
+	TestConfigTwoWorkload = TestConfigOneWorkload
+
+	apiServer := config.URL{&url.URL{
+		Scheme: "https",
+		Host:   "apiserver.0ba9v",
+	}}
+
 	clusterID := "0ba9v"
-	caFile := "/certs/0ba9v-ca.pem"
-	crtFile := "/certs/0ba9v-crt.pem"
-	keyFile := "/certs/0ba9v-key.pem"
 
-	TestConfigTwoApiserver.JobName = "guest-cluster-0ba9v-apiserver"
-	TestConfigTwoApiserver.HTTPClientConfig.TLSConfig.CAFile = caFile
-	TestConfigTwoApiserver.HTTPClientConfig.TLSConfig.CertFile = crtFile
-	TestConfigTwoApiserver.HTTPClientConfig.TLSConfig.KeyFile = keyFile
-	TestConfigTwoApiserver.ServiceDiscoveryConfig.KubernetesSDConfigs[0].APIServer.Host = apiserver
-	TestConfigTwoApiserver.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.CAFile = caFile
-	TestConfigTwoApiserver.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.CertFile = crtFile
-	TestConfigTwoApiserver.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.KeyFile = keyFile
-	TestConfigTwoApiserver.RelabelConfigs[2].Replacement = clusterID
+	tlsConfig := config.TLSConfig{
+		CAFile:             "/certs/0ba9v-ca.pem",
+		CertFile:           "/certs/0ba9v-crt.pem",
+		KeyFile:            "/certs/0ba9v-key.pem",
+		InsecureSkipVerify: false,
+	}
 
-	TestConfigTwoCadvisor.JobName = "guest-cluster-0ba9v-cadvisor"
-	TestConfigTwoCadvisor.HTTPClientConfig.TLSConfig.CAFile = caFile
-	TestConfigTwoCadvisor.HTTPClientConfig.TLSConfig.CertFile = crtFile
-	TestConfigTwoCadvisor.HTTPClientConfig.TLSConfig.KeyFile = keyFile
-	TestConfigTwoCadvisor.ServiceDiscoveryConfig.KubernetesSDConfigs[0].APIServer.Host = apiserver
-	TestConfigTwoCadvisor.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.CAFile = caFile
-	TestConfigTwoCadvisor.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.CertFile = crtFile
-	TestConfigTwoCadvisor.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.KeyFile = keyFile
-	TestConfigTwoCadvisor.RelabelConfigs[0].Replacement = apiserver
-	TestConfigTwoCadvisor.RelabelConfigs[3].Replacement = clusterID
+	{
+		TestConfigTwoApiserver.JobName = "guest-cluster-0ba9v-apiserver"
+		TestConfigTwoApiserver.HTTPClientConfig.TLSConfig = tlsConfig
+		TestConfigTwoApiserver.HTTPClientConfig.TLSConfig.InsecureSkipVerify = true
+		TestConfigTwoApiserver.ServiceDiscoveryConfig.KubernetesSDConfigs = []*config.KubernetesSDConfig{
+			&config.KubernetesSDConfig{
+				APIServer: apiServer,
+				Role:      config.KubernetesRoleEndpoint,
+				TLSConfig: tlsConfig,
+			},
+		}
 
-	TestConfigTwoKubelet.JobName = "guest-cluster-0ba9v-kubelet"
-	TestConfigTwoKubelet.HTTPClientConfig.TLSConfig.CAFile = caFile
-	TestConfigTwoKubelet.HTTPClientConfig.TLSConfig.CertFile = crtFile
-	TestConfigTwoKubelet.HTTPClientConfig.TLSConfig.KeyFile = keyFile
-	TestConfigTwoKubelet.ServiceDiscoveryConfig.KubernetesSDConfigs[0].APIServer.Host = apiserver
-	TestConfigTwoKubelet.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.CAFile = caFile
-	TestConfigTwoKubelet.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.CertFile = crtFile
-	TestConfigTwoKubelet.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.KeyFile = keyFile
-	TestConfigTwoKubelet.RelabelConfigs[1].Replacement = clusterID
+		// Deepcopy relabel configs and change clusterID to match second test config.
+		TestConfigTwoApiserver.RelabelConfigs = nil
+		for _, r := range TestConfigOneApiserver.RelabelConfigs {
+			newRelabelConfig := *r
+			newRelabelConfig.Replacement = strings.ReplaceAll(r.Replacement, "xa5ly", clusterID)
+			TestConfigTwoApiserver.RelabelConfigs = append(TestConfigTwoApiserver.RelabelConfigs, &newRelabelConfig)
+		}
+	}
 
-	TestConfigTwoNodeExporter.JobName = "guest-cluster-0ba9v-node-exporter"
-	TestConfigTwoNodeExporter.ServiceDiscoveryConfig.KubernetesSDConfigs[0].APIServer.Host = apiserver
-	TestConfigTwoNodeExporter.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.CAFile = caFile
-	TestConfigTwoNodeExporter.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.CertFile = crtFile
-	TestConfigTwoNodeExporter.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.KeyFile = keyFile
-	TestConfigTwoNodeExporter.RelabelConfigs[3].Replacement = clusterID
+	{
+		TestConfigTwoCadvisor.JobName = "guest-cluster-0ba9v-cadvisor"
+		TestConfigTwoCadvisor.HTTPClientConfig.TLSConfig = tlsConfig
+		TestConfigTwoCadvisor.ServiceDiscoveryConfig.KubernetesSDConfigs = []*config.KubernetesSDConfig{
+			&config.KubernetesSDConfig{
+				APIServer: apiServer,
+				Role:      config.KubernetesRoleNode,
+				TLSConfig: tlsConfig,
+			},
+		}
 
-	TestConfigTwoWorkload.JobName = "guest-cluster-0ba9v-workload"
-	TestConfigTwoWorkload.HTTPClientConfig.TLSConfig.CAFile = caFile
-	TestConfigTwoWorkload.HTTPClientConfig.TLSConfig.CertFile = crtFile
-	TestConfigTwoWorkload.HTTPClientConfig.TLSConfig.KeyFile = keyFile
-	TestConfigTwoWorkload.ServiceDiscoveryConfig.KubernetesSDConfigs[0].APIServer.Host = apiserver
-	TestConfigTwoWorkload.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.CAFile = caFile
-	TestConfigTwoWorkload.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.CertFile = crtFile
-	TestConfigTwoWorkload.ServiceDiscoveryConfig.KubernetesSDConfigs[0].TLSConfig.KeyFile = keyFile
-	TestConfigTwoWorkload.RelabelConfigs[4].Replacement = clusterID
-	TestConfigTwoWorkload.RelabelConfigs[6].Replacement = key.APIServiceHost(key.PrefixMaster, clusterID)
+		// Deepcopy relabel configs and change clusterID to match second test config.
+		TestConfigTwoCadvisor.RelabelConfigs = nil
+		for _, r := range TestConfigOneCadvisor.RelabelConfigs {
+			newRelabelConfig := *r
+			newRelabelConfig.Replacement = strings.ReplaceAll(r.Replacement, "xa5ly", clusterID)
+			TestConfigTwoCadvisor.RelabelConfigs = append(TestConfigTwoCadvisor.RelabelConfigs, &newRelabelConfig)
+		}
+	}
+
+	{
+		TestConfigTwoKubelet.JobName = "guest-cluster-0ba9v-kubelet"
+		TestConfigTwoKubelet.HTTPClientConfig.TLSConfig = tlsConfig
+		TestConfigTwoKubelet.HTTPClientConfig.TLSConfig.InsecureSkipVerify = true
+		TestConfigTwoKubelet.ServiceDiscoveryConfig.KubernetesSDConfigs = []*config.KubernetesSDConfig{
+			&config.KubernetesSDConfig{
+				APIServer: apiServer,
+				Role:      config.KubernetesRoleNode,
+				TLSConfig: tlsConfig,
+			},
+		}
+
+		// Deepcopy relabel configs and change clusterID to match second test config.
+		TestConfigTwoKubelet.RelabelConfigs = nil
+		for _, r := range TestConfigOneKubelet.RelabelConfigs {
+			newRelabelConfig := *r
+			newRelabelConfig.Replacement = strings.ReplaceAll(r.Replacement, "xa5ly", clusterID)
+			TestConfigTwoKubelet.RelabelConfigs = append(TestConfigTwoKubelet.RelabelConfigs, &newRelabelConfig)
+		}
+	}
+
+	{
+		TestConfigTwoNodeExporter.JobName = "guest-cluster-0ba9v-node-exporter"
+		TestConfigTwoNodeExporter.ServiceDiscoveryConfig.KubernetesSDConfigs = []*config.KubernetesSDConfig{
+			&config.KubernetesSDConfig{
+				APIServer: apiServer,
+				Role:      config.KubernetesRoleEndpoint,
+				TLSConfig: tlsConfig,
+			},
+		}
+
+		// Deepcopy relabel configs and change clusterID to match second test config.
+		TestConfigTwoNodeExporter.RelabelConfigs = nil
+		for _, r := range TestConfigOneNodeExporter.RelabelConfigs {
+			newRelabelConfig := *r
+			newRelabelConfig.Replacement = strings.ReplaceAll(r.Replacement, "xa5ly", clusterID)
+			TestConfigTwoNodeExporter.RelabelConfigs = append(TestConfigTwoNodeExporter.RelabelConfigs, &newRelabelConfig)
+		}
+	}
+
+	{
+		TestConfigTwoWorkload.JobName = "guest-cluster-0ba9v-workload"
+		TestConfigTwoWorkload.HTTPClientConfig.TLSConfig = tlsConfig
+		TestConfigTwoWorkload.ServiceDiscoveryConfig.KubernetesSDConfigs = []*config.KubernetesSDConfig{
+			&config.KubernetesSDConfig{
+				APIServer: apiServer,
+				Role:      config.KubernetesRoleEndpoint,
+				TLSConfig: tlsConfig,
+			},
+		}
+
+		// Deepcopy relabel configs and change clusterID to match second test config.
+		TestConfigTwoWorkload.RelabelConfigs = nil
+		for _, r := range TestConfigOneWorkload.RelabelConfigs {
+			newRelabelConfig := *r
+			newRelabelConfig.Replacement = strings.ReplaceAll(r.Replacement, "xa5ly", clusterID)
+			TestConfigTwoWorkload.RelabelConfigs = append(TestConfigTwoWorkload.RelabelConfigs, &newRelabelConfig)
+		}
+	}
 }
