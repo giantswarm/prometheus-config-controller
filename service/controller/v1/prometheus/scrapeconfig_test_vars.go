@@ -455,7 +455,8 @@ var (
 )
 
 func init() {
-
+	// Copy base of test data structures. Deep copying of required fields is
+	// done further below.
 	TestConfigTwoApiserver = TestConfigOneApiserver
 	TestConfigTwoCadvisor = TestConfigOneCadvisor
 	TestConfigTwoKubelet = TestConfigOneKubelet
