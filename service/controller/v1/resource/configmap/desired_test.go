@@ -2,6 +2,7 @@ package configmap
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -15,6 +16,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 
+	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/prometheus"
 	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/prometheus/prometheustest"
 )
 
@@ -25,6 +27,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 	configMapNamespace := "monitoring"
 
 	tests := []struct {
+		name                         string
 		setUpPrometheusConfiguration *config.Config
 		setUpConfigMap               *v1.ConfigMap
 		setUpServices                []*v1.Service
@@ -35,6 +38,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 		// Test that if the configmap does not exist,
 		// an error is returned.
 		{
+			name:                         "return error when configmap doesn't exist",
 			setUpPrometheusConfiguration: nil,
 			setUpConfigMap:               nil,
 			setUpServices:                nil,
@@ -46,6 +50,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 		// Test that if the configmap does exist, but is empty,
 		// an error is returned.
 		{
+			name:                         "return error when configmap exists but is empty",
 			setUpPrometheusConfiguration: nil,
 			setUpConfigMap: &v1.ConfigMap{
 				ObjectMeta: metav1.ObjectMeta{
@@ -63,6 +68,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 		// Test that if the configmap does exist, with an invalid config,
 		// an error is returned.
 		{
+			name:                         "return error when configmap exists but is invalid config",
 			setUpPrometheusConfiguration: nil,
 			setUpConfigMap: &v1.ConfigMap{
 				ObjectMeta: metav1.ObjectMeta{
@@ -84,6 +90,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 		// the configmap is returned without modifications.
 		// Note - the returned config is marshalled, so some defaults appear.
 		{
+			name: "return unchanged configmap when configuration is valid but no services exist",
 			setUpPrometheusConfiguration: &config.Config{
 				GlobalConfig: config.GlobalConfig{
 					ScrapeInterval: model.Duration(1 * time.Minute),
@@ -125,6 +132,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 		// and a non-annotated service exists,
 		// the configmap is returned without modification.
 		{
+			name: "return unchanged configmap when configuration is valid but no annotated services exist",
 			setUpPrometheusConfiguration: &config.Config{
 				GlobalConfig: config.GlobalConfig{
 					ScrapeInterval: model.Duration(1 * time.Minute),
@@ -173,6 +181,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 		// and an annotated service exists, without the app=master label,
 		// the configmap is returned without modification.
 		{
+			name: "return unchanged configmap when configuration is valid but no annotated services exist with app=master label",
 			setUpPrometheusConfiguration: &config.Config{
 				GlobalConfig: config.GlobalConfig{
 					ScrapeInterval: model.Duration(1 * time.Minute),
@@ -224,6 +233,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 		// and an annotated service exists,
 		// the configmap is returned with the new service.
 		{
+			name: "return configmap with new service when configuration is valid and annotated service is found",
 			setUpPrometheusConfiguration: &config.Config{
 				GlobalConfig: config.GlobalConfig{
 					ScrapeInterval: model.Duration(1 * time.Minute),
@@ -284,6 +294,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 		// and the service no longer exists,
 		// the configmap is returned without the service.
 		{
+			name: "return updated configmap without the service when previously configured service doesn't exist anymore",
 			setUpPrometheusConfiguration: &config.Config{
 				GlobalConfig: config.GlobalConfig{
 					ScrapeInterval: model.Duration(1 * time.Minute),
@@ -335,6 +346,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 		// and a new service is added,
 		// the configmap is returned with both services.
 		{
+			name: "return configmap with two services when it previously had only one and another new service is found",
 			setUpPrometheusConfiguration: &config.Config{
 				GlobalConfig: config.GlobalConfig{
 					ScrapeInterval: model.Duration(1 * time.Minute),
@@ -405,88 +417,90 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 	}
 
 	for index, test := range tests {
-		fakeK8sClient := fake.NewSimpleClientset()
+		t.Run(fmt.Sprintf("case %d: %s", index, test.name), func(t *testing.T) {
+			fakeK8sClient := fake.NewSimpleClientset()
 
-		resourceConfig := Config{}
+			resourceConfig := Config{}
 
-		resourceConfig.K8sClient = fakeK8sClient
-		resourceConfig.Logger = microloggertest.New()
-		resourceConfig.PrometheusReloader = prometheustest.New()
+			resourceConfig.K8sClient = fakeK8sClient
+			resourceConfig.Logger = microloggertest.New()
+			resourceConfig.PrometheusReloader = prometheustest.New()
 
-		resourceConfig.CertDirectory = "/certs"
-		resourceConfig.ConfigMapKey = configMapKey
-		resourceConfig.ConfigMapName = configMapName
-		resourceConfig.ConfigMapNamespace = configMapNamespace
+			resourceConfig.CertDirectory = "/certs"
+			resourceConfig.ConfigMapKey = configMapKey
+			resourceConfig.ConfigMapName = configMapName
+			resourceConfig.ConfigMapNamespace = configMapNamespace
 
-		resource, err := New(resourceConfig)
-		if err != nil {
-			t.Fatalf("%d: error returned creating resource: %s\n", index, err)
-		}
-
-		if test.setUpPrometheusConfiguration != nil {
-			prometheusConfig, err := yaml.Marshal(test.setUpPrometheusConfiguration)
+			resource, err := New(resourceConfig)
 			if err != nil {
-				t.Fatalf("%d: error returned marshaling prometheus configuration: %s\n", index, err)
+				t.Fatalf("%d: error returned creating resource: %s\n", index, err)
 			}
 
-			if test.setUpConfigMap.Data == nil {
-				test.setUpConfigMap.Data = map[string]string{}
-			}
-			test.setUpConfigMap.Data[configMapKey] = string(prometheusConfig)
-		}
+			if test.setUpPrometheusConfiguration != nil {
+				prometheusConfig, err := yaml.Marshal(test.setUpPrometheusConfiguration)
+				if err != nil {
+					t.Fatalf("%d: error returned marshaling prometheus configuration: %s\n", index, err)
+				}
 
-		if test.setUpConfigMap != nil {
-			if _, err := fakeK8sClient.CoreV1().ConfigMaps(configMapNamespace).Create(test.setUpConfigMap); err != nil {
-				t.Fatalf("%d: error returned setting up configmap: %s\n", index, err)
-			}
-		}
-
-		for _, service := range test.setUpServices {
-			if _, err := fakeK8sClient.CoreV1().Services(service.Namespace).Create(service); err != nil {
-				t.Fatalf("%d: error returned setting up service: %s\n", index, err)
-			}
-		}
-
-		desiredState, err := resource.GetDesiredState(context.TODO(), v1.Service{})
-
-		if err != nil && test.expectedErrorHandler == nil {
-			t.Fatalf("%d: unexpected error returned getting desired state: %s\n", index, err)
-		}
-		if err != nil && !test.expectedErrorHandler(err) {
-			t.Fatalf("%d: incorrect error returned getting desired state: %s\n", index, err)
-		}
-		if err == nil && test.expectedErrorHandler != nil {
-			t.Fatalf("%d: expected error not returned getting desired state\n", index)
-		}
-
-		if test.expectedPrometheusConfiguration == nil && desiredState != nil {
-			t.Fatalf("%d: unexpected configmap returned getting desired state: %s\n", index, spew.Sdump(desiredState))
-		}
-
-		if test.expectedPrometheusConfiguration != nil {
-			desiredStateConfigMap, ok := desiredState.(*v1.ConfigMap)
-			if !ok {
-				t.Fatalf("%d: could not cast desired state to configmap: %s\n", index, spew.Sdump(desiredState))
+				if test.setUpConfigMap.Data == nil {
+					test.setUpConfigMap.Data = map[string]string{}
+				}
+				test.setUpConfigMap.Data[configMapKey] = string(prometheusConfig)
 			}
 
-			expectedPrometheusConfigurationBytes, err := yaml.Marshal(test.expectedPrometheusConfiguration)
-			if err != nil {
-				t.Fatalf("%d: could not marshal expected prometheus configuration: %s\n", index, err)
-			}
-			expectedPrometheusConfiguration := string(expectedPrometheusConfigurationBytes)
-
-			returnedPrometheusConfiguration, ok := desiredStateConfigMap.Data[configMapKey]
-			if !ok {
-				t.Fatalf("%d: configuration key not found in desired state configmap: %s\n", index, spew.Sdump(desiredState))
+			if test.setUpConfigMap != nil {
+				if _, err := fakeK8sClient.CoreV1().ConfigMaps(configMapNamespace).Create(test.setUpConfigMap); err != nil {
+					t.Fatalf("%d: error returned setting up configmap: %s\n", index, err)
+				}
 			}
 
-			if expectedPrometheusConfiguration != returnedPrometheusConfiguration {
-				t.Fatalf(
-					"%d: expected configmap does not match returned desired state.\ndiff:\n%s\n",
-					index,
-					cmp.Diff(expectedPrometheusConfiguration, returnedPrometheusConfiguration),
-				)
+			for _, service := range test.setUpServices {
+				if _, err := fakeK8sClient.CoreV1().Services(service.Namespace).Create(service); err != nil {
+					t.Fatalf("%d: error returned setting up service: %s\n", index, err)
+				}
 			}
-		}
+
+			desiredState, err := resource.GetDesiredState(context.TODO(), v1.Service{})
+
+			if err != nil && test.expectedErrorHandler == nil {
+				t.Fatalf("%d: unexpected error returned getting desired state: %s\n", index, err)
+			}
+			if err != nil && !test.expectedErrorHandler(err) {
+				t.Fatalf("%d: incorrect error returned getting desired state: %s\n", index, err)
+			}
+			if err == nil && test.expectedErrorHandler != nil {
+				t.Fatalf("%d: expected error not returned getting desired state\n", index)
+			}
+
+			if test.expectedPrometheusConfiguration == nil && desiredState != nil {
+				t.Fatalf("%d: unexpected configmap returned getting desired state: %s\n", index, spew.Sdump(desiredState))
+			}
+
+			if test.expectedPrometheusConfiguration != nil {
+				desiredStateConfigMap, ok := desiredState.(*v1.ConfigMap)
+				if !ok {
+					t.Fatalf("%d: could not cast desired state to configmap: %s\n", index, spew.Sdump(desiredState))
+				}
+
+				expectedPrometheusConfigurationBytes, err := yaml.Marshal(test.expectedPrometheusConfiguration)
+				if err != nil {
+					t.Fatalf("%d: could not marshal expected prometheus configuration: %s\n", index, err)
+				}
+				expectedPrometheusConfiguration := string(expectedPrometheusConfigurationBytes)
+
+				returnedPrometheusConfiguration, ok := desiredStateConfigMap.Data[configMapKey]
+				if !ok {
+					t.Fatalf("%d: configuration key not found in desired state configmap: %s\n", index, spew.Sdump(desiredState))
+				}
+
+				if expectedPrometheusConfiguration != returnedPrometheusConfiguration {
+					t.Fatalf(
+						"%d: expected configmap does not match returned desired state.\ndiff:\n%s\n",
+						index,
+						cmp.Diff(expectedPrometheusConfiguration, returnedPrometheusConfiguration),
+					)
+				}
+			}
+		})
 	}
 }
