@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/davecgh/go-spew/spew"
+	"github.com/google/go-cmp/cmp"
 	"github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/config"
 	yaml "gopkg.in/yaml.v2"
@@ -267,10 +268,9 @@ func Test_Prometheus_GetScrapeConfigs_Deterministic(t *testing.T) {
 
 		if !reflect.DeepEqual(expectedScrapeConfigs, scrapeConfigs) {
 			t.Fatalf(
-				"%d: expected scrape configs do not match returned scrape configs. GetScrapeConfigs not deterministic.\nexpected: %s\nreturned: %s\n",
+				"%d: expected scrape configs do not match returned scrape configs. GetScrapeConfigs not deterministic.\ndiff: %s\n",
 				index,
-				spew.Sdump(expectedScrapeConfigs),
-				spew.Sdump(scrapeConfigs),
+				cmp.Diff(spew.Sdump(expectedScrapeConfigs), spew.Sdump(scrapeConfigs)),
 			)
 		}
 	}
