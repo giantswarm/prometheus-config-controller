@@ -269,10 +269,11 @@
   revision = "4030bb1f1f0c35b30ca7009e9ebd06849dd45306"
 
 [[projects]]
-  digest = "1:1d1cbf539d9ac35eb3148129f96be5537f1a1330cadcc7e3a83b4e72a59672a3"
+  digest = "1:248e9efd818d7156968df6d7d02018d2b7b6debf3ea21e81228cf0abb29b24cd"
   name = "github.com/google/go-cmp"
   packages = [
     "cmp",
+    "cmp/cmpopts",
     "cmp/internal/diff",
     "cmp/internal/flags",
     "cmp/internal/function",
@@ -951,6 +952,7 @@
     "github.com/giantswarm/operatorkit/informer",
     "github.com/giantswarm/versionbundle",
     "github.com/google/go-cmp/cmp",
+    "github.com/google/go-cmp/cmp/cmpopts",
     "github.com/prometheus/client_golang/prometheus",
     "github.com/prometheus/common/model",
     "github.com/prometheus/prometheus/config",

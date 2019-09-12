@@ -282,6 +282,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 
 					&TestConfigOneApiserver,
 					&TestConfigOneCadvisor,
+					&TestConfigOneCalicoNode,
 					&TestConfigOneKubelet,
 					&TestConfigOneNodeExporter,
 					&TestConfigOneWorkload,
@@ -310,6 +311,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 
 					&TestConfigOneApiserver,
 					&TestConfigOneCadvisor,
+					&TestConfigOneCalicoNode,
 					&TestConfigOneKubelet,
 					&TestConfigOneNodeExporter,
 					&TestConfigOneWorkload,
@@ -354,6 +356,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 				ScrapeConfigs: []*config.ScrapeConfig{
 					&TestConfigOneApiserver,
 					&TestConfigOneCadvisor,
+					&TestConfigOneCalicoNode,
 					&TestConfigOneKubelet,
 					&TestConfigOneNodeExporter,
 					&TestConfigOneWorkload,
@@ -401,12 +404,14 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 				ScrapeConfigs: []*config.ScrapeConfig{
 					&TestConfigTwoApiserver,
 					&TestConfigTwoCadvisor,
+					&TestConfigTwoCalicoNode,
 					&TestConfigTwoKubelet,
 					&TestConfigTwoNodeExporter,
 					&TestConfigTwoWorkload,
 
 					&TestConfigOneApiserver,
 					&TestConfigOneCadvisor,
+					&TestConfigOneCalicoNode,
 					&TestConfigOneKubelet,
 					&TestConfigOneNodeExporter,
 					&TestConfigOneWorkload,
@@ -493,7 +498,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 					t.Fatalf("%d: configuration key not found in desired state configmap: %s\n", index, spew.Sdump(desiredState))
 				}
 
-				if expectedPrometheusConfiguration != returnedPrometheusConfiguration {
+				if !cmp.Equal(expectedPrometheusConfiguration, returnedPrometheusConfiguration) {
 					t.Fatalf(
 						"%d: expected configmap does not match returned desired state.\ndiff:\n%s\n",
 						index,

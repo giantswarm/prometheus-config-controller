@@ -158,6 +158,89 @@ var (
 			},
 		},
 	}
+	TestConfigOneCalicoNode = config.ScrapeConfig{
+		JobName: "guest-cluster-xa5ly-calico-node",
+		Scheme:  "https",
+		HTTPClientConfig: config.HTTPClientConfig{
+			TLSConfig: config.TLSConfig{
+				CAFile:             "/certs/xa5ly-ca.pem",
+				CertFile:           "/certs/xa5ly-crt.pem",
+				KeyFile:            "/certs/xa5ly-key.pem",
+				InsecureSkipVerify: false,
+			},
+		},
+		ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
+			KubernetesSDConfigs: []*config.KubernetesSDConfig{
+				{
+					APIServer: config.URL{
+						URL: &url.URL{
+							Scheme: "https",
+							Host:   "apiserver.xa5ly",
+						},
+					},
+					Role: config.KubernetesRolePod,
+					TLSConfig: config.TLSConfig{
+						CAFile:             "/certs/xa5ly-ca.pem",
+						CertFile:           "/certs/xa5ly-crt.pem",
+						KeyFile:            "/certs/xa5ly-key.pem",
+						InsecureSkipVerify: false,
+					},
+				},
+			},
+		},
+		RelabelConfigs: []*config.RelabelConfig{
+			{
+				SourceLabels: model.LabelNames{PodSDNamespaceLabel, PodSDPodNameLabel},
+				Regex:        CalicoNodePodNameRegexp,
+				Action:       config.RelabelKeep,
+			},
+			{
+				TargetLabel:  AppLabel,
+				SourceLabels: model.LabelNames{PodSDContainerNameLabel},
+			},
+			{
+				TargetLabel:  NamespaceLabel,
+				SourceLabels: model.LabelNames{PodSDNamespaceLabel},
+			},
+			{
+				TargetLabel:  PodNameLabel,
+				SourceLabels: model.LabelNames{PodSDPodNameLabel},
+			},
+			{
+				TargetLabel: ClusterIDLabel,
+				Replacement: "xa5ly",
+			},
+			{
+				TargetLabel: ClusterTypeLabel,
+				Replacement: GuestClusterType,
+			},
+			{
+				TargetLabel: AddressLabel,
+				Replacement: key.APIServiceHost(key.PrefixMaster, "xa5ly"),
+			},
+			{
+				SourceLabels: model.LabelNames{PodSDPodNameLabel},
+				Regex:        CalicoNodePodNameRegexp,
+				TargetLabel:  MetricPathLabel,
+				Replacement:  key.APIProxyPodMetricsPath(key.CalicoNodeNamespace, key.CalicoNodeMetricPort),
+			},
+		},
+		MetricRelabelConfigs: []*config.RelabelConfig{
+			{
+				Action:       ActionRelabel,
+				SourceLabels: model.LabelNames{MetricExportedNamespaceLabel, MetricNamespaceLabel},
+				Regex:        RelabelNamespaceRegexp,
+				Replacement:  GroupCapture,
+				TargetLabel:  ExportedNamespaceLabel,
+			},
+			// keep only kube-system cadvisor metrics
+			{
+				Action:       ActionKeep,
+				SourceLabels: model.LabelNames{MetricExportedNamespaceLabel},
+				Regex:        NSRegexp,
+			},
+		},
+	}
 	TestConfigOneKubelet = config.ScrapeConfig{
 		JobName: "guest-cluster-xa5ly-kubelet",
 		Scheme:  "https",
@@ -334,7 +417,7 @@ var (
 		RelabelConfigs: []*config.RelabelConfig{
 			{
 				SourceLabels: model.LabelNames{KubernetesSDNamespaceLabel, KubernetesSDServiceNameLabel},
-				Regex:        WhitelistRegexp,
+				Regex:        ServiceWhitelistRegexp,
 				Action:       config.RelabelKeep,
 			},
 			{
@@ -455,6 +538,7 @@ var (
 var (
 	TestConfigTwoApiserver    config.ScrapeConfig
 	TestConfigTwoCadvisor     config.ScrapeConfig
+	TestConfigTwoCalicoNode   config.ScrapeConfig
 	TestConfigTwoKubelet      config.ScrapeConfig
 	TestConfigTwoNodeExporter config.ScrapeConfig
 	TestConfigTwoWorkload     config.ScrapeConfig
@@ -465,11 +549,12 @@ func init() {
 	// done further below.
 	TestConfigTwoApiserver = TestConfigOneApiserver
 	TestConfigTwoCadvisor = TestConfigOneCadvisor
+	TestConfigTwoCalicoNode = TestConfigOneCalicoNode
 	TestConfigTwoKubelet = TestConfigOneKubelet
 	TestConfigTwoNodeExporter = TestConfigOneNodeExporter
 	TestConfigTwoWorkload = TestConfigOneWorkload
 
-	apiServer := config.URL{&url.URL{
+	apiServer := config.URL{URL: &url.URL{
 		Scheme: "https",
 		Host:   "apiserver.0ba9v",
 	}}
@@ -521,6 +606,26 @@ func init() {
 			newRelabelConfig := *r
 			newRelabelConfig.Replacement = strings.ReplaceAll(r.Replacement, "xa5ly", clusterID)
 			TestConfigTwoCadvisor.RelabelConfigs = append(TestConfigTwoCadvisor.RelabelConfigs, &newRelabelConfig)
+		}
+	}
+
+	{
+		TestConfigTwoCalicoNode.JobName = "guest-cluster-0ba9v-calico-node"
+		TestConfigTwoCalicoNode.HTTPClientConfig.TLSConfig = tlsConfig
+		TestConfigTwoCalicoNode.ServiceDiscoveryConfig.KubernetesSDConfigs = []*config.KubernetesSDConfig{
+			&config.KubernetesSDConfig{
+				APIServer: apiServer,
+				Role:      config.KubernetesRolePod,
+				TLSConfig: tlsConfig,
+			},
+		}
+
+		// Deepcopy relabel configs and change clusterID to match second test config.
+		TestConfigTwoCalicoNode.RelabelConfigs = nil
+		for _, r := range TestConfigOneCalicoNode.RelabelConfigs {
+			newRelabelConfig := *r
+			newRelabelConfig.Replacement = strings.ReplaceAll(r.Replacement, "xa5ly", clusterID)
+			TestConfigTwoCalicoNode.RelabelConfigs = append(TestConfigTwoCalicoNode.RelabelConfigs, &newRelabelConfig)
 		}
 	}
 

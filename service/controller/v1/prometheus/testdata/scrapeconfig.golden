@@ -1,0 +1,289 @@
+- job_name: guest-cluster-xa5ly-apiserver
+  scheme: https
+  kubernetes_sd_configs:
+  - api_server: https://apiserver.xa5ly
+    role: endpoints
+    tls_config:
+      ca_file: /certs/xa5ly-ca.pem
+      cert_file: /certs/xa5ly-crt.pem
+      key_file: /certs/xa5ly-key.pem
+      insecure_skip_verify: false
+    namespaces:
+      names: []
+  tls_config:
+    ca_file: /certs/xa5ly-ca.pem
+    cert_file: /certs/xa5ly-crt.pem
+    key_file: /certs/xa5ly-key.pem
+    insecure_skip_verify: true
+  relabel_configs:
+  - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name]
+    regex: default;kubernetes
+    action: keep
+  - target_label: app
+    replacement: kubernetes
+  - target_label: cluster_id
+    replacement: xa5ly
+  - target_label: cluster_type
+    replacement: guest
+  metric_relabel_configs:
+  - source_labels: [__name__]
+    regex: (apiserver_admission_controller_admission_latencies_seconds_bucket|apiserver_admission_step_admission_latencies_seconds_bucket|apiserver_response_sizes_bucket|rest_client_request_latency_seconds_bucket|rest_client_request_latency_seconds_bucket)
+    action: drop
+  - source_labels: [__name__]
+    regex: (reflector.*)
+    action: drop
+- job_name: guest-cluster-xa5ly-cadvisor
+  scheme: https
+  kubernetes_sd_configs:
+  - api_server: https://apiserver.xa5ly
+    role: node
+    tls_config:
+      ca_file: /certs/xa5ly-ca.pem
+      cert_file: /certs/xa5ly-crt.pem
+      key_file: /certs/xa5ly-key.pem
+      insecure_skip_verify: false
+    namespaces:
+      names: []
+  tls_config:
+    ca_file: /certs/xa5ly-ca.pem
+    cert_file: /certs/xa5ly-crt.pem
+    key_file: /certs/xa5ly-key.pem
+    insecure_skip_verify: false
+  relabel_configs:
+  - target_label: __address__
+    replacement: apiserver.xa5ly
+  - source_labels: [__meta_kubernetes_node_name]
+    target_label: __metrics_path__
+    replacement: /api/v1/nodes/${1}:10250/proxy/metrics/cadvisor
+  - target_label: app
+    replacement: cadvisor
+  - target_label: cluster_id
+    replacement: xa5ly
+  - target_label: cluster_type
+    replacement: guest
+  - source_labels: [__meta_kubernetes_node_address_InternalIP]
+    target_label: ip
+  - source_labels: [__meta_kubernetes_node_label_role]
+    target_label: role
+  - source_labels: [__meta_kubernetes_node_label_role]
+    regex: null
+    target_label: role
+    replacement: worker
+  metric_relabel_configs:
+  - source_labels: [namespace]
+    regex: (kube-system|giantswarm.*|vault-exporter)
+    action: keep
+  - source_labels: [__name__]
+    regex: container_network_.*
+    action: drop
+- job_name: guest-cluster-xa5ly-calico-node
+  scheme: https
+  kubernetes_sd_configs:
+  - api_server: https://apiserver.xa5ly
+    role: pod
+    tls_config:
+      ca_file: /certs/xa5ly-ca.pem
+      cert_file: /certs/xa5ly-crt.pem
+      key_file: /certs/xa5ly-key.pem
+      insecure_skip_verify: false
+    namespaces:
+      names: []
+  tls_config:
+    ca_file: /certs/xa5ly-ca.pem
+    cert_file: /certs/xa5ly-crt.pem
+    key_file: /certs/xa5ly-key.pem
+    insecure_skip_verify: false
+  relabel_configs:
+  - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_pod_name]
+    regex: kube-system;calico-node.*
+    action: keep
+  - source_labels: [__meta_kubernetes_pod_container_name]
+    target_label: app
+  - source_labels: [__meta_kubernetes_namespace]
+    target_label: namespace
+  - source_labels: [__meta_kubernetes_pod_name]
+    target_label: pod_name
+  - target_label: cluster_id
+    replacement: xa5ly
+  - target_label: cluster_type
+    replacement: guest
+  - target_label: __address__
+    replacement: master.xa5ly:443
+  - source_labels: [__meta_kubernetes_pod_name]
+    regex: kube-system;calico-node.*
+    target_label: __metrics_path__
+    replacement: /api/v1/namespaces/kube-system/pods/${1}:9091/proxy/metrics
+  metric_relabel_configs:
+  - source_labels: [exported_namespace, namespace]
+    regex: ;(kube-system|giantswarm.*|vault-exporter)
+    target_label: exported_namespace
+    replacement: ${1}
+    action: replace
+  - source_labels: [exported_namespace]
+    regex: (kube-system|giantswarm.*|vault-exporter)
+    action: keep
+- job_name: guest-cluster-xa5ly-kubelet
+  scheme: https
+  kubernetes_sd_configs:
+  - api_server: https://apiserver.xa5ly
+    role: node
+    tls_config:
+      ca_file: /certs/xa5ly-ca.pem
+      cert_file: /certs/xa5ly-crt.pem
+      key_file: /certs/xa5ly-key.pem
+      insecure_skip_verify: false
+    namespaces:
+      names: []
+  tls_config:
+    ca_file: /certs/xa5ly-ca.pem
+    cert_file: /certs/xa5ly-crt.pem
+    key_file: /certs/xa5ly-key.pem
+    insecure_skip_verify: true
+  relabel_configs:
+  - target_label: app
+    replacement: kubelet
+  - target_label: cluster_id
+    replacement: xa5ly
+  - target_label: cluster_type
+    replacement: guest
+  - source_labels: [__meta_kubernetes_node_address_InternalIP]
+    target_label: ip
+  - source_labels: [__meta_kubernetes_node_label_role]
+    target_label: role
+  - source_labels: [__meta_kubernetes_node_label_role]
+    regex: null
+    target_label: role
+    replacement: worker
+  metric_relabel_configs:
+  - source_labels: [__name__]
+    regex: (reflector.*)
+    action: drop
+- job_name: guest-cluster-xa5ly-node-exporter
+  scheme: http
+  kubernetes_sd_configs:
+  - api_server: https://apiserver.xa5ly
+    role: endpoints
+    tls_config:
+      ca_file: /certs/xa5ly-ca.pem
+      cert_file: /certs/xa5ly-crt.pem
+      key_file: /certs/xa5ly-key.pem
+      insecure_skip_verify: false
+    namespaces:
+      names: []
+  relabel_configs:
+  - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name]
+    regex: kube-system;node-exporter
+    action: keep
+  - source_labels: [__address__]
+    regex: (.*):10250
+    target_label: __address__
+    replacement: ${1}:10300
+  - target_label: app
+    replacement: node-exporter
+  - target_label: cluster_id
+    replacement: xa5ly
+  - target_label: cluster_type
+    replacement: guest
+  - source_labels: [__address__]
+    regex: (.*):10300
+    target_label: ip
+    replacement: ${1}
+  metric_relabel_configs:
+  - source_labels: [fstype]
+    regex: (cgroup|devpts|mqueue|nsfs|overlay|tmpfs)
+    action: drop
+  - source_labels: [__name__, state]
+    regex: node_systemd_unit_state;(active|activating|deactivating|inactive)
+    action: drop
+  - source_labels: [__name__, name]
+    regex: node_systemd_unit_state;(dev-disk-by|run-docker-netns|sys-devices|sys-subsystem-net|var-lib-docker-overlay2|var-lib-docker-containers|var-lib-kubelet-pods).*
+    action: drop
+- job_name: guest-cluster-xa5ly-workload
+  scheme: https
+  kubernetes_sd_configs:
+  - api_server: https://apiserver.xa5ly
+    role: endpoints
+    tls_config:
+      ca_file: /certs/xa5ly-ca.pem
+      cert_file: /certs/xa5ly-crt.pem
+      key_file: /certs/xa5ly-key.pem
+      insecure_skip_verify: false
+    namespaces:
+      names: []
+  tls_config:
+    ca_file: /certs/xa5ly-ca.pem
+    cert_file: /certs/xa5ly-crt.pem
+    key_file: /certs/xa5ly-key.pem
+    insecure_skip_verify: false
+  relabel_configs:
+  - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name]
+    regex: (kube-system;(cert-exporter|cluster-autoscaler|coredns|kube-state-metrics|net-exporter|nic-exporter|nginx-ingress-controller))|(giantswarm;chart-operator)|(giantswarm-elastic-logging;elastic-logging-elasticsearch-exporter)|(vault-exporter;vault-exporter)
+    action: keep
+  - source_labels: [__meta_kubernetes_service_name]
+    target_label: app
+  - source_labels: [__meta_kubernetes_namespace]
+    target_label: namespace
+  - source_labels: [__meta_kubernetes_pod_name]
+    target_label: pod_name
+  - target_label: cluster_id
+    replacement: xa5ly
+  - target_label: cluster_type
+    replacement: guest
+  - target_label: __address__
+    replacement: master.xa5ly:443
+  - source_labels: [__meta_kubernetes_pod_name]
+    regex: (kube-state-metrics.*)
+    target_label: __metrics_path__
+    replacement: /api/v1/namespaces/kube-system/pods/${1}:10301/proxy/metrics
+  - source_labels: [__meta_kubernetes_pod_name]
+    regex: (nginx-ingress-controller.*)
+    target_label: __metrics_path__
+    replacement: /api/v1/namespaces/kube-system/pods/${1}:10254/proxy/metrics
+  - source_labels: [__meta_kubernetes_pod_name]
+    regex: kube-system;calico-node.*
+    target_label: __metrics_path__
+    replacement: /api/v1/namespaces/kube-system/pods/${1}:9091/proxy/metrics
+  - source_labels: [__meta_kubernetes_pod_name]
+    regex: (chart-operator.*)
+    target_label: __metrics_path__
+    replacement: /api/v1/namespaces/giantswarm/pods/${1}:8000/proxy/metrics
+  - source_labels: [__meta_kubernetes_pod_name]
+    regex: (cert-exporter.*)
+    target_label: __metrics_path__
+    replacement: /api/v1/namespaces/kube-system/pods/${1}:9005/proxy/metrics
+  - source_labels: [__meta_kubernetes_pod_name]
+    regex: (cluster-autoscaler.*)
+    target_label: __metrics_path__
+    replacement: /api/v1/namespaces/kube-system/pods/${1}:8085/proxy/metrics
+  - source_labels: [__meta_kubernetes_pod_name]
+    regex: (coredns.*)
+    target_label: __metrics_path__
+    replacement: /api/v1/namespaces/kube-system/pods/${1}:9153/proxy/metrics
+  - source_labels: [__meta_kubernetes_pod_name]
+    regex: (elastic-logging-elasticsearch-exporter.*)
+    target_label: __metrics_path__
+    replacement: /api/v1/namespaces/giantswarm-elastic-logging/pods/${1}:9108/proxy/metrics
+  - source_labels: [__meta_kubernetes_pod_name]
+    regex: (net-exporter.*)
+    target_label: __metrics_path__
+    replacement: /api/v1/namespaces/kube-system/pods/${1}:8000/proxy/metrics
+  - source_labels: [__meta_kubernetes_pod_name]
+    regex: (nic-exporter.*)
+    target_label: __metrics_path__
+    replacement: /api/v1/namespaces/kube-system/pods/${1}:10800/proxy/metrics
+  - source_labels: [__meta_kubernetes_pod_name]
+    regex: (vault-exporter.*)
+    target_label: __metrics_path__
+    replacement: /api/v1/namespaces/vault-exporter/pods/${1}:9410/proxy/metrics
+  metric_relabel_configs:
+  - source_labels: [exported_namespace, namespace]
+    regex: ;(kube-system|giantswarm.*|vault-exporter)
+    target_label: exported_namespace
+    replacement: ${1}
+    action: replace
+  - source_labels: [exported_namespace]
+    regex: (kube-system|giantswarm.*|vault-exporter)
+    action: keep
+  - source_labels: [__name__]
+    regex: (ingress_controller_ssl_expire_time_seconds|nginx.*)
+    action: drop
