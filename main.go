@@ -139,7 +139,7 @@ func mainError() error {
 
 	daemonCommand.PersistentFlags().Duration(f.Service.Controller.ControllerBackOffDuration, time.Minute*5, "Maximum backoff duration for controller.")
 	daemonCommand.PersistentFlags().Duration(f.Service.Controller.FrameworkBackOffDuration, time.Minute*5, "Maximum backoff duration for operator framework.")
-	daemonCommand.PersistentFlags().Duration(f.Service.Controller.ResyncPeriod, time.Minute*1, "Controller resync period.")
+	daemonCommand.PersistentFlags().Duration(f.Service.Controller.ResyncPeriod, time.Minute*3, "Controller resync period.")
 
 	newCommand.CobraCommand().Execute()
 
