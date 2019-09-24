@@ -386,6 +386,12 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				rewriteCalicoNodePath,
 			},
 			MetricRelabelConfigs: []*config.RelabelConfig{
+				// keep calico-node metrics
+				{
+					SourceLabels: model.LabelNames{PodSDNamespaceLabel, PodSDPodNameLabel},
+					Regex:        CalicoNodePodNameRegexp,
+					Action:       config.RelabelKeep,
+				},
 				// relabel namespace to exported_namespace for endpoints in kube-system namespace.
 				// this keeps metrics from nginx ingress controller from being dropped by filter below
 				{

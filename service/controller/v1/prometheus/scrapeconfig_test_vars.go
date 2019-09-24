@@ -227,6 +227,11 @@ var (
 		},
 		MetricRelabelConfigs: []*config.RelabelConfig{
 			{
+				SourceLabels: model.LabelNames{PodSDNamespaceLabel, PodSDPodNameLabel},
+				Regex:        CalicoNodePodNameRegexp,
+				Action:       config.RelabelKeep,
+			},
+			{
 				Action:       ActionRelabel,
 				SourceLabels: model.LabelNames{MetricExportedNamespaceLabel, MetricNamespaceLabel},
 				Regex:        RelabelNamespaceRegexp,

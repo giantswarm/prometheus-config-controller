@@ -225,6 +225,11 @@ var (
 		},
 		MetricRelabelConfigs: []*config.RelabelConfig{
 			{
+				SourceLabels: model.LabelNames{prometheus.PodSDNamespaceLabel, prometheus.PodSDPodNameLabel},
+				Regex:        prometheus.CalicoNodePodNameRegexp,
+				Action:       config.RelabelKeep,
+			},
+			{
 				Action:       prometheus.ActionRelabel,
 				SourceLabels: model.LabelNames{prometheus.MetricExportedNamespaceLabel, prometheus.MetricNamespaceLabel},
 				Regex:        prometheus.RelabelNamespaceRegexp,
