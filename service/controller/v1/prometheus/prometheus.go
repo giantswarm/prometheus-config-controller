@@ -146,6 +146,9 @@ var (
 	// APIServerRegexp is the regular expression to match against Kubernetes API servers.
 	APIServerRegexp = config.MustNewRegexp(`default;kubernetes`)
 
+	// CalicoNodePodRegexp is the regular expression to match calico-node pod name and namespace.
+	CalicoNodePodRegexp = config.MustNewRegexp(`kube-system;calico-node.*`)
+
 	// CalicoNodePodNameRegexp is the regular expression to match calico-node pod name.
 	CalicoNodePodNameRegexp = config.MustNewRegexp(`(calico-node.*)`)
 

@@ -191,7 +191,7 @@ var (
 		RelabelConfigs: []*config.RelabelConfig{
 			{
 				SourceLabels: model.LabelNames{PodSDNamespaceLabel, PodSDPodNameLabel},
-				Regex:        CalicoNodePodNameRegexp,
+				Regex:        CalicoNodePodRegexp,
 				Action:       config.RelabelKeep,
 			},
 			{

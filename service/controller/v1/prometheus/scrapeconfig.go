@@ -358,7 +358,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				// Only keep kube-state-metrics targets.
 				{
 					SourceLabels: model.LabelNames{PodSDNamespaceLabel, PodSDPodNameLabel},
-					Regex:        CalicoNodePodNameRegexp,
+					Regex:        CalicoNodePodRegexp,
 					Action:       config.RelabelKeep,
 				},
 				// Add app label.

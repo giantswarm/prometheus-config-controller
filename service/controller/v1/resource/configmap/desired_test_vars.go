@@ -189,7 +189,7 @@ var (
 		RelabelConfigs: []*config.RelabelConfig{
 			{
 				SourceLabels: model.LabelNames{prometheus.PodSDNamespaceLabel, prometheus.PodSDPodNameLabel},
-				Regex:        prometheus.CalicoNodePodNameRegexp,
+				Regex:        prometheus.CalicoNodePodRegexp,
 				Action:       config.RelabelKeep,
 			},
 			{
