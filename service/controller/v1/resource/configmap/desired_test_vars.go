@@ -223,26 +223,7 @@ var (
 				Replacement:  key.APIProxyPodMetricsPath(key.CalicoNodeNamespace, key.CalicoNodeMetricPort),
 			},
 		},
-		MetricRelabelConfigs: []*config.RelabelConfig{
-			{
-				SourceLabels: model.LabelNames{prometheus.PodSDNamespaceLabel, prometheus.PodSDPodNameLabel},
-				Regex:        prometheus.CalicoNodePodNameRegexp,
-				Action:       config.RelabelKeep,
-			},
-			{
-				Action:       prometheus.ActionRelabel,
-				SourceLabels: model.LabelNames{prometheus.MetricExportedNamespaceLabel, prometheus.MetricNamespaceLabel},
-				Regex:        prometheus.RelabelNamespaceRegexp,
-				Replacement:  prometheus.GroupCapture,
-				TargetLabel:  prometheus.ExportedNamespaceLabel,
-			},
-			// keep only kube-system cadvisor metrics
-			{
-				Action:       prometheus.ActionKeep,
-				SourceLabels: model.LabelNames{prometheus.MetricExportedNamespaceLabel},
-				Regex:        prometheus.NSRegexp,
-			},
-		},
+		MetricRelabelConfigs: []*config.RelabelConfig{},
 	}
 	TestConfigOneKubelet = config.ScrapeConfig{
 		JobName: "guest-cluster-xa5ly-kubelet",

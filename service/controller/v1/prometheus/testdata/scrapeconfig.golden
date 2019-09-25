@@ -113,18 +113,6 @@
     regex: kube-system;calico-node.*
     target_label: __metrics_path__
     replacement: /api/v1/namespaces/kube-system/pods/${1}:9091/proxy/metrics
-  metric_relabel_configs:
-  - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_pod_name]
-    regex: kube-system;calico-node.*
-    action: keep
-  - source_labels: [exported_namespace, namespace]
-    regex: ;(kube-system|giantswarm.*|vault-exporter)
-    target_label: exported_namespace
-    replacement: ${1}
-    action: replace
-  - source_labels: [exported_namespace]
-    regex: (kube-system|giantswarm.*|vault-exporter)
-    action: keep
 - job_name: guest-cluster-xa5ly-kubelet
   scheme: https
   kubernetes_sd_configs:
