@@ -55,6 +55,21 @@ var (
 	MetricFSTypeLabel = model.LabelName("fstype")
 )
 
+// Prometheus POD service discovery labels.
+var (
+	// PodSDContainerNameLabel is a label applied to the target by Prometheus
+	// POD service discovery that holds the target's POD container name.
+	PodSDContainerNameLabel = model.LabelName("__meta_kubernetes_pod_container_name")
+
+	// PodSDPodNameLabel is the label applied to the target by Prometheus POD
+	// service discovery that holds the target's Kubernetes POD name.
+	PodSDPodNameLabel = model.LabelName("__meta_kubernetes_pod_name")
+
+	// PodSDNamespaceLabel is the label applied to the target by Prometheus POD
+	// service discovery that holds the target's Kubernetes namespace.
+	PodSDNamespaceLabel = model.LabelName("__meta_kubernetes_namespace")
+)
+
 // Giant Swarm metrics schema labels.
 var (
 	// AddressLabel is the label used to hold target ip and port.
@@ -95,6 +110,9 @@ const (
 	// CadvisorAppName is the label value for Cadvisor targets.
 	CadvisorAppName = "cadvisor"
 
+	// CalicoNodeAppName is the label value for calico-node targets.
+	CalicoNodeAppName = "calico-node"
+
 	// GuestClusterType is the cluster type for guest clusters.
 	GuestClusterType = "guest"
 
@@ -127,6 +145,12 @@ const (
 var (
 	// APIServerRegexp is the regular expression to match against Kubernetes API servers.
 	APIServerRegexp = config.MustNewRegexp(`default;kubernetes`)
+
+	// CalicoNodePodRegexp is the regular expression to match calico-node pod name and namespace.
+	CalicoNodePodRegexp = config.MustNewRegexp(`kube-system;calico-node.*`)
+
+	// CalicoNodePodNameRegexp is the regular expression to match calico-node pod name.
+	CalicoNodePodNameRegexp = config.MustNewRegexp(`(calico-node.*)`)
 
 	// EmptyRegexp is the regular expression to match against the empty string.
 	EmptyRegexp = config.MustNewRegexp(``)
@@ -201,8 +225,8 @@ var (
 	// node-exporter IP (including port), and capture the IP.
 	NodeExporterPortRegexp = config.MustNewRegexp(`(.*):10300`)
 
-	// WhitelistRegexp is the regular expression to match workload targets to scrape.
-	WhitelistRegexp = config.MustNewRegexp(`(kube-system;(cert-exporter|cluster-autoscaler|coredns|kube-state-metrics|net-exporter|nic-exporter|nginx-ingress-controller))|(giantswarm;chart-operator)|(giantswarm-elastic-logging;elastic-logging-elasticsearch-exporter)|(vault-exporter;vault-exporter)`)
+	// ServiceWhitelistRegexp is the regular expression to match workload targets to scrape.
+	ServiceWhitelistRegexp = config.MustNewRegexp(`(kube-system;(cert-exporter|cluster-autoscaler|coredns|kube-state-metrics|net-exporter|nic-exporter|nginx-ingress-controller))|(giantswarm;chart-operator)|(giantswarm-elastic-logging;elastic-logging-elasticsearch-exporter)|(vault-exporter;vault-exporter)`)
 )
 
 // GetClusterID returns the value of the cluster annotation.

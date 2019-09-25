@@ -27,6 +27,8 @@ const (
 	APIServerJobType = "apiserver"
 	// CadvisorJobType is the job type for scraping Cadvisor.
 	CadvisorJobType = "cadvisor"
+	// CalicoNodeJobType is the job type for scraping calico-node PODs.
+	CalicoNodeJobType = "calico-node"
 	// EtcdJobType is the job type for scraping etcd.
 	EtcdJobType = "etcd"
 	// KubeletJobType is the job type for scraping kubelets.
@@ -122,6 +124,20 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 			},
 		},
 	}
+	podSDConfig := config.ServiceDiscoveryConfig{
+		KubernetesSDConfigs: []*config.KubernetesSDConfig{
+			{
+				APIServer: config.URL{
+					URL: &url.URL{
+						Scheme: HttpsScheme,
+						Host:   getTargetHost(service),
+					},
+				},
+				Role:      config.KubernetesRolePod,
+				TLSConfig: secureTLSConfig,
+			},
+		},
+	}
 
 	clusterIDLabelRelabelConfig := &config.RelabelConfig{
 		TargetLabel: ClusterIDLabel,
@@ -151,6 +167,12 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 		Regex:        NginxIngressControllerPodNameRegexp,
 		TargetLabel:  MetricPathLabel,
 		Replacement:  key.APIProxyPodMetricsPath(key.NginxIngressControllerNamespace, key.NginxIngressControllerMetricPort),
+	}
+	rewriteCalicoNodePath := &config.RelabelConfig{
+		SourceLabels: model.LabelNames{PodSDPodNameLabel},
+		Regex:        CalicoNodePodNameRegexp,
+		TargetLabel:  MetricPathLabel,
+		Replacement:  key.APIProxyPodMetricsPath(key.CalicoNodeNamespace, key.CalicoNodeMetricPort),
 	}
 	rewriteChartOperatorPath := &config.RelabelConfig{
 		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
@@ -328,6 +350,45 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 		},
 
 		{
+			JobName:                getJobName(service, CalicoNodeJobType),
+			HTTPClientConfig:       secureHTTPClientConfig,
+			Scheme:                 HttpsScheme,
+			ServiceDiscoveryConfig: podSDConfig,
+			RelabelConfigs: []*config.RelabelConfig{
+				// Only keep kube-state-metrics targets.
+				{
+					SourceLabels: model.LabelNames{PodSDNamespaceLabel, PodSDPodNameLabel},
+					Regex:        CalicoNodePodRegexp,
+					Action:       config.RelabelKeep,
+				},
+				// Add app label.
+				{
+					TargetLabel:  AppLabel,
+					SourceLabels: model.LabelNames{PodSDContainerNameLabel},
+				},
+				// Add namespace label.
+				{
+					TargetLabel:  NamespaceLabel,
+					SourceLabels: model.LabelNames{PodSDNamespaceLabel},
+				},
+				// Add pod_name label.
+				{
+					TargetLabel:  PodNameLabel,
+					SourceLabels: model.LabelNames{PodSDPodNameLabel},
+				},
+				// Add cluster_id label.
+				clusterIDLabelRelabelConfig,
+				// Add cluster_type label.
+				clusterTypeLabelRelabelConfig,
+				// rewrite host to api proxy
+				rewriteAddress,
+				// rewrite metrics scrape path to connect pods
+				rewriteCalicoNodePath,
+			},
+			MetricRelabelConfigs: []*config.RelabelConfig{},
+		},
+
+		{
 			JobName:                getJobName(service, NodeExporterJobType),
 			Scheme:                 HttpScheme,
 			ServiceDiscoveryConfig: endpointSDConfig,
@@ -396,7 +457,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				// Only keep kube-state-metrics targets.
 				{
 					SourceLabels: model.LabelNames{KubernetesSDNamespaceLabel, KubernetesSDServiceNameLabel},
-					Regex:        WhitelistRegexp,
+					Regex:        ServiceWhitelistRegexp,
 					Action:       config.RelabelKeep,
 				},
 				// Add app label.
@@ -423,6 +484,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				// rewrite metrics scrape path to connect pods
 				rewriteKubeStateMetricPath,
 				rewriteICMetricPath,
+				rewriteCalicoNodePath,
 				rewriteChartOperatorPath,
 				rewriteCertExporterPath,
 				rewriteClusterAutoscalerPath,
