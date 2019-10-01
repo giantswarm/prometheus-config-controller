@@ -17,11 +17,6 @@ import (
 
 var (
 	f *flag.Flag = flag.New()
-
-	description string = "The prometheus-config-controller provides Prometheus service discovery for Kubernetes clusters on Kubernetes."
-	gitCommit   string = "n/a"
-	name        string = "prometheus-config-controller"
-	source      string = "https://github.com/giantswarm/prometheus-config-controller"
 )
 
 func panicOnErr(err error) {
@@ -57,14 +52,15 @@ func mainError() error {
 		var newService *service.Service
 		{
 			c := service.Config{
-				Logger: newLogger,
-
-				Description: description,
 				Flag:        f,
-				GitCommit:   gitCommit,
-				Name:        name,
-				Source:      source,
+				Logger: newLogger,
 				Viper:       v,
+
+				Description: project.Description(),
+				GitCommit:   project.GitSHA(),
+				ProjectName: project.Name(),
+				Source:      project.Source(),
+				Version:     project.Version(),
 			}
 
 			newService, err = service.New(c)
@@ -101,10 +97,11 @@ func mainError() error {
 			Logger:        newLogger,
 			ServerFactory: newServerFactory,
 
-			Description:    description,
-			GitCommit:      gitCommit,
-			Name:           name,
-			Source:         source,
+			Description: project.Description(),
+			GitCommit:   project.GitSHA(),
+			ProjectName: project.Name(),
+			Source:      project.Source(),
+			Version:     project.Version()
 			VersionBundles: service.NewVersionBundles(),
 		}
 
