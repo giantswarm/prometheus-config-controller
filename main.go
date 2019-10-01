@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/giantswarm/prometheus-config-controller/flag"
+	"github.com/giantswarm/prometheus-config-controller/pkg/project"
 	"github.com/giantswarm/prometheus-config-controller/server"
 	"github.com/giantswarm/prometheus-config-controller/service"
 )
@@ -52,9 +53,9 @@ func mainError() error {
 		var newService *service.Service
 		{
 			c := service.Config{
-				Flag:        f,
+				Flag:   f,
 				Logger: newLogger,
-				Viper:       v,
+				Viper:  v,
 
 				Description: project.Description(),
 				GitCommit:   project.GitSHA(),
@@ -97,11 +98,11 @@ func mainError() error {
 			Logger:        newLogger,
 			ServerFactory: newServerFactory,
 
-			Description: project.Description(),
-			GitCommit:   project.GitSHA(),
-			ProjectName: project.Name(),
-			Source:      project.Source(),
-			Version:     project.Version()
+			Description:    project.Description(),
+			GitCommit:      project.GitSHA(),
+			Name:           project.Name(),
+			Source:         project.Source(),
+			Version:        project.Version(),
 			VersionBundles: service.NewVersionBundles(),
 		}
 
