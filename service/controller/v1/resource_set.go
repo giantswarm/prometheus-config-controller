@@ -7,8 +7,9 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
-	"github.com/giantswarm/operatorkit/controller/resource/metricsresource"
-	"github.com/giantswarm/operatorkit/controller/resource/retryresource"
+	"github.com/giantswarm/operatorkit/resource"
+	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
+	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
 	"github.com/spf13/afero"
 	"k8s.io/client-go/kubernetes"
 
@@ -55,7 +56,7 @@ func NewResourceSet(config ResourceSetConfig) (*controller.ResourceSet, error) {
 		}
 	}
 
-	var certificateResource controller.Resource
+	var certificateResource resource.Interface
 	{
 		c := certificate.Config{
 			Fs:                 afero.NewOsFs(),
@@ -80,7 +81,7 @@ func NewResourceSet(config ResourceSetConfig) (*controller.ResourceSet, error) {
 		}
 	}
 
-	var configMapResource controller.Resource
+	var configMapResource resource.Interface
 	{
 		c := configmap.Config{
 			K8sClient:          config.K8sClient,
@@ -104,7 +105,7 @@ func NewResourceSet(config ResourceSetConfig) (*controller.ResourceSet, error) {
 		}
 	}
 
-	resources := []controller.Resource{
+	resources := []resource.Interface{
 		certificateResource,
 		configMapResource,
 	}
