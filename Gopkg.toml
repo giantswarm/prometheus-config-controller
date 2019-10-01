@@ -27,6 +27,10 @@
 
 
 [[constraint]]
+  branch = "kubernetes-1.15.4"
+  name = "github.com/giantswarm/k8shealthz"
+
+[[constraint]]
   branch = "master"
   name = "github.com/giantswarm/microendpoint"
 

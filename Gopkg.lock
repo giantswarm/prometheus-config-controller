@@ -107,12 +107,12 @@
   revision = "9749deade60f7624620aa7158a4f38c87ea23795"
 
 [[projects]]
-  branch = "master"
-  digest = "1:b08bd7378e47e7fc971a77b99c5e9fbfbc898fb648bcbd6e5ce1d6bfd7e265bb"
+  branch = "kubernetes-1.15.4"
+  digest = "1:a5f65f475afc51e6764f58ee39361382c0c9e2dded347b231a542dff9a277822"
   name = "github.com/giantswarm/k8shealthz"
   packages = ["."]
   pruneopts = "UT"
-  revision = "9abe467ab9085610b261319dfe875c6d13537b06"
+  revision = "d37896dc0e3e3e7f41454365c23d61004750180a"
 
 [[projects]]
   branch = "master"
