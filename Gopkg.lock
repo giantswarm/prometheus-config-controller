@@ -2,7 +2,7 @@
 
 
 [[projects]]
-  digest = "1:04c6b096ca19d1cb9b06c71189fbd056106c8027d1af1a05e5394106c38bbe12"
+  digest = "1:3a46a66ab48e72dc8041ecfc5fa5e2c4a39cdadb32837d327f76aaf260dafd15"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -39,8 +39,8 @@
     "service/sts/stsiface",
   ]
   pruneopts = "UT"
-  revision = "63033a5636f9a9ad84cfaaf97b44e31286fb3c54"
-  version = "v1.25.2"
+  revision = "9deb6031265e7efb2ed0c2c87cf4549ed9483554"
+  version = "v1.25.5"
 
 [[projects]]
   digest = "1:d6afaeed1502aa28e80a4ed0981d570ad91b2579193404256ce672ed0a609e0d"
@@ -107,12 +107,12 @@
   revision = "9749deade60f7624620aa7158a4f38c87ea23795"
 
 [[projects]]
-  branch = "kubernetes-1.15.4"
+  branch = "master"
   digest = "1:a5f65f475afc51e6764f58ee39361382c0c9e2dded347b231a542dff9a277822"
   name = "github.com/giantswarm/k8shealthz"
   packages = ["."]
   pruneopts = "UT"
-  revision = "d37896dc0e3e3e7f41454365c23d61004750180a"
+  revision = "0de6f3b92a38f10786b90c72401d2034b240d7cd"
 
 [[projects]]
   branch = "master"
@@ -171,7 +171,7 @@
   revision = "0926d9b7c5419173936b4556411a103bdf8d5966"
 
 [[projects]]
-  branch = "kubernetes-1.15.4"
+  branch = "master"
   digest = "1:a20261f33e19d5b869342e85f9c71eb6c41cd842ab14cc7ff3f916a223ff3aaf"
   name = "github.com/giantswarm/operatorkit"
   packages = [
@@ -193,7 +193,7 @@
     "resource/wrapper/retryresource",
   ]
   pruneopts = "UT"
-  revision = "994bfd4b64084d21fdf43018cbe75a0e293cb3e3"
+  revision = "c193ea196181c42e5c54f30ba2f2d6055b3742b2"
 
 [[projects]]
   branch = "master"
@@ -330,12 +330,12 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:a0cefd27d12712af4b5018dc7046f245e1e3b5760e2e848c30b171b570708f9b"
+  digest = "1:78d28d5b84a26159c67ea51996a230da4bc07cac648adaae1dfb5fc0ec8e40d3"
   name = "github.com/imdario/mergo"
   packages = ["."]
   pruneopts = "UT"
-  revision = "7c29201646fa3de8506f701213473dd407f19646"
-  version = "v0.3.7"
+  revision = "1afb36080aec31e0d1528973ebe6721b191b0369"
+  version = "v0.3.8"
 
 [[projects]]
   digest = "1:870d441fe217b8e689d7949fef6e43efbc787e50f200cb1e70dbca9204a1d6be"
@@ -549,11 +549,11 @@
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "UT"
-  revision = "a832865fa7ada6126f4c6124ac49f71be71bff2a"
+  revision = "34f69633bfdcf9db92f698f8487115767eebef81"
 
 [[projects]]
   branch = "master"
-  digest = "1:742a1821940949dc680b0d793f11a3fe00df3bdf1422d456025dae18c9ac80d0"
+  digest = "1:179ffea44f35d21ca398fa1f318850af5a0a679bde368e9c41f53fa6582d71af"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -565,7 +565,7 @@
     "publicsuffix",
   ]
   pruneopts = "UT"
-  revision = "c5a3c61f89f3ed696ec36b629ef1b97541165225"
+  revision = "d98b1b4438230571bd7fbc5aaa89843e92937bd3"
 
 [[projects]]
   branch = "master"
@@ -588,14 +588,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:7711a885664a85941a1d9d339f7f12c742cd8f88def90e74f89805508cfca97f"
+  digest = "1:456406ce03ca17dfe57d9f3cae7eec35bc5101dce0adadf5bd636760b7d1e15c"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "c990c680b611ac1aeb7d8f2af94a825f98d69720"
+  revision = "c178f38b412c7b426e4e97be2e75d11ff7b8d4d4"
 
 [[projects]]
   digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
@@ -663,12 +663,12 @@
   version = "v1.12.0"
 
 [[projects]]
-  digest = "1:1033856ca84153217fda9f527e1c02e11b636e28ad2ab19f2ea4a06e4abbe8e1"
+  digest = "1:59f10c1537d2199d9115d946927fe31165959a95190849c82ff11e05803528b0"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
   pruneopts = "UT"
-  revision = "bb4e33bf68bf89cad44d386192cbed201f35b241"
-  version = "v2.2.3"
+  revision = "f221b8435cfb71e54062f6c6e99e9ade30b124d5"
+  version = "v2.2.4"
 
 [[projects]]
   digest = "1:d89afbf3588e87d2c9e6efdd5528d249b32d23a12fbd7ec324f3cb373c6fb76c"
