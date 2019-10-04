@@ -8,3 +8,5 @@ import:
   version: master
 - package: github.com/giantswarm/microstorage
   version: master
+- package: k8s.io/client-go/kubernetes
+  version: kubernetes-1.15.4

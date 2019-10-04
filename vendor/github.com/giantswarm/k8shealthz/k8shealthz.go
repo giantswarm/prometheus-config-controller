@@ -94,7 +94,7 @@ func (s *Service) GetHealthz(ctx context.Context) (healthz.Response, error) {
 		ch := make(chan string, 1)
 
 		go func() {
-			_, err := s.k8sClient.Core().RESTClient().Get().AbsPath("/").DoRaw()
+			_, err := s.k8sClient.CoreV1().RESTClient().Get().AbsPath("/").DoRaw()
 			if err != nil {
 				ch <- err.Error()
 				return

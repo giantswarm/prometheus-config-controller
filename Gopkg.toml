@@ -28,6 +28,10 @@
 
 [[constraint]]
   branch = "master"
+  name = "github.com/giantswarm/k8shealthz"
+
+[[constraint]]
+  branch = "master"
   name = "github.com/giantswarm/microendpoint"
 
 [[constraint]]
@@ -51,8 +55,8 @@
   version = "0.3.1"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/prometheus/client_golang"
+  version = "0.9.3"
 
 [[constraint]]
   branch = "master"
@@ -68,11 +72,15 @@
 
 [[constraint]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.13.2"
+  version = "kubernetes-1.15.4"
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.13.2"
+  version = "kubernetes-1.15.4"
+
+[[override]]
+  name = "k8s.io/api"
+  version = "kubernetes-1.15.4"
 
 
 

@@ -11,17 +11,13 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/giantswarm/prometheus-config-controller/flag"
+	"github.com/giantswarm/prometheus-config-controller/pkg/project"
 	"github.com/giantswarm/prometheus-config-controller/server"
 	"github.com/giantswarm/prometheus-config-controller/service"
 )
 
 var (
 	f *flag.Flag = flag.New()
-
-	description string = "The prometheus-config-controller provides Prometheus service discovery for Kubernetes clusters on Kubernetes."
-	gitCommit   string = "n/a"
-	name        string = "prometheus-config-controller"
-	source      string = "https://github.com/giantswarm/prometheus-config-controller"
 )
 
 func panicOnErr(err error) {
@@ -57,14 +53,15 @@ func mainError() error {
 		var newService *service.Service
 		{
 			c := service.Config{
+				Flag:   f,
 				Logger: newLogger,
+				Viper:  v,
 
-				Description: description,
-				Flag:        f,
-				GitCommit:   gitCommit,
-				Name:        name,
-				Source:      source,
-				Viper:       v,
+				Description: project.Description(),
+				GitCommit:   project.GitSHA(),
+				ProjectName: project.Name(),
+				Source:      project.Source(),
+				Version:     project.Version(),
 			}
 
 			newService, err = service.New(c)
@@ -82,7 +79,7 @@ func mainError() error {
 				Service: newService,
 				Viper:   v,
 
-				ProjectName: name,
+				ProjectName: project.Name(),
 			}
 
 			newServer, err = server.New(c)
@@ -101,10 +98,11 @@ func mainError() error {
 			Logger:        newLogger,
 			ServerFactory: newServerFactory,
 
-			Description:    description,
-			GitCommit:      gitCommit,
-			Name:           name,
-			Source:         source,
+			Description:    project.Description(),
+			GitCommit:      project.GitSHA(),
+			Name:           project.Name(),
+			Source:         project.Source(),
+			Version:        project.Version(),
 			VersionBundles: service.NewVersionBundles(),
 		}
 

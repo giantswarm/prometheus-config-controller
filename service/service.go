@@ -23,14 +23,15 @@ import (
 )
 
 type Config struct {
+	Flag   *flag.Flag
 	Logger micrologger.Logger
+	Viper  *viper.Viper
 
 	Description string
-	Flag        *flag.Flag
 	GitCommit   string
-	Name        string
+	ProjectName string
 	Source      string
-	Viper       *viper.Viper
+	Version     string
 }
 
 type Service struct {
@@ -107,7 +108,7 @@ func New(config Config) (*Service, error) {
 			CertNamespace:      config.Viper.GetString(config.Flag.Service.Resource.Certificate.Namespace),
 			CertPermission:     config.Viper.GetInt(config.Flag.Service.Resource.Certificate.Permission),
 			MinReloadTime:      config.Viper.GetDuration(config.Flag.Service.Resource.ConfigMap.MinimumReloadTime),
-			ProjectName:        config.Name,
+			ProjectName:        config.ProjectName,
 			PrometheusAddress:  config.Viper.GetString(config.Flag.Service.Prometheus.Address),
 			ResyncPeriod:       config.Viper.GetDuration(config.Flag.Service.Controller.ResyncPeriod),
 		}
@@ -123,8 +124,9 @@ func New(config Config) (*Service, error) {
 		c := version.Config{
 			Description:    config.Description,
 			GitCommit:      config.GitCommit,
-			Name:           config.Name,
+			Name:           config.ProjectName,
 			Source:         config.Source,
+			Version:        config.Version,
 			VersionBundles: NewVersionBundles(),
 		}
 
