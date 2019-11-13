@@ -37,6 +37,8 @@ const (
 	NodeExporterJobType = "node-exporter"
 	// WorkloadJobType is the job type for scraping general workloads.
 	WorkloadJobType = "workload"
+	//
+	ManagedAppJobType = "managed-app"
 
 	// ActionKeep is action type that keeps only matching metrics.
 	ActionKeep = "keep"
@@ -134,6 +136,20 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					},
 				},
 				Role:      config.KubernetesRolePod,
+				TLSConfig: secureTLSConfig,
+			},
+		},
+	}
+	serviceSDConfig := config.ServiceDiscoveryConfig{
+		KubernetesSDConfigs: []*config.KubernetesSDConfig{
+			{
+				APIServer: config.URL{
+					URL: &url.URL{
+						Scheme: HttpsScheme,
+						Host:   getTargetHost(service),
+					},
+				},
+				Role:      config.KubernetesRoleService,
 				TLSConfig: secureTLSConfig,
 			},
 		},
@@ -516,6 +532,48 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					SourceLabels: model.LabelNames{MetricNameLabel},
 					Regex:        MetricDropICRegexp,
 				},
+			},
+		},
+
+		{
+			JobName:                getJobName(service, ManagedAppJobType),
+			HTTPClientConfig:       secureHTTPClientConfig,
+			Scheme:                 HttpsScheme,
+			ServiceDiscoveryConfig: serviceSDConfig,
+			RelabelConfigs: []*config.RelabelConfig{
+				// Only keep monitoring label presents
+				{
+					SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringPresentLabel},
+					Regex:        config.MustNewRegexp(`(true)`),
+					Action:       config.RelabelKeep,
+				},
+				// Only keep monitoring label as true
+				{
+					SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringLabel},
+					Regex:        config.MustNewRegexp(`(true)`),
+					Action:       config.RelabelKeep,
+				},
+				// Add app label.
+				{
+					TargetLabel:  AppLabel,
+					SourceLabels: model.LabelNames{KubernetesSDServiceNameLabel},
+				},
+				// Add namespace label.
+				{
+					TargetLabel:  NamespaceLabel,
+					SourceLabels: model.LabelNames{KubernetesSDNamespaceLabel},
+				},
+				// Add pod_name label.
+				{
+					TargetLabel:  PodNameLabel,
+					SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
+				},
+				// Add cluster_id label.
+				clusterIDLabelRelabelConfig,
+				// Add cluster_type label.
+				clusterTypeLabelRelabelConfig,
+				// rewrite host to api proxy
+				rewriteAddress,
 			},
 		},
 	}

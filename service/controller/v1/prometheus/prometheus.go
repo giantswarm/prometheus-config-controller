@@ -37,6 +37,14 @@ var (
 	// KubernetesSDServiceNameLabel is the label applied to the target
 	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes service.
 	KubernetesSDServiceNameLabel = model.LabelName("__meta_kubernetes_service_name")
+
+	// KubernetesSDServiceGiantSwarmMonitoringPresentLabel is the label applied to the target
+	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes service presenting the label giantswarm_io_monitoring.
+	KubernetesSDServiceGiantSwarmMonitoringPresentLabel = model.LabelName("__meta_kubernetes_service_labelpresent_giantswarm_io_monitoring")
+
+	// KubernetesSDServiceGiantSwarmMonitoringLabel is the label applied to the target
+	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes service presenting the label giantswarm_io_monitoring as true.
+	KubernetesSDServiceGiantSwarmMonitoringLabel = model.LabelName("__meta_kubernetes_service_label_giantswarm_io_monitoring")
 )
 
 // Prometheus Kubernetes metrics labels.
