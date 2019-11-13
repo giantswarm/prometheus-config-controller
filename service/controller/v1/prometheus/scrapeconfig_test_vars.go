@@ -519,6 +519,73 @@ var (
 			},
 		},
 	}
+	TestConfigOneManagedApp = config.ScrapeConfig{
+		JobName: "guest-cluster-xa5ly-managed-app",
+		HTTPClientConfig: config.HTTPClientConfig{
+			TLSConfig: config.TLSConfig{
+				CAFile:             "/certs/xa5ly-ca.pem",
+				CertFile:           "/certs/xa5ly-crt.pem",
+				KeyFile:            "/certs/xa5ly-key.pem",
+				InsecureSkipVerify: false,
+			},
+		},
+		Scheme: "https",
+		ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
+			KubernetesSDConfigs: []*config.KubernetesSDConfig{
+				{
+					APIServer: config.URL{
+						URL: &url.URL{
+							Scheme: "https",
+							Host:   "apiserver.xa5ly",
+						},
+					},
+					Role: config.KubernetesRoleService,
+					TLSConfig: config.TLSConfig{
+						CAFile:             "/certs/xa5ly-ca.pem",
+						CertFile:           "/certs/xa5ly-crt.pem",
+						KeyFile:            "/certs/xa5ly-key.pem",
+						InsecureSkipVerify: false,
+					},
+				},
+			},
+		},
+		RelabelConfigs: []*config.RelabelConfig{
+			{
+				SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringPresentLabel},
+				Regex:        config.MustNewRegexp(`(true)`),
+				Action:       config.RelabelKeep,
+			},
+			{
+				SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringLabel},
+				Regex:        config.MustNewRegexp(`(true)`),
+				Action:       config.RelabelKeep,
+			},
+			{
+				TargetLabel:  AppLabel,
+				SourceLabels: model.LabelNames{KubernetesSDServiceNameLabel},
+			},
+			{
+				TargetLabel:  NamespaceLabel,
+				SourceLabels: model.LabelNames{KubernetesSDNamespaceLabel},
+			},
+			{
+				TargetLabel:  PodNameLabel,
+				SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
+			},
+			{
+				TargetLabel: ClusterIDLabel,
+				Replacement: "xa5ly",
+			},
+			{
+				TargetLabel: ClusterTypeLabel,
+				Replacement: GuestClusterType,
+			},
+			{
+				TargetLabel: AddressLabel,
+				Replacement: key.APIServiceHost(key.PrefixMaster, "xa5ly"),
+			},
+		},
+	}
 )
 
 var (
@@ -528,6 +595,7 @@ var (
 	TestConfigTwoKubelet      config.ScrapeConfig
 	TestConfigTwoNodeExporter config.ScrapeConfig
 	TestConfigTwoWorkload     config.ScrapeConfig
+	TestConfigTwoManagedApp   config.ScrapeConfig
 )
 
 func init() {
@@ -539,6 +607,7 @@ func init() {
 	TestConfigTwoKubelet = TestConfigOneKubelet
 	TestConfigTwoNodeExporter = TestConfigOneNodeExporter
 	TestConfigTwoWorkload = TestConfigOneWorkload
+	TestConfigTwoManagedApp = TestConfigOneManagedApp
 
 	apiServer := config.URL{URL: &url.URL{
 		Scheme: "https",
@@ -672,6 +741,26 @@ func init() {
 			newRelabelConfig := *r
 			newRelabelConfig.Replacement = strings.ReplaceAll(r.Replacement, "xa5ly", clusterID)
 			TestConfigTwoWorkload.RelabelConfigs = append(TestConfigTwoWorkload.RelabelConfigs, &newRelabelConfig)
+		}
+
+		{
+			TestConfigTwoManagedApp.JobName = "guest-cluster-0ba9v-managed-app"
+			TestConfigTwoManagedApp.HTTPClientConfig.TLSConfig = tlsConfig
+			TestConfigTwoManagedApp.ServiceDiscoveryConfig.KubernetesSDConfigs = []*config.KubernetesSDConfig{
+				{
+					APIServer: apiServer,
+					Role:      config.KubernetesRoleService,
+					TLSConfig: tlsConfig,
+				},
+			}
+
+			// Deepcopy relabel configs and change clusterID to match second test config.
+			TestConfigTwoManagedApp.RelabelConfigs = nil
+			for _, r := range TestConfigOneManagedApp.RelabelConfigs {
+				newRelabelConfig := *r
+				newRelabelConfig.Replacement = strings.ReplaceAll(r.Replacement, "xa5ly", clusterID)
+				TestConfigTwoManagedApp.RelabelConfigs = append(TestConfigTwoManagedApp.RelabelConfigs, &newRelabelConfig)
+			}
 		}
 	}
 }
