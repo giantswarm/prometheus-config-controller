@@ -577,6 +577,7 @@ var (
 					model.LabelName(prometheus.ClusterIDLabel),
 					model.LabelName(prometheus.NamespaceLabel),
 					model.LabelName(prometheus.PodNameLabel),
+					prometheus.PodSDPodContainerPortNumberLabel,
 				},
 				TargetLabel: prometheus.AddressLabel,
 				Replacement: key.ManagedAppPodMetricsPath(),
