@@ -229,6 +229,8 @@ var (
 	// RelabelNamespaceRegexp is the regular expression to match against metrics with empty exported_namespace and namespace kube-system.
 	RelabelNamespaceRegexp = config.MustNewRegexp(`;(kube-system|giantswarm.*|vault-exporter)`)
 
+	ManagedAppSourceRegexp = config.MustNewRegexp(`(.*);(.*);(.*);(.*)`)
+
 	// NodeExporterRegexp is the regular expression to match against the
 	// node-exporter name.
 	NodeExporterRegexp = config.MustNewRegexp(`kube-system;node-exporter`)

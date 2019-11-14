@@ -184,6 +184,7 @@
   - target_label: cluster_type
     replacement: guest
   - source_labels: [cluster_id, namespace, pod_name, __meta_kubernetes_pod_container_port_number]
+    regex: (.*);(.*);(.*);(.*)
     target_label: __address__
     replacement: https://master.${1}:443/api/v1/namespaces/${2}/pods/${3}:${4}/proxy/metrics
 - job_name: guest-cluster-xa5ly-node-exporter

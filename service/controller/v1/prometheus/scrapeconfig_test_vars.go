@@ -582,6 +582,7 @@ var (
 			},
 			{
 				SourceLabels: model.LabelNames{model.LabelName(ClusterIDLabel), model.LabelName(NamespaceLabel), model.LabelName(PodNameLabel), PodSDPodContainerPortNumberLabel},
+				Regex:        ManagedAppSourceRegexp,
 				TargetLabel:  AddressLabel,
 				Replacement:  key.ManagedAppPodMetricsPath(),
 			},

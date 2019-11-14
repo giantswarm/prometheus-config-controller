@@ -579,6 +579,7 @@ var (
 					model.LabelName(prometheus.PodNameLabel),
 					prometheus.PodSDPodContainerPortNumberLabel,
 				},
+				Regex:       prometheus.ManagedAppSourceRegexp,
 				TargetLabel: prometheus.AddressLabel,
 				Replacement: key.ManagedAppPodMetricsPath(),
 			},
