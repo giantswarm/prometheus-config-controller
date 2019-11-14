@@ -539,7 +539,7 @@ var (
 							Host:   "apiserver.xa5ly",
 						},
 					},
-					Role: config.KubernetesRoleService,
+					Role: config.KubernetesRoleEndpoint,
 					TLSConfig: config.TLSConfig{
 						CAFile:             "/certs/xa5ly-ca.pem",
 						CertFile:           "/certs/xa5ly-crt.pem",
@@ -581,8 +581,9 @@ var (
 				Replacement: GuestClusterType,
 			},
 			{
-				TargetLabel: AddressLabel,
-				Replacement: key.APIServiceHost(key.PrefixMaster, "xa5ly"),
+				SourceLabels: model.LabelNames{model.LabelName(ClusterIDLabel), model.LabelName(NamespaceLabel), model.LabelName(PodNameLabel), PodSDPodContainerPortNumberLabel},
+				TargetLabel:  AddressLabel,
+				Replacement:  key.ManagedAppPodMetricsPath(),
 			},
 		},
 	}
@@ -749,7 +750,7 @@ func init() {
 			TestConfigTwoManagedApp.ServiceDiscoveryConfig.KubernetesSDConfigs = []*config.KubernetesSDConfig{
 				{
 					APIServer: apiServer,
-					Role:      config.KubernetesRoleService,
+					Role:      config.KubernetesRoleEndpoint,
 					TLSConfig: tlsConfig,
 				},
 			}

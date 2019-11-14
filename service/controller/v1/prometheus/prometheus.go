@@ -73,6 +73,10 @@ var (
 	// service discovery that holds the target's Kubernetes POD name.
 	PodSDPodNameLabel = model.LabelName("__meta_kubernetes_pod_name")
 
+	// PodSDPodContainerPortNumberLabel is the label applied to the target by Prometheus POD
+	// service discovery that holds the target's Kubernetes POD container port number.
+	PodSDPodContainerPortNumberLabel = model.LabelName("__meta_kubernetes_pod_container_port_number")
+
 	// PodSDNamespaceLabel is the label applied to the target by Prometheus POD
 	// service discovery that holds the target's Kubernetes namespace.
 	PodSDNamespaceLabel = model.LabelName("__meta_kubernetes_namespace")

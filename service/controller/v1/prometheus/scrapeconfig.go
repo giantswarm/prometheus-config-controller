@@ -140,20 +140,6 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 			},
 		},
 	}
-	serviceSDConfig := config.ServiceDiscoveryConfig{
-		KubernetesSDConfigs: []*config.KubernetesSDConfig{
-			{
-				APIServer: config.URL{
-					URL: &url.URL{
-						Scheme: HttpsScheme,
-						Host:   getTargetHost(service),
-					},
-				},
-				Role:      config.KubernetesRoleService,
-				TLSConfig: secureTLSConfig,
-			},
-		},
-	}
 
 	clusterIDLabelRelabelConfig := &config.RelabelConfig{
 		TargetLabel: ClusterIDLabel,
@@ -171,6 +157,11 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 	rewriteAddress := &config.RelabelConfig{
 		TargetLabel: AddressLabel,
 		Replacement: key.APIServiceHost(key.PrefixMaster, clusterID),
+	}
+	rewriteManagedAppMetricPod := &config.RelabelConfig{
+		SourceLabels: model.LabelNames{model.LabelName(ClusterIDLabel), model.LabelName(NamespaceLabel), model.LabelName(PodNameLabel), PodSDPodContainerPortNumberLabel},
+		TargetLabel:  AddressLabel,
+		Replacement:  key.ManagedAppPodMetricsPath(),
 	}
 	rewriteKubeStateMetricPath := &config.RelabelConfig{
 		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
@@ -539,7 +530,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 			JobName:                getJobName(service, ManagedAppJobType),
 			HTTPClientConfig:       secureHTTPClientConfig,
 			Scheme:                 HttpsScheme,
-			ServiceDiscoveryConfig: serviceSDConfig,
+			ServiceDiscoveryConfig: endpointSDConfig,
 			RelabelConfigs: []*config.RelabelConfig{
 				// Only keep monitoring label presents
 				{
@@ -573,7 +564,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				// Add cluster_type label.
 				clusterTypeLabelRelabelConfig,
 				// rewrite host to api proxy
-				rewriteAddress,
+				rewriteManagedAppMetricPod,
 			},
 		},
 	}

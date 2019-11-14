@@ -531,7 +531,7 @@ var (
 							Host:   "apiserver.xa5ly",
 						},
 					},
-					Role: config.KubernetesRoleService,
+					Role: config.KubernetesRoleEndpoint,
 					TLSConfig: config.TLSConfig{
 						CAFile:             "/certs/xa5ly-ca.pem",
 						CertFile:           "/certs/xa5ly-crt.pem",
@@ -573,8 +573,14 @@ var (
 				Replacement: prometheus.GuestClusterType,
 			},
 			{
+				SourceLabels: model.LabelNames{
+					model.LabelName(prometheus.ClusterIDLabel),
+					model.LabelName(prometheus.NamespaceLabel),
+					model.LabelName(prometheus.PodNameLabel),
+					prometheus.PodSDPodContainerPortNumberLabel,
+				},
 				TargetLabel: prometheus.AddressLabel,
-				Replacement: key.APIServiceHost(key.PrefixMaster, "xa5ly"),
+				Replacement: key.ManagedAppPodMetricsPath(),
 			},
 		},
 	}
@@ -762,7 +768,7 @@ func init() {
 		TestConfigTwoManagedApp.ServiceDiscoveryConfig.KubernetesSDConfigs = []*config.KubernetesSDConfig{
 			{
 				APIServer: apiServer,
-				Role:      config.KubernetesRoleService,
+				Role:      config.KubernetesRoleEndpoint,
 				TLSConfig: tlsConfig,
 			},
 		}
