@@ -581,7 +581,7 @@ var (
 				Replacement: GuestClusterType,
 			},
 			{
-				SourceLabels: model.LabelNames{model.LabelName(ClusterIDLabel), model.LabelName(NamespaceLabel), model.LabelName(PodNameLabel), PodSDPodContainerPortNumberLabel},
+				SourceLabels: model.LabelNames{model.LabelName(ClusterIDLabel), model.LabelName(NamespaceLabel), model.LabelName(PodNameLabel)},
 				TargetLabel:  AddressLabel,
 				Replacement:  key.ManagedAppPodMetricsPath(),
 			},
