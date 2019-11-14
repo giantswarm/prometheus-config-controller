@@ -561,6 +561,11 @@ var (
 				Action:       config.RelabelKeep,
 			},
 			{
+				SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringPortPresentLabel},
+				Regex:        config.MustNewRegexp(`(true)`),
+				Action:       config.RelabelKeep,
+			},
+			{
 				TargetLabel:  AppLabel,
 				SourceLabels: model.LabelNames{KubernetesSDServiceNameLabel},
 			},

@@ -173,6 +173,9 @@
   - source_labels: [__meta_kubernetes_service_label_giantswarm_io_monitoring]
     regex: (true)
     action: keep
+  - source_labels: [__meta_kubernetes_service_labelpresent_giantswarm_io_monitoring_port]
+    regex: (true)
+    action: keep
   - source_labels: [__meta_kubernetes_service_name]
     target_label: app
   - source_labels: [__meta_kubernetes_namespace]

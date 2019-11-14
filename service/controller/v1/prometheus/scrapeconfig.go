@@ -37,7 +37,7 @@ const (
 	NodeExporterJobType = "node-exporter"
 	// WorkloadJobType is the job type for scraping general workloads.
 	WorkloadJobType = "workload"
-	//
+	// ManagedAppJobType is the job type for scraping managed app metrics.
 	ManagedAppJobType = "managed-app"
 
 	// ActionKeep is action type that keeps only matching metrics.
@@ -542,6 +542,12 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				// Only keep monitoring label as true
 				{
 					SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringLabel},
+					Regex:        config.MustNewRegexp(`(true)`),
+					Action:       config.RelabelKeep,
+				},
+				// Only keep monitoring port presents
+				{
+					SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringPortPresentLabel},
 					Regex:        config.MustNewRegexp(`(true)`),
 					Action:       config.RelabelKeep,
 				},
