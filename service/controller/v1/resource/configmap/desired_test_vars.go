@@ -577,7 +577,7 @@ var (
 					model.LabelName(prometheus.ClusterIDLabel),
 					model.LabelName(prometheus.NamespaceLabel),
 					model.LabelName(prometheus.PodNameLabel),
-					prometheus.PodSDPodContainerPortNumberLabel,
+					prometheus.KubernetesSDServiceGiantSwarmMonitoringPortLabel,
 				},
 				Regex:       prometheus.ManagedAppSourceRegexp,
 				TargetLabel: prometheus.AddressLabel,
