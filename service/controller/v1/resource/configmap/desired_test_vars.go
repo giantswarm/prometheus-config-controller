@@ -573,14 +573,18 @@ var (
 				Replacement: prometheus.GuestClusterType,
 			},
 			{
+				TargetLabel: prometheus.AddressLabel,
+				Replacement: key.APIServiceHost(key.PrefixMaster, "xa5ly"),
+			},
+			{
 				SourceLabels: model.LabelNames{
 					model.LabelName(prometheus.NamespaceLabel),
 					model.LabelName(prometheus.PodNameLabel),
 					prometheus.KubernetesSDServiceGiantSwarmMonitoringPortLabel,
 				},
 				Regex:       prometheus.ManagedAppSourceRegexp,
-				TargetLabel: prometheus.AddressLabel,
-				Replacement: key.ManagedAppPodMetricsPath("xa5ly"),
+				TargetLabel: prometheus.MetricPathLabel,
+				Replacement: key.ManagedAppPodMetricsPath(),
 			},
 		},
 	}

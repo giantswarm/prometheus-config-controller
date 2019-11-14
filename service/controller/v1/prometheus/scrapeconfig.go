@@ -158,11 +158,11 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 		TargetLabel: AddressLabel,
 		Replacement: key.APIServiceHost(key.PrefixMaster, clusterID),
 	}
-	rewriteManagedAppMetricAddress := &config.RelabelConfig{
+	rewriteManagedAppMetricPath := &config.RelabelConfig{
 		SourceLabels: model.LabelNames{model.LabelName(NamespaceLabel), model.LabelName(PodNameLabel), KubernetesSDServiceGiantSwarmMonitoringPortLabel},
 		Regex:        ManagedAppSourceRegexp,
-		TargetLabel:  AddressLabel,
-		Replacement:  key.ManagedAppPodMetricsPath(clusterID),
+		TargetLabel:  MetricPathLabel,
+		Replacement:  key.ManagedAppPodMetricsPath(),
 	}
 	rewriteKubeStateMetricPath := &config.RelabelConfig{
 		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
@@ -565,7 +565,9 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				// Add cluster_type label.
 				clusterTypeLabelRelabelConfig,
 				// rewrite host to api proxy
-				rewriteManagedAppMetricAddress,
+				rewriteAddress,
+				// Relabel metrics path to specific managed app proxy.
+				rewriteManagedAppMetricPath,
 			},
 		},
 	}

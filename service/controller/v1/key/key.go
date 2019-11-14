@@ -63,8 +63,8 @@ func APIServiceHost(prefix string, clusterID string) string {
 	return fmt.Sprintf("%s.%s:443", prefix, clusterID)
 }
 
-func ManagedAppPodMetricsPath(clusterID string) string {
-	return fmt.Sprintf("master.%s/api/v1/namespaces/${1}/pods/${2}:${3}/proxy/metrics:443", clusterID)
+func ManagedAppPodMetricsPath() string {
+	return fmt.Sprintf("/api/v1/namespaces/${1}/pods/${2}:${3}/proxy/metrics")
 }
 
 // PrometheusURLConfig returns the Prometheus API URL that returns the current
