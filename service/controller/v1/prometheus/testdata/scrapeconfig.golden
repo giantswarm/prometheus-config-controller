@@ -183,10 +183,10 @@
     replacement: xa5ly
   - target_label: cluster_type
     replacement: guest
-  - source_labels: [cluster_id, namespace, pod_name, __meta_kubernetes_service_label_giantswarm_io_monitoring_port]
-    regex: (.*);(.*);(.*);(.*)
+  - source_labels: [namespace, pod_name, __meta_kubernetes_service_label_giantswarm_io_monitoring_port]
+    regex: (.*);(.*);(.*)
     target_label: __address__
-    replacement: https://master.${1}:443/api/v1/namespaces/${2}/pods/${3}:${4}/proxy/metrics
+    replacement: master.xa5ly/api/v1/namespaces/${1}/pods/${2}:${3}/proxy/metrics:443
 - job_name: guest-cluster-xa5ly-node-exporter
   scheme: http
   kubernetes_sd_configs:

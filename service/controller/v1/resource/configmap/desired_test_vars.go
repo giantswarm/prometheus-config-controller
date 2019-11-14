@@ -574,14 +574,13 @@ var (
 			},
 			{
 				SourceLabels: model.LabelNames{
-					model.LabelName(prometheus.ClusterIDLabel),
 					model.LabelName(prometheus.NamespaceLabel),
 					model.LabelName(prometheus.PodNameLabel),
 					prometheus.KubernetesSDServiceGiantSwarmMonitoringPortLabel,
 				},
 				Regex:       prometheus.ManagedAppSourceRegexp,
 				TargetLabel: prometheus.AddressLabel,
-				Replacement: key.ManagedAppPodMetricsPath(),
+				Replacement: key.ManagedAppPodMetricsPath("xa5ly"),
 			},
 		},
 	}

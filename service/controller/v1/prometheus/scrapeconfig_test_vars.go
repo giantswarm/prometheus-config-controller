@@ -581,10 +581,10 @@ var (
 				Replacement: GuestClusterType,
 			},
 			{
-				SourceLabels: model.LabelNames{model.LabelName(ClusterIDLabel), model.LabelName(NamespaceLabel), model.LabelName(PodNameLabel), KubernetesSDServiceGiantSwarmMonitoringPortLabel},
+				SourceLabels: model.LabelNames{model.LabelName(NamespaceLabel), model.LabelName(PodNameLabel), KubernetesSDServiceGiantSwarmMonitoringPortLabel},
 				Regex:        ManagedAppSourceRegexp,
 				TargetLabel:  AddressLabel,
-				Replacement:  key.ManagedAppPodMetricsPath(),
+				Replacement:  key.ManagedAppPodMetricsPath("xa5ly"),
 			},
 		},
 	}

@@ -159,7 +159,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 		Replacement: key.APIServiceHost(key.PrefixMaster, clusterID),
 	}
 	rewriteManagedAppMetricAddress := &config.RelabelConfig{
-		SourceLabels: model.LabelNames{model.LabelName(ClusterIDLabel), model.LabelName(NamespaceLabel), model.LabelName(PodNameLabel), KubernetesSDServiceGiantSwarmMonitoringPortLabel},
+		SourceLabels: model.LabelNames{model.LabelName(NamespaceLabel), model.LabelName(PodNameLabel), KubernetesSDServiceGiantSwarmMonitoringPortLabel},
 		Regex:        ManagedAppSourceRegexp,
 		TargetLabel:  AddressLabel,
 		Replacement:  key.ManagedAppPodMetricsPath(clusterID),
