@@ -33,12 +33,12 @@ const (
 	EtcdJobType = "etcd"
 	// KubeletJobType is the job type for scraping kubelets.
 	KubeletJobType = "kubelet"
+	// ManagedAppJobType is the job type for scraping managed app metrics.
+	ManagedAppJobType = "managed-app"
 	// NodeExporterJobType is the job type for scraping node-exporters
 	NodeExporterJobType = "node-exporter"
 	// WorkloadJobType is the job type for scraping general workloads.
 	WorkloadJobType = "workload"
-	// ManagedAppJobType is the job type for scraping managed app metrics.
-	ManagedAppJobType = "managed-app"
 
 	// ActionKeep is action type that keeps only matching metrics.
 	ActionKeep = "keep"
