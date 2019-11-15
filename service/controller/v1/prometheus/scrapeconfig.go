@@ -545,13 +545,13 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					Regex:        config.MustNewRegexp(`(true)`),
 					Action:       config.RelabelKeep,
 				},
-				// Only keep when monitoring port presents
+				// Only keep when monitoring port presents in annotation.
 				{
 					SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringPortPresentLabel},
 					Regex:        config.MustNewRegexp(`(true)`),
 					Action:       config.RelabelKeep,
 				},
-				// Only keep when monitoring path presents
+				// Only keep when monitoring path presents in annotation.
 				{
 					SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringPathPresentLabel},
 					Regex:        config.MustNewRegexp(`(true)`),

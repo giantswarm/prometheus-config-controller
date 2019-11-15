@@ -167,16 +167,16 @@
     key_file: /certs/xa5ly-key.pem
     insecure_skip_verify: false
   relabel_configs:
-  - source_labels: [__meta_kubernetes_service_labelpresent_giantswarm_io_monitoring]
+  - source_labels: [__meta_kubernetes_service_annotationpresent_giantswarm_io_monitoring]
     regex: (true)
     action: keep
-  - source_labels: [__meta_kubernetes_service_label_giantswarm_io_monitoring]
+  - source_labels: [__meta_kubernetes_service_annotation_giantswarm_io_monitoring]
     regex: (true)
     action: keep
-  - source_labels: [__meta_kubernetes_service_labelpresent_giantswarm_io_monitoring_port]
+  - source_labels: [__meta_kubernetes_service_annotationpresent_giantswarm_io_monitoring_port]
     regex: (true)
     action: keep
-  - source_labels: [__meta_kubernetes_service_labelpresent_giantswarm_io_monitoring_path]
+  - source_labels: [__meta_kubernetes_service_annotationpresent_giantswarm_io_monitoring_path]
     regex: (true)
     action: keep
   - source_labels: [__meta_kubernetes_service_name]
@@ -191,8 +191,8 @@
     replacement: guest
   - target_label: __address__
     replacement: master.xa5ly:443
-  - source_labels: [namespace, pod_name, __meta_kubernetes_service_label_giantswarm_io_monitoring_port,
-      __meta_kubernetes_service_label_giantswarm_io_monitoring_path]
+  - source_labels: [namespace, pod_name, __meta_kubernetes_service_annotation_giantswarm_io_monitoring_port,
+      __meta_kubernetes_service_annotation_giantswarm_io_monitoring_path]
     regex: (.*);(.*);(.*);(.*)
     target_label: __metrics_path__
     replacement: /api/v1/namespaces/${1}/pods/${2}:${3}/proxy/${4}
