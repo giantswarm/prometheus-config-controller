@@ -159,7 +159,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 		Replacement: key.APIServiceHost(key.PrefixMaster, clusterID),
 	}
 	rewriteManagedAppMetricPath := &config.RelabelConfig{
-		SourceLabels: model.LabelNames{model.LabelName(NamespaceLabel), model.LabelName(PodNameLabel), KubernetesSDServiceGiantSwarmMonitoringPortLabel},
+		SourceLabels: model.LabelNames{model.LabelName(NamespaceLabel), model.LabelName(PodNameLabel), KubernetesSDServiceGiantSwarmMonitoringPortLabel, KubernetesSDServiceGiantSwarmMonitoringPathLabel},
 		Regex:        ManagedAppSourceRegexp,
 		TargetLabel:  MetricPathLabel,
 		Replacement:  key.ManagedAppPodMetricsPath(),
@@ -545,9 +545,15 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					Regex:        config.MustNewRegexp(`(true)`),
 					Action:       config.RelabelKeep,
 				},
-				// Only keep monitoring port presents
+				// Only keep when monitoring port presents
 				{
 					SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringPortPresentLabel},
+					Regex:        config.MustNewRegexp(`(true)`),
+					Action:       config.RelabelKeep,
+				},
+				// Only keep when monitoring path presents
+				{
+					SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringPathPresentLabel},
 					Regex:        config.MustNewRegexp(`(true)`),
 					Action:       config.RelabelKeep,
 				},

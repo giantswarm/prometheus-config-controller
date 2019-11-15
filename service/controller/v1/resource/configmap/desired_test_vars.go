@@ -558,6 +558,11 @@ var (
 				Action:       config.RelabelKeep,
 			},
 			{
+				SourceLabels: model.LabelNames{prometheus.KubernetesSDServiceGiantSwarmMonitoringPathPresentLabel},
+				Regex:        config.MustNewRegexp(`(true)`),
+				Action:       config.RelabelKeep,
+			},
+			{
 				TargetLabel:  prometheus.AppLabel,
 				SourceLabels: model.LabelNames{prometheus.KubernetesSDServiceNameLabel},
 			},
@@ -586,6 +591,7 @@ var (
 					model.LabelName(prometheus.NamespaceLabel),
 					model.LabelName(prometheus.PodNameLabel),
 					prometheus.KubernetesSDServiceGiantSwarmMonitoringPortLabel,
+					prometheus.KubernetesSDServiceGiantSwarmMonitoringPathLabel,
 				},
 				Regex:       prometheus.ManagedAppSourceRegexp,
 				TargetLabel: prometheus.MetricPathLabel,

@@ -64,7 +64,7 @@ func APIServiceHost(prefix string, clusterID string) string {
 }
 
 func ManagedAppPodMetricsPath() string {
-	return "/api/v1/namespaces/${1}/pods/${2}:${3}/proxy/metrics"
+	return "/api/v1/namespaces/${1}/pods/${2}:${3}/proxy/${4}"
 }
 
 // PrometheusURLConfig returns the Prometheus API URL that returns the current

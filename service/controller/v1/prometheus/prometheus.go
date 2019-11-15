@@ -46,6 +46,14 @@ var (
 	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes service presenting the label giantswarm_io_monitoring as true.
 	KubernetesSDServiceGiantSwarmMonitoringLabel = model.LabelName("__meta_kubernetes_service_label_giantswarm_io_monitoring")
 
+	// KubernetesSDServiceGiantSwarmMonitoringPathLabel is the label applied to the target
+	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes service path.
+	KubernetesSDServiceGiantSwarmMonitoringPathLabel = model.LabelName("__meta_kubernetes_service_label_giantswarm_io_monitoring_path")
+
+	// KubernetesSDServiceGiantSwarmMonitoringPathPresentLabel is the label applied to the target
+	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes service presenting the label giantswarm_io_monitoring_path.
+	KubernetesSDServiceGiantSwarmMonitoringPathPresentLabel = model.LabelName("__meta_kubernetes_service_labelpresent_giantswarm_io_monitoring_path")
+
 	// KubernetesSDServiceGiantSwarmMonitoringPortLabel is the label applied to the target
 	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes service port number.
 	KubernetesSDServiceGiantSwarmMonitoringPortLabel = model.LabelName("__meta_kubernetes_service_label_giantswarm_io_monitoring_port")
@@ -233,7 +241,7 @@ var (
 	// RelabelNamespaceRegexp is the regular expression to match against metrics with empty exported_namespace and namespace kube-system.
 	RelabelNamespaceRegexp = config.MustNewRegexp(`;(kube-system|giantswarm.*|vault-exporter)`)
 
-	ManagedAppSourceRegexp = config.MustNewRegexp(`(.*);(.*);(.*)`)
+	ManagedAppSourceRegexp = config.MustNewRegexp(`(.*);(.*);(.*);(.*)`)
 
 	// NodeExporterRegexp is the regular expression to match against the
 	// node-exporter name.

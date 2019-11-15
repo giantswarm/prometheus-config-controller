@@ -566,6 +566,11 @@ var (
 				Action:       config.RelabelKeep,
 			},
 			{
+				SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringPathPresentLabel},
+				Regex:        config.MustNewRegexp(`(true)`),
+				Action:       config.RelabelKeep,
+			},
+			{
 				TargetLabel:  AppLabel,
 				SourceLabels: model.LabelNames{KubernetesSDServiceNameLabel},
 			},
@@ -590,10 +595,14 @@ var (
 				Replacement: key.APIServiceHost(key.PrefixMaster, "xa5ly"),
 			},
 			{
-				SourceLabels: model.LabelNames{model.LabelName(NamespaceLabel), model.LabelName(PodNameLabel), KubernetesSDServiceGiantSwarmMonitoringPortLabel},
-				Regex:        ManagedAppSourceRegexp,
-				TargetLabel:  MetricPathLabel,
-				Replacement:  key.ManagedAppPodMetricsPath(),
+				SourceLabels: model.LabelNames{
+					model.LabelName(NamespaceLabel),
+					model.LabelName(PodNameLabel),
+					KubernetesSDServiceGiantSwarmMonitoringPortLabel,
+					KubernetesSDServiceGiantSwarmMonitoringPathLabel},
+				Regex:       ManagedAppSourceRegexp,
+				TargetLabel: MetricPathLabel,
+				Replacement: key.ManagedAppPodMetricsPath(),
 			},
 		},
 	}
