@@ -37,6 +37,30 @@ var (
 	// KubernetesSDServiceNameLabel is the label applied to the target
 	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes service.
 	KubernetesSDServiceNameLabel = model.LabelName("__meta_kubernetes_service_name")
+
+	// KubernetesSDServiceGiantSwarmMonitoringPresentLabel is the label applied to the target
+	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes service presenting the annotation giantswarm_io_monitoring.
+	KubernetesSDServiceGiantSwarmMonitoringPresentLabel = model.LabelName("__meta_kubernetes_service_annotationpresent_giantswarm_io_monitoring")
+
+	// KubernetesSDServiceGiantSwarmMonitoringLabel is the label applied to the target
+	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes service presenting the annotation giantswarm_io_monitoring as true.
+	KubernetesSDServiceGiantSwarmMonitoringLabel = model.LabelName("__meta_kubernetes_service_annotation_giantswarm_io_monitoring")
+
+	// KubernetesSDServiceGiantSwarmMonitoringPathLabel is the label applied to the target
+	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes service path.
+	KubernetesSDServiceGiantSwarmMonitoringPathLabel = model.LabelName("__meta_kubernetes_service_annotation_giantswarm_io_monitoring_path")
+
+	// KubernetesSDServiceGiantSwarmMonitoringPathPresentLabel is the label applied to the target
+	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes service presenting the annotation giantswarm_io_monitoring_path.
+	KubernetesSDServiceGiantSwarmMonitoringPathPresentLabel = model.LabelName("__meta_kubernetes_service_annotationpresent_giantswarm_io_monitoring_path")
+
+	// KubernetesSDServiceGiantSwarmMonitoringPortLabel is the label applied to the target
+	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes service port number.
+	KubernetesSDServiceGiantSwarmMonitoringPortLabel = model.LabelName("__meta_kubernetes_service_annotation_giantswarm_io_monitoring_port")
+
+	// KubernetesSDServiceGiantSwarmMonitoringPortPresentLabel is the label applied to the target
+	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes service presenting the annotation giantswarm_io_monitoring_port.
+	KubernetesSDServiceGiantSwarmMonitoringPortPresentLabel = model.LabelName("__meta_kubernetes_service_annotationpresent_giantswarm_io_monitoring_port")
 )
 
 // Prometheus Kubernetes metrics labels.
@@ -216,6 +240,8 @@ var (
 
 	// RelabelNamespaceRegexp is the regular expression to match against metrics with empty exported_namespace and namespace kube-system.
 	RelabelNamespaceRegexp = config.MustNewRegexp(`;(kube-system|giantswarm.*|vault-exporter)`)
+
+	ManagedAppSourceRegexp = config.MustNewRegexp(`(.*);(.*);(.*);(.*)`)
 
 	// NodeExporterRegexp is the regular expression to match against the
 	// node-exporter name.

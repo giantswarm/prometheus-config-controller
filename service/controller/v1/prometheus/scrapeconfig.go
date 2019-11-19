@@ -33,6 +33,8 @@ const (
 	EtcdJobType = "etcd"
 	// KubeletJobType is the job type for scraping kubelets.
 	KubeletJobType = "kubelet"
+	// ManagedAppJobType is the job type for scraping managed app metrics.
+	ManagedAppJobType = "managed-app"
 	// NodeExporterJobType is the job type for scraping node-exporters
 	NodeExporterJobType = "node-exporter"
 	// WorkloadJobType is the job type for scraping general workloads.
@@ -155,6 +157,12 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 	rewriteAddress := &config.RelabelConfig{
 		TargetLabel: AddressLabel,
 		Replacement: key.APIServiceHost(key.PrefixMaster, clusterID),
+	}
+	rewriteManagedAppMetricPath := &config.RelabelConfig{
+		SourceLabels: model.LabelNames{model.LabelName(NamespaceLabel), model.LabelName(PodNameLabel), KubernetesSDServiceGiantSwarmMonitoringPortLabel, KubernetesSDServiceGiantSwarmMonitoringPathLabel},
+		Regex:        ManagedAppSourceRegexp,
+		TargetLabel:  MetricPathLabel,
+		Replacement:  key.ManagedAppPodMetricsPath(),
 	}
 	rewriteKubeStateMetricPath := &config.RelabelConfig{
 		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
@@ -516,6 +524,62 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					SourceLabels: model.LabelNames{MetricNameLabel},
 					Regex:        MetricDropICRegexp,
 				},
+			},
+		},
+
+		{
+			JobName:                getJobName(service, ManagedAppJobType),
+			HTTPClientConfig:       secureHTTPClientConfig,
+			Scheme:                 HttpsScheme,
+			ServiceDiscoveryConfig: endpointSDConfig,
+			RelabelConfigs: []*config.RelabelConfig{
+				// Only keep monitoring label presents
+				{
+					SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringPresentLabel},
+					Regex:        config.MustNewRegexp(`(true)`),
+					Action:       config.RelabelKeep,
+				},
+				// Only keep monitoring label as true
+				{
+					SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringLabel},
+					Regex:        config.MustNewRegexp(`(true)`),
+					Action:       config.RelabelKeep,
+				},
+				// Only keep when monitoring port presents in annotation.
+				{
+					SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringPortPresentLabel},
+					Regex:        config.MustNewRegexp(`(true)`),
+					Action:       config.RelabelKeep,
+				},
+				// Only keep when monitoring path presents in annotation.
+				{
+					SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringPathPresentLabel},
+					Regex:        config.MustNewRegexp(`(true)`),
+					Action:       config.RelabelKeep,
+				},
+				// Add app label.
+				{
+					TargetLabel:  AppLabel,
+					SourceLabels: model.LabelNames{KubernetesSDServiceNameLabel},
+				},
+				// Add namespace label.
+				{
+					TargetLabel:  NamespaceLabel,
+					SourceLabels: model.LabelNames{KubernetesSDNamespaceLabel},
+				},
+				// Add pod_name label.
+				{
+					TargetLabel:  PodNameLabel,
+					SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
+				},
+				// Add cluster_id label.
+				clusterIDLabelRelabelConfig,
+				// Add cluster_type label.
+				clusterTypeLabelRelabelConfig,
+				// rewrite host to api proxy
+				rewriteAddress,
+				// Relabel metrics path to specific managed app proxy.
+				rewriteManagedAppMetricPath,
 			},
 		},
 	}

@@ -165,6 +165,7 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 				TestConfigOneCadvisor,
 				TestConfigOneCalicoNode,
 				TestConfigOneKubelet,
+				TestConfigOneManagedApp,
 				TestConfigOneNodeExporter,
 				TestConfigOneWorkload,
 			},
@@ -199,6 +200,7 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 				TestConfigTwoCadvisor,
 				TestConfigTwoCalicoNode,
 				TestConfigTwoKubelet,
+				TestConfigTwoManagedApp,
 				TestConfigTwoNodeExporter,
 				TestConfigTwoWorkload,
 
@@ -206,6 +208,7 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 				TestConfigOneCadvisor,
 				TestConfigOneCalicoNode,
 				TestConfigOneKubelet,
+				TestConfigOneManagedApp,
 				TestConfigOneNodeExporter,
 				TestConfigOneWorkload,
 			},
@@ -257,6 +260,7 @@ func Test_Prometheus_GetScrapeConfigs_Deterministic(t *testing.T) {
 		TestConfigTwoCadvisor,
 		TestConfigTwoCalicoNode,
 		TestConfigTwoKubelet,
+		TestConfigTwoManagedApp,
 		TestConfigTwoNodeExporter,
 		TestConfigTwoWorkload,
 
@@ -264,6 +268,7 @@ func Test_Prometheus_GetScrapeConfigs_Deterministic(t *testing.T) {
 		TestConfigOneCadvisor,
 		TestConfigOneCalicoNode,
 		TestConfigOneKubelet,
+		TestConfigOneManagedApp,
 		TestConfigOneNodeExporter,
 		TestConfigOneWorkload,
 	}
