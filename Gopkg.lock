@@ -92,6 +92,35 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:08188cf7ce7027b22e88cc23da27f17349a0ba7746271a60cbe0a70266c2346f"
+  name = "github.com/ghodss/yaml"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "25d852aebe32c875e9c044af3eef9c7dc6bc777f"
+
+[[projects]]
+  branch = "master"
+  digest = "1:fe0bfabd93de8e05804c44a8b1ab0ff8b5e6f7a4408a7282ed87b711ec2b2933"
+  name = "github.com/giantswarm/apiextensions"
+  packages = [
+    "pkg/apis/application/v1alpha1",
+    "pkg/apis/core/v1alpha1",
+    "pkg/apis/example/v1alpha1",
+    "pkg/apis/provider/v1alpha1",
+    "pkg/apis/release/v1alpha1",
+    "pkg/clientset/versioned",
+    "pkg/clientset/versioned/scheme",
+    "pkg/clientset/versioned/typed/application/v1alpha1",
+    "pkg/clientset/versioned/typed/core/v1alpha1",
+    "pkg/clientset/versioned/typed/example/v1alpha1",
+    "pkg/clientset/versioned/typed/provider/v1alpha1",
+    "pkg/clientset/versioned/typed/release/v1alpha1",
+  ]
+  pruneopts = "UT"
+  revision = "4a323ea2f6647e7b1b037abffc7acf30a923a604"
+
+[[projects]]
+  branch = "master"
   digest = "1:0dc70d5c96ccd9ef24d12f7c222447425447f7a2ec72556f2479137fe72f5476"
   name = "github.com/giantswarm/backoff"
   packages = ["."]
@@ -105,6 +134,18 @@
   packages = ["collector"]
   pruneopts = "UT"
   revision = "9749deade60f7624620aa7158a4f38c87ea23795"
+
+[[projects]]
+  branch = "master"
+  digest = "1:f14f3cf9e9784cbcffe13c6fe4728a9e38b9c124337e72570c720fe46642231f"
+  name = "github.com/giantswarm/k8sclient"
+  packages = [
+    ".",
+    "k8scrdclient",
+    "k8srestconfig",
+  ]
+  pruneopts = "UT"
+  revision = "059a94fd04e59aceab384413cf9608ae1640a2ca"
 
 [[projects]]
   branch = "master"
@@ -172,11 +213,10 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a20261f33e19d5b869342e85f9c71eb6c41cd842ab14cc7ff3f916a223ff3aaf"
+  digest = "1:b07cb8eed75f805f61061250b6a2b57b1110a2cb1e092f3060e8ebf26313b5fa"
   name = "github.com/giantswarm/operatorkit"
   packages = [
     "client/k8scrdclient",
-    "client/k8srestconfig",
     "controller",
     "controller/context/finalizerskeptcontext",
     "controller/context/reconciliationcanceledcontext",
@@ -188,6 +228,7 @@
     "informer",
     "informer/collector",
     "resource",
+    "resource/crud",
     "resource/wrapper/internal",
     "resource/wrapper/metricsresource",
     "resource/wrapper/retryresource",
@@ -631,6 +672,17 @@
   revision = "c4c64cad1fd0a1a8dab2523e04e61d35308e131e"
 
 [[projects]]
+  branch = "master"
+  digest = "1:918a46e4a2fb83df33f668f5a6bd51b2996775d073fce1800d3ec01b0a5ddd2b"
+  name = "golang.org/x/xerrors"
+  packages = [
+    ".",
+    "internal",
+  ]
+  pruneopts = "UT"
+  revision = "9bdfabe68543c54f90421aeb9a60ef8061b5b544"
+
+[[projects]]
   digest = "1:e0a1881f9e0564bebdeac98c75e59f07acdde6ed3a5396e0e613eaad31194866"
   name = "google.golang.org/appengine"
   packages = [
@@ -781,11 +833,12 @@
   version = "kubernetes-1.15.4"
 
 [[projects]]
-  digest = "1:494b9a880b4c896dda88e5b71b271290aa1fb9504941009681ec6b361258582b"
+  digest = "1:46461530875a174fac01ad6773078ca96a3fdb0eb26d3926e96f57548bdf4d97"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
     "discovery/fake",
+    "dynamic",
     "kubernetes",
     "kubernetes/fake",
     "kubernetes/scheme",
@@ -868,6 +921,7 @@
     "plugin/pkg/client/auth/exec",
     "rest",
     "rest/watch",
+    "restmapper",
     "testing",
     "tools/auth",
     "tools/cache",
@@ -920,6 +974,17 @@
   revision = "69764acb6e8e900b7c05296c5d3c9c19545475f9"
 
 [[projects]]
+  digest = "1:bdb52c1bab3f4336d128f504e0035e956fc7b817fbacd7eed60287c5e99a5d34"
+  name = "sigs.k8s.io/controller-runtime"
+  packages = [
+    "pkg/client",
+    "pkg/client/apiutil",
+  ]
+  pruneopts = "UT"
+  revision = "d21241119ea4de139f1892ba2f5bc72c96d07f3f"
+  version = "v0.3.0"
+
+[[projects]]
   digest = "1:7719608fe0b52a4ece56c2dde37bedd95b938677d1ab0f84b8a7852e4c59f849"
   name = "sigs.k8s.io/yaml"
   packages = ["."]
@@ -932,7 +997,10 @@
   analyzer-version = 1
   input-imports = [
     "github.com/davecgh/go-spew/spew",
+    "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1",
     "github.com/giantswarm/backoff",
+    "github.com/giantswarm/k8sclient",
+    "github.com/giantswarm/k8sclient/k8srestconfig",
     "github.com/giantswarm/k8shealthz",
     "github.com/giantswarm/microendpoint/endpoint/healthz",
     "github.com/giantswarm/microendpoint/endpoint/version",
@@ -944,12 +1012,12 @@
     "github.com/giantswarm/microkit/server",
     "github.com/giantswarm/micrologger",
     "github.com/giantswarm/micrologger/microloggertest",
-    "github.com/giantswarm/operatorkit/client/k8srestconfig",
     "github.com/giantswarm/operatorkit/controller",
     "github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext",
     "github.com/giantswarm/operatorkit/flag/service/kubernetes",
     "github.com/giantswarm/operatorkit/informer",
     "github.com/giantswarm/operatorkit/resource",
+    "github.com/giantswarm/operatorkit/resource/crud",
     "github.com/giantswarm/operatorkit/resource/wrapper/metricsresource",
     "github.com/giantswarm/operatorkit/resource/wrapper/retryresource",
     "github.com/giantswarm/versionbundle",
