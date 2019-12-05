@@ -4,21 +4,21 @@ import (
 	"context"
 
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
+	"github.com/giantswarm/operatorkit/resource/crud"
 	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/prometheus"
 	prometheusclient "github.com/prometheus/client_golang/prometheus"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 )
 
-func (r *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*controller.Patch, error) {
+func (r *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*crud.Patch, error) {
 	update, err := r.newUpdateChange(ctx, obj, currentState, desiredState)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	patch := controller.NewPatch()
+	patch := crud.NewPatch()
 	patch.SetUpdateChange(update)
 
 	return patch, nil

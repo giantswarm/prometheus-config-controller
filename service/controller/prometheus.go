@@ -3,18 +3,18 @@ package controller
 import (
 	"time"
 
+	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/operatorkit/informer"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 
 	"github.com/giantswarm/prometheus-config-controller/service/controller/v1"
 )
 
 type PrometheusConfig struct {
-	K8sClient kubernetes.Interface
+	K8sClient k8sclient.Interface
 	Logger    micrologger.Logger
 
 	ConfigMapKey       string
@@ -45,7 +45,7 @@ func NewPrometheus(config PrometheusConfig) (*Prometheus, error) {
 	{
 		c := informer.Config{
 			Logger:  config.Logger,
-			Watcher: config.K8sClient.CoreV1().Services(""),
+			Watcher: config.K8sClient.K8sClient().CoreV1().Services(""),
 
 			ListOptions: metav1.ListOptions{
 				LabelSelector: "giantswarm.io/cluster",
@@ -63,7 +63,7 @@ func NewPrometheus(config PrometheusConfig) (*Prometheus, error) {
 	var resourceSetV1 *controller.ResourceSet
 	{
 		c := v1.ResourceSetConfig{
-			K8sClient: config.K8sClient,
+			K8sClient: config.K8sClient.K8sClient(),
 			Logger:    config.Logger,
 
 			ConfigMapKey:       config.ConfigMapKey,
@@ -92,7 +92,7 @@ func NewPrometheus(config PrometheusConfig) (*Prometheus, error) {
 			ResourceSets: []*controller.ResourceSet{
 				resourceSetV1,
 			},
-			RESTClient: config.K8sClient.CoreV1().RESTClient(),
+			RESTClient: config.K8sClient.RESTClient(),
 
 			Name: config.ProjectName,
 		}
