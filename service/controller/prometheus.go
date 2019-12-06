@@ -7,8 +7,8 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
-	"github.com/giantswarm/operatorkit/informer"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/giantswarm/prometheus-config-controller/service/controller/v1"
 )
@@ -41,25 +41,6 @@ func NewPrometheus(config PrometheusConfig) (*Prometheus, error) {
 
 	var err error
 
-	var newInformer *informer.Informer
-	{
-		c := informer.Config{
-			Logger:  config.Logger,
-			Watcher: config.K8sClient.K8sClient().CoreV1().Services(""),
-
-			ListOptions: metav1.ListOptions{
-				LabelSelector: "giantswarm.io/cluster",
-			},
-			RateWait:     informer.DefaultRateWait,
-			ResyncPeriod: config.ResyncPeriod,
-		}
-
-		newInformer, err = informer.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var resourceSetV1 *controller.ResourceSet
 	{
 		c := v1.ResourceSetConfig{
@@ -87,14 +68,15 @@ func NewPrometheus(config PrometheusConfig) (*Prometheus, error) {
 	var operatorkitController *controller.Controller
 	{
 		c := controller.Config{
-			Informer: newInformer,
-			Logger:   config.Logger,
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
+			Name:      config.ProjectName,
 			ResourceSets: []*controller.ResourceSet{
 				resourceSetV1,
 			},
-			RESTClient: config.K8sClient.RESTClient(),
-
-			Name: config.ProjectName,
+			NewRuntimeObjectFunc: func() runtime.Object {
+				return new(corev1.Service)
+			},
 		}
 
 		operatorkitController, err = controller.New(c)
