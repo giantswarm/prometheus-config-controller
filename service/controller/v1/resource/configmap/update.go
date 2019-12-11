@@ -4,9 +4,7 @@ import (
 	"context"
 
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
 	"github.com/giantswarm/operatorkit/resource/crud"
-	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/prometheus"
 	prometheusclient "github.com/prometheus/client_golang/prometheus"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -86,22 +84,10 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 		}
 	}
 
-	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "reloading prometheus configuration")
-		// We attempt to reload Prometheus even if the configmap hasn't updated,
-		// as the PrometheusReloader takes care that we don't reload too often.
-		err := r.prometheusReloader.Reload(ctx)
-		if prometheus.IsReloadThrottle(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not reload prometheus configuration")
-
-			r.logger.LogCtx(ctx, "level", "debug", "message", err.Error())
-			r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
-			finalizerskeptcontext.SetKept(ctx)
-		} else if err != nil {
-			return microerror.Mask(err)
-		} else {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "reloaded prometheus configuration")
-		}
+	// We attempt to reload Prometheus even if the configmap hasn't updated,
+	// as the PrometheusReloader takes care that we don't reload too often.
+	if err := r.prometheusReloader.Reload(ctx); err != nil {
+		return microerror.Mask(err)
 	}
 
 	return nil
@@ -114,7 +100,7 @@ func toConfigMap(v interface{}) (*v1.ConfigMap, error) {
 
 	configMap, ok := v.(*v1.ConfigMap)
 	if !ok {
-		return nil, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", configMap, v)
+		return nil, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", v1.ConfigMap{}, v)
 	}
 
 	return configMap, nil
