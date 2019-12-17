@@ -2,7 +2,7 @@
 
 
 [[projects]]
-  digest = "1:442fc60e6af0d9a4fc1033ba0a1f2f8da8c3cb30e44cea2e00683fce941bc2d8"
+  digest = "1:9fb22917f1c29adcf21f372e6d1504e42e646acded4cd6df8cf69cb63e738473"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -39,8 +39,8 @@
     "service/sts/stsiface",
   ]
   pruneopts = "UT"
-  revision = "c5f6db9139bd300297119f712fd4e09f6b0f89f7"
-  version = "v1.25.49"
+  revision = "547e50a7858bd6ad310bdf99cb5d40599dc350fc"
+  version = "v1.26.3"
 
 [[projects]]
   digest = "1:d6afaeed1502aa28e80a4ed0981d570ad91b2579193404256ce672ed0a609e0d"
@@ -100,12 +100,13 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:2f9b3a4dc1447d6b0143e2416125989df27d522989afc22031740ff4782befc1"
+  digest = "1:f2448b52a81ba466f07eac7a20b6e81cc69cba3048ec0c2e7865f0a1f50a56bc"
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/application/v1alpha1",
     "pkg/apis/core/v1alpha1",
     "pkg/apis/example/v1alpha1",
+    "pkg/apis/infrastructure/v1alpha2",
     "pkg/apis/provider/v1alpha1",
     "pkg/apis/release/v1alpha1",
     "pkg/clientset/versioned",
@@ -113,11 +114,12 @@
     "pkg/clientset/versioned/typed/application/v1alpha1",
     "pkg/clientset/versioned/typed/core/v1alpha1",
     "pkg/clientset/versioned/typed/example/v1alpha1",
+    "pkg/clientset/versioned/typed/infrastructure/v1alpha2",
     "pkg/clientset/versioned/typed/provider/v1alpha1",
     "pkg/clientset/versioned/typed/release/v1alpha1",
   ]
   pruneopts = "UT"
-  revision = "a4fd7939e26e7e2cd681af032963a1597ffae781"
+  revision = "4531a2bea641c212df36ceaf574f972cd223b75d"
 
 [[projects]]
   branch = "master"
@@ -137,15 +139,15 @@
     "k8srestconfig",
   ]
   pruneopts = "UT"
-  revision = "6cb127468cd6b30eaf8030b875f796e34b481938"
+  revision = "f75fead2ae064a2ae20a117cc1cd1d2f6d050641"
 
 [[projects]]
   branch = "master"
-  digest = "1:a5f65f475afc51e6764f58ee39361382c0c9e2dded347b231a542dff9a277822"
+  digest = "1:b1e9efa214946947392232a9cb7cc1786797576e32e867e8d9749690f20e75ca"
   name = "github.com/giantswarm/k8shealthz"
   packages = ["."]
   pruneopts = "UT"
-  revision = "0de6f3b92a38f10786b90c72401d2034b240d7cd"
+  revision = "7a88b558b713badfd8a6477be6305daaba883e47"
 
 [[projects]]
   branch = "master"
@@ -205,7 +207,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e3dcfca96177f8b713e76e0f15660b33afc5de3110b2cf6c0a801dbaac904a9f"
+  digest = "1:43f84c6762eb3c63f1f8053e7d789ad590a1bac9eb5730dc6e3c0700c7018711"
   name = "github.com/giantswarm/operatorkit"
   packages = [
     "controller",
@@ -223,7 +225,7 @@
     "resource/wrapper/retryresource",
   ]
   pruneopts = "UT"
-  revision = "5d098618662e74384f52bf064fe3588436873eb2"
+  revision = "ce72eefd011ccef2eee654ae1e90b81241195b85"
 
 [[projects]]
   branch = "master"
@@ -235,11 +237,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:90fda7152f6ded9c45d67bee5f23f2d8f148eb15672f30030c095e08eccf02b0"
+  digest = "1:62f331bfc5c1f966a4c289170927241ce4eb5d801e6f488962376afaf370654a"
   name = "github.com/giantswarm/versionbundle"
   packages = ["."]
   pruneopts = "UT"
-  revision = "be95231628aed039183214a0e337bfe621e3072a"
+  revision = "0e21f30ed4e6d96dd8bc1a7f1f57610f445f2620"
 
 [[projects]]
   digest = "1:83a37f3bd4ccd13469775ef771e943e6c7cfaba6926decff6c83135e56512f08"
@@ -658,14 +660,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:8191c209ac2aaba9e958a061256fab8955ad10cc731aa609660184800f1ef55a"
+  digest = "1:472d3f5adc36e1c0b9120bc3830d692a090134aa5461335f39caabd0fdb7feac"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "eeba5f6aabab6d6594a9191d6bfeaca5fa6a8248"
+  revision = "ac6580df4449443a05718fd7858c1f91ad5f8d20"
 
 [[projects]]
   digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
@@ -1041,7 +1043,7 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "6ca3b61696b65b0e81f1a39b4937fc2d2994ed6a"
+  revision = "9e5e9d854fcc5cc704f00d68fa057146e8c4ad26"
 
 [[projects]]
   digest = "1:8053263951e435c10bfb257f59063caafdb5f7de5ee35336383c84949bb84a25"
@@ -1107,7 +1109,6 @@
     "github.com/giantswarm/micrologger",
     "github.com/giantswarm/micrologger/microloggertest",
     "github.com/giantswarm/operatorkit/controller",
-    "github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext",
     "github.com/giantswarm/operatorkit/flag/service/kubernetes",
     "github.com/giantswarm/operatorkit/resource",
     "github.com/giantswarm/operatorkit/resource/crud",
