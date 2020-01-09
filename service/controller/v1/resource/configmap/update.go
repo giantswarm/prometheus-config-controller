@@ -17,7 +17,10 @@ func (r *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desire
 	}
 
 	patch := crud.NewPatch()
-	patch.SetUpdateChange(update)
+
+	if update != nil {
+		patch.SetUpdateChange(update)
+	}
 
 	return patch, nil
 }
