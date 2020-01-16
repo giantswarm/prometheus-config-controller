@@ -85,6 +85,8 @@ func PrometheusURLReload(address string) string {
 }
 
 func ServiceLabelSelector() labels.Selector {
+	// Selector to check if "app=master" and if "giantswarm.io/cluster"
+	// exists.
 	s := fmt.Sprintf("%s=%s,%s", label.App, "master", label.Cluster)
 
 	selector, err := labels.Parse(s)
