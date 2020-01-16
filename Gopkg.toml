@@ -60,7 +60,7 @@
 
 [[constraint]]
   name = "github.com/giantswarm/operatorkit"
-  branch = "controller-selector"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/giantswarm/versionbundle"
