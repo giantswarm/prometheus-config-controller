@@ -11,8 +11,12 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/key"
 	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/prometheus"
+)
+
+const (
+	// serviceLabelSelector is the label selector to match master services.
+	serviceLabelSelector = "app=master"
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
@@ -44,7 +48,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 
 	servicesTimer := prometheusclient.NewTimer(kubernetesResource.WithLabelValues("services", "list"))
 	services, err := r.k8sClient.CoreV1().Services("").List(metav1.ListOptions{
-		LabelSelector: key.ServiceLabelSelector().String(),
+		LabelSelector: serviceLabelSelector,
 	})
 	servicesTimer.ObserveDuration()
 

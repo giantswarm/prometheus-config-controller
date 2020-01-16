@@ -4,9 +4,6 @@ import (
 	"fmt"
 	"path"
 	"strings"
-
-	"github.com/giantswarm/prometheus-config-controller/pkg/label"
-	"k8s.io/apimachinery/pkg/labels"
 )
 
 const (
@@ -82,17 +79,4 @@ func PrometheusURLConfig(address string) string {
 func PrometheusURLReload(address string) string {
 	u := strings.TrimSuffix(address, "/")
 	return u + "/-/reload"
-}
-
-func ServiceLabelSelector() labels.Selector {
-	// Selector to check if "app=master" and if "giantswarm.io/cluster"
-	// exists.
-	s := fmt.Sprintf("%s=%s,%s", label.App, "master", label.Cluster)
-
-	selector, err := labels.Parse(s)
-	if err != nil {
-		panic(fmt.Sprintf("failed to parse selector %#q with error %#q", s, err))
-	}
-
-	return selector
 }

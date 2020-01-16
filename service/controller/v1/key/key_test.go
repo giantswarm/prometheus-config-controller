@@ -2,7 +2,6 @@ package key
 
 import (
 	"reflect"
-	"strconv"
 	"testing"
 
 	"github.com/davecgh/go-spew/spew"
@@ -131,29 +130,5 @@ func Test_Key_KeyPath(t *testing.T) {
 				spew.Sdump(path),
 			)
 		}
-	}
-}
-
-func Test_ServiceLabelSelector(t *testing.T) {
-	testCases := []struct {
-		name                   string
-		expectedSelectorString string
-	}{
-		{
-			name:                   "case 0",
-			expectedSelectorString: "app=master,giantswarm.io/cluster",
-		},
-	}
-
-	for i, tc := range testCases {
-		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			t.Log(tc.name)
-
-			selectorString := ServiceLabelSelector().String()
-			if !reflect.DeepEqual(tc.expectedSelectorString, selectorString) {
-				t.Fatalf("tc.expectedSelectorString = %v, want %v", tc.expectedSelectorString, selectorString)
-			}
-
-		})
 	}
 }

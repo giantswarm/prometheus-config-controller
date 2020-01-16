@@ -259,8 +259,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 							prometheus.ClusterAnnotation: "xa5ly",
 						},
 						Labels: map[string]string{
-							"app":                   "master",
-							"giantswarm.io/cluster": "xa5ly",
+							"app": "master",
 						},
 					},
 				},
@@ -381,8 +380,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 							prometheus.ClusterAnnotation: "xa5ly",
 						},
 						Labels: map[string]string{
-							"app":                   "master",
-							"giantswarm.io/cluster": "xa5ly",
+							"app": "master",
 						},
 					},
 				},
@@ -394,8 +392,7 @@ func Test_Resource_ConfigMap_GetDesiredState(t *testing.T) {
 							prometheus.ClusterAnnotation: "0ba9v",
 						},
 						Labels: map[string]string{
-							"app":                   "master",
-							"giantswarm.io/cluster": "0ba9v",
+							"app": "master",
 						},
 					},
 				},
