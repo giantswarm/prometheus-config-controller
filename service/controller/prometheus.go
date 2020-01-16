@@ -10,7 +10,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
-	"github.com/giantswarm/prometheus-config-controller/service/controller/v1"
+	v1 "github.com/giantswarm/prometheus-config-controller/service/controller/v1"
+	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/key"
 )
 
 type PrometheusConfig struct {
@@ -69,14 +70,16 @@ func NewPrometheus(config PrometheusConfig) (*Prometheus, error) {
 	{
 		c := controller.Config{
 			K8sClient: config.K8sClient,
-			Logger:    config.Logger,
-			Name:      config.ProjectName,
-			ResourceSets: []*controller.ResourceSet{
-				resourceSetV1,
-			},
 			NewRuntimeObjectFunc: func() runtime.Object {
 				return new(corev1.Service)
 			},
+			Logger: config.Logger,
+			ResourceSets: []*controller.ResourceSet{
+				resourceSetV1,
+			},
+			Selector: key.ServiceLabelSelector(),
+
+			Name: config.ProjectName,
 		}
 
 		operatorkitController, err = controller.New(c)

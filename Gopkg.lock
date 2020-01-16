@@ -131,6 +131,14 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:5164d17414266145c643e4997dacbc32e6e1ad552c3c70a78837f64d9a0140ea"
+  name = "github.com/giantswarm/exporterkit"
+  packages = ["collector"]
+  pruneopts = "UT"
+  revision = "9749deade60f7624620aa7158a4f38c87ea23795"
+
+[[projects]]
+  branch = "master"
   digest = "1:5ea4a83b027c56f8f5f5bae17671964275cbcd50115528ed9dc733f9330cac79"
   name = "github.com/giantswarm/k8sclient"
   packages = [
@@ -207,10 +215,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:43f84c6762eb3c63f1f8053e7d789ad590a1bac9eb5730dc6e3c0700c7018711"
+  digest = "1:e35bb8852e24edcf07a8ebf2f0a488ff21a8686ab105963a5d712c77e24bf005"
   name = "github.com/giantswarm/operatorkit"
   packages = [
     "controller",
+    "controller/collector",
     "controller/context/finalizerskeptcontext",
     "controller/context/reconciliationcanceledcontext",
     "controller/context/resourcecanceledcontext",
@@ -225,7 +234,7 @@
     "resource/wrapper/retryresource",
   ]
   pruneopts = "UT"
-  revision = "ce72eefd011ccef2eee654ae1e90b81241195b85"
+  revision = "aa7ed959916171a1bc18c4f5ecf4b680c7e4af9e"
 
 [[projects]]
   branch = "master"
@@ -1046,14 +1055,16 @@
   revision = "9e5e9d854fcc5cc704f00d68fa057146e8c4ad26"
 
 [[projects]]
-  digest = "1:8053263951e435c10bfb257f59063caafdb5f7de5ee35336383c84949bb84a25"
+  digest = "1:1467ce430fe64e79b42e62d087dbcc58aaaa6d862f92f5d4daae68545af8507e"
   name = "sigs.k8s.io/controller-runtime"
   packages = [
+    "pkg/builder",
     "pkg/cache",
     "pkg/cache/internal",
     "pkg/client",
     "pkg/client/apiutil",
     "pkg/controller",
+    "pkg/conversion",
     "pkg/event",
     "pkg/handler",
     "pkg/healthz",
@@ -1073,6 +1084,7 @@
     "pkg/source/internal",
     "pkg/webhook",
     "pkg/webhook/admission",
+    "pkg/webhook/conversion",
     "pkg/webhook/internal/certwatcher",
     "pkg/webhook/internal/metrics",
   ]
@@ -1109,6 +1121,7 @@
     "github.com/giantswarm/micrologger",
     "github.com/giantswarm/micrologger/microloggertest",
     "github.com/giantswarm/operatorkit/controller",
+    "github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext",
     "github.com/giantswarm/operatorkit/flag/service/kubernetes",
     "github.com/giantswarm/operatorkit/resource",
     "github.com/giantswarm/operatorkit/resource/crud",
@@ -1126,6 +1139,7 @@
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
+    "k8s.io/apimachinery/pkg/labels",
     "k8s.io/apimachinery/pkg/runtime",
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/fake",
