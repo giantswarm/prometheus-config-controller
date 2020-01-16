@@ -107,6 +107,11 @@ func New(config Config) (*Service, error) {
 }
 
 func (s *Service) Reload(ctx context.Context) error {
+	err := s.throttleReload(ctx)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
 	reloadRequired, err := s.isReloadRequired(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -189,27 +194,10 @@ func (s *Service) getConfigFromPrometheus(ctx context.Context) (string, error) {
 	return config, nil
 }
 
-func (s *Service) isReloadRateLimited(ctx context.Context) bool {
-	timeSinceLastReload := time.Since(s.lastReloadTime)
-
-	if timeSinceLastReload < s.minimumReloadTime {
-		s.logger.LogCtx(ctx, "debug", fmt.Sprintf("ignoring reload request, only %s since last reload, minimum time between is %s", timeSinceLastReload, s.minimumReloadTime))
-		configurationReloadIgnoredCount.Inc()
-
-		return true
-	}
-
-	return false
-}
-
 func (s *Service) isReloadRequired(ctx context.Context) (bool, error) {
 	s.logger.LogCtx(ctx, "debug", "checking if reload is required")
 
 	configurationReloadCheckCount.Inc()
-
-	if s.isReloadRateLimited(ctx) {
-		return false, nil
-	}
 
 	s.isReloadRequestedMutex.Lock()
 	isReloadRequested := s.isReloadRequested
@@ -262,6 +250,18 @@ func (s *Service) reload(ctx context.Context) error {
 	configurationReloadCount.Inc()
 
 	s.lastReloadTime = time.Now()
+
+	return nil
+}
+
+func (s *Service) throttleReload(ctx context.Context) error {
+	timeSinceLastReload := time.Since(s.lastReloadTime)
+
+	if timeSinceLastReload < s.minimumReloadTime {
+		configurationReloadIgnoredCount.Inc()
+
+		return microerror.Maskf(reloadThrottleError, "%s since last reload, minimum time between is %s", timeSinceLastReload, s.minimumReloadTime)
+	}
 
 	return nil
 }
