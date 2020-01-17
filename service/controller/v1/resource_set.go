@@ -17,6 +17,7 @@ import (
 	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/prometheus"
 	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/resource/certificate"
 	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/resource/configmap"
+	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/resource/reloadonce"
 )
 
 type ResourceSetConfig struct {
@@ -101,7 +102,21 @@ func NewResourceSet(config ResourceSetConfig) (*controller.ResourceSet, error) {
 		}
 	}
 
+	var reloadOnceResouce resource.Interface
+	{
+		c := reloadonce.Config{
+			Logger:             config.Logger,
+			PrometheusReloader: prometheusReloader,
+		}
+
+		reloadOnceResouce, err = reloadonce.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	resources := []resource.Interface{
+		reloadOnceResouce,
 		certificateResource,
 		configMapResource,
 	}
