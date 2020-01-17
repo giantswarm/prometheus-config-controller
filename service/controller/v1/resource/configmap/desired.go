@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/giantswarm/microerror"
-	prometheusclient "github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/prometheus/config"
 	"gopkg.in/yaml.v2"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -18,11 +17,9 @@ import (
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
 	r.logger.LogCtx(ctx, "debug", fmt.Sprintf("fetching configmap: %s/%s", r.configMapNamespace, r.configMapName))
 
-	configMapTimer := prometheusclient.NewTimer(kubernetesResource.WithLabelValues("configmap", "get"))
 	configMap, err := r.k8sClient.CoreV1().ConfigMaps(r.configMapNamespace).Get(
 		r.configMapName, metav1.GetOptions{},
 	)
-	configMapTimer.ObserveDuration()
 
 	if errors.IsNotFound(err) {
 		return nil, microerror.Maskf(configMapNotFoundError, "%s/%s", r.configMapNamespace, r.configMapName)
@@ -42,11 +39,9 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 
 	r.logger.LogCtx(ctx, "debug", fmt.Sprintf("fetching all services"))
 
-	servicesTimer := prometheusclient.NewTimer(kubernetesResource.WithLabelValues("services", "list"))
 	services, err := r.k8sClient.CoreV1().Services("").List(metav1.ListOptions{
 		LabelSelector: key.ServiceLabelSelector().String(),
 	})
-	servicesTimer.ObserveDuration()
 
 	if err != nil {
 		return nil, microerror.Maskf(err, "an error occurred listing all services")
@@ -57,8 +52,6 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	if err != nil {
 		return nil, microerror.Maskf(err, "an error occurred creating scrape configs")
 	}
-
-	scrapeConfigCount.Set(float64(len(scrapeConfigs)))
 
 	newPrometheusConfig, err := prometheus.UpdateConfig(*prometheusConfig, scrapeConfigs)
 	if err != nil {
