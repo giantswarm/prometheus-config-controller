@@ -7,8 +7,6 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/spf13/afero"
 	"k8s.io/client-go/kubernetes"
-
-	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/prometheus"
 )
 
 const (
@@ -16,10 +14,9 @@ const (
 )
 
 type Config struct {
-	Fs                 afero.Fs
-	K8sClient          kubernetes.Interface
-	Logger             micrologger.Logger
-	PrometheusReloader prometheus.PrometheusReloader
+	Fs        afero.Fs
+	K8sClient kubernetes.Interface
+	Logger    micrologger.Logger
 
 	CertComponentName string
 	CertDirectory     string
@@ -28,10 +25,9 @@ type Config struct {
 }
 
 type Resource struct {
-	fs                 afero.Fs
-	k8sClient          kubernetes.Interface
-	logger             micrologger.Logger
-	prometheusReloader prometheus.PrometheusReloader
+	fs        afero.Fs
+	k8sClient kubernetes.Interface
+	logger    micrologger.Logger
 
 	certComponentName string
 	certDirectory     string
@@ -49,9 +45,6 @@ func New(config Config) (*Resource, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
 	}
-	if config.PrometheusReloader == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.PrometheusReloader must not be empty")
-	}
 
 	if config.CertComponentName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "config.CertComponentName must not be empty")
@@ -67,10 +60,9 @@ func New(config Config) (*Resource, error) {
 	}
 
 	r := &Resource{
-		fs:                 config.Fs,
-		k8sClient:          config.K8sClient,
-		logger:             config.Logger,
-		prometheusReloader: config.PrometheusReloader,
+		fs:        config.Fs,
+		k8sClient: config.K8sClient,
+		logger:    config.Logger,
 
 		certComponentName: config.CertComponentName,
 		certDirectory:     config.CertDirectory,
