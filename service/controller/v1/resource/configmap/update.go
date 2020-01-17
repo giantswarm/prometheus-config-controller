@@ -8,7 +8,6 @@ import (
 
 	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
 	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/prometheus"
-	prometheusclient "github.com/prometheus/client_golang/prometheus"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 )
@@ -77,9 +76,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 	if configMapToUpdate != nil {
 		r.logger.LogCtx(ctx, "debug", "updating configmap")
 
-		timer := prometheusclient.NewTimer(kubernetesResource.WithLabelValues("configmap", "update"))
 		_, err := r.k8sClient.CoreV1().ConfigMaps(r.configMapNamespace).Update(configMapToUpdate)
-		timer.ObserveDuration()
 
 		if errors.IsConflict(err) {
 			// fall through, we'll update it on the next reconciliation loop.
