@@ -5,14 +5,15 @@ import (
 	"fmt"
 
 	"github.com/giantswarm/microerror"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// GetCurrentState returns the current state of the prometheus config configmap.
+// getCurrentState returns the current state of the prometheus config configmap.
 // If the configmap exists, it is returned.
 // If the configmap does not exist, nil is returned.
-func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
+func (r *Resource) getCurrentState(ctx context.Context) (*corev1.ConfigMap, error) {
 	r.logger.LogCtx(ctx, "debug", fmt.Sprintf("fetching configmap: %s/%s", r.configMapNamespace, r.configMapName))
 
 	configMap, err := r.k8sClient.CoreV1().ConfigMaps(r.configMapNamespace).Get(

@@ -2,9 +2,15 @@ package configmap
 
 import (
 	"context"
+
+	"github.com/giantswarm/microerror"
 )
 
-// ApplyCreateChange is a no-op.
-func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange interface{}) error {
+func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
+	err := r.ensure(ctx, obj)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
 	return nil
 }

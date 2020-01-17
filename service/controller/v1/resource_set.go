@@ -95,12 +95,7 @@ func NewResourceSet(config ResourceSetConfig) (*controller.ResourceSet, error) {
 			ConfigMapNamespace: config.ConfigMapNamespace,
 		}
 
-		ops, err := configmap.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		configMapResource, err = toCRUDResource(config.Logger, ops)
+		configMapResource, err = configmap.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

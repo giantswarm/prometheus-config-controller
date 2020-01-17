@@ -7,6 +7,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/prometheus/prometheus/config"
 	"gopkg.in/yaml.v2"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -14,7 +15,7 @@ import (
 	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/prometheus"
 )
 
-func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
+func (r *Resource) getDesiredState(ctx context.Context) (*corev1.ConfigMap, error) {
 	r.logger.LogCtx(ctx, "debug", fmt.Sprintf("fetching configmap: %s/%s", r.configMapNamespace, r.configMapName))
 
 	configMap, err := r.k8sClient.CoreV1().ConfigMaps(r.configMapNamespace).Get(
