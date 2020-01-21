@@ -44,6 +44,7 @@ type Service struct {
 	bootOnce             sync.Once
 	prometheusAddress    string
 	prometheusController *controller.Prometheus
+	reloaderController   *controller.Reloader
 }
 
 func New(config Config) (*Service, error) {
@@ -126,6 +127,22 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
+	var reloaderController *controller.Reloader
+	{
+		c := controller.ReloaderConfig{
+			K8sClient: k8sClient,
+			Logger:    config.Logger,
+
+			PrometheusAddress: config.Viper.GetString(config.Flag.Service.Prometheus.Address),
+		}
+
+		reloaderController, err = controller.NewReloader(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+	}
+
 	var versionService *version.Service
 	{
 		c := version.Config{
@@ -153,6 +170,7 @@ func New(config Config) (*Service, error) {
 
 		prometheusAddress:    config.Viper.GetString(config.Flag.Service.Prometheus.Address),
 		prometheusController: prometheusController,
+		reloaderController:   reloaderController,
 	}
 
 	return s, nil
@@ -205,6 +223,7 @@ func (s *Service) boot(ctx context.Context) error {
 
 	s.bootOnce.Do(func() {
 		go s.prometheusController.Boot(ctx)
+		go s.reloaderController.Boot(ctx)
 	})
 
 	return nil
