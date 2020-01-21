@@ -67,7 +67,7 @@ func NewReloader(config ReloaderConfig) (*Reloader, error) {
 			},
 			Selector: key.LabelSelectorConfigMap(),
 
-			Name:         project.Name(),
+			Name:         project.Name() + "-reloader",
 			ResyncPeriod: 3 * time.Minute,
 		}
 
