@@ -70,6 +70,30 @@ func ManagedAppPodMetricsPath() string {
 	return "/api/v1/namespaces/${1}/pods/${2}:${3}/proxy/${4}"
 }
 
+func LabelSelectorConfigMap() labels.Selector {
+	s := fmt.Sprintf("%s=%s", label.App, "prometheus")
+
+	selector, err := labels.Parse(s)
+	if err != nil {
+		panic(fmt.Sprintf("failed to parse selector %#q with error %#q", s, err))
+	}
+
+	return selector
+}
+
+func LabelSelectorService() labels.Selector {
+	// Selector to check if "app=master" and if "giantswarm.io/cluster"
+	// exists.
+	s := fmt.Sprintf("%s=%s,%s", label.App, "master", label.Cluster)
+
+	selector, err := labels.Parse(s)
+	if err != nil {
+		panic(fmt.Sprintf("failed to parse selector %#q with error %#q", s, err))
+	}
+
+	return selector
+}
+
 // PrometheusURLConfig returns the Prometheus API URL that returns the current
 // configuration. It assumes that address is a valid HTTP URL.
 func PrometheusURLConfig(address string) string {
@@ -82,17 +106,4 @@ func PrometheusURLConfig(address string) string {
 func PrometheusURLReload(address string) string {
 	u := strings.TrimSuffix(address, "/")
 	return u + "/-/reload"
-}
-
-func ServiceLabelSelector() labels.Selector {
-	// Selector to check if "app=master" and if "giantswarm.io/cluster"
-	// exists.
-	s := fmt.Sprintf("%s=%s,%s", label.App, "master", label.Cluster)
-
-	selector, err := labels.Parse(s)
-	if err != nil {
-		panic(fmt.Sprintf("failed to parse selector %#q with error %#q", s, err))
-	}
-
-	return selector
 }

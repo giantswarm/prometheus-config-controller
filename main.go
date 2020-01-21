@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/microkit/command"
@@ -133,11 +132,6 @@ func mainError() error {
 	daemonCommand.PersistentFlags().String(f.Service.Resource.ConfigMap.Key, "prometheus.yml", "Key in configmap under which prometheus configuration is held.")
 	daemonCommand.PersistentFlags().String(f.Service.Resource.ConfigMap.Name, "prometheus", "Name of prometheus configmap to control.")
 	daemonCommand.PersistentFlags().String(f.Service.Resource.ConfigMap.Namespace, "monitoring", "Namespace of prometheus configmap to control.")
-	daemonCommand.PersistentFlags().Duration(f.Service.Resource.ConfigMap.MinimumReloadTime, 2*time.Minute, "Minimum time between reloads of Prometheus.")
-
-	daemonCommand.PersistentFlags().Duration(f.Service.Controller.ControllerBackOffDuration, time.Minute*5, "Maximum backoff duration for controller.")
-	daemonCommand.PersistentFlags().Duration(f.Service.Controller.FrameworkBackOffDuration, time.Minute*5, "Maximum backoff duration for operator framework.")
-	daemonCommand.PersistentFlags().Duration(f.Service.Controller.ResyncPeriod, time.Minute*3, "Controller resync period.")
 
 	newCommand.CobraCommand().Execute()
 

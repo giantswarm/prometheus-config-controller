@@ -1,8 +1,7 @@
-package v1
+package controller
 
 import (
 	"os"
-	"time"
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -14,13 +13,11 @@ import (
 	"github.com/spf13/afero"
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/prometheus"
 	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/resource/certificate"
 	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/resource/configmap"
-	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/resource/reloadonce"
 )
 
-type ResourceSetConfig struct {
+type prometheusResourceSetConfig struct {
 	K8sClient kubernetes.Interface
 	Logger    micrologger.Logger
 
@@ -31,40 +28,17 @@ type ResourceSetConfig struct {
 	CertDirectory      string
 	CertNamespace      string
 	CertPermission     int
-	MinReloadTime      time.Duration
-	ProjectName        string
-	PrometheusAddress  string
 }
 
-func NewResourceSet(config ResourceSetConfig) (*controller.ResourceSet, error) {
+func newPrometheusResourceSet(config prometheusResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
-
-	var prometheusReloader prometheus.PrometheusReloader
-	{
-		c := prometheus.Config{
-			K8sClient: config.K8sClient,
-			Logger:    config.Logger,
-
-			Address:            config.PrometheusAddress,
-			ConfigMapKey:       config.ConfigMapKey,
-			ConfigMapName:      config.ConfigMapName,
-			ConfigMapNamespace: config.ConfigMapNamespace,
-			MinimumReloadTime:  config.MinReloadTime,
-		}
-
-		prometheusReloader, err = prometheus.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
 
 	var certificateResource resource.Interface
 	{
 		c := certificate.Config{
-			Fs:                 afero.NewOsFs(),
-			K8sClient:          config.K8sClient,
-			Logger:             config.Logger,
-			PrometheusReloader: prometheusReloader,
+			Fs:        afero.NewOsFs(),
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
 
 			CertComponentName: config.CertComponentName,
 			CertDirectory:     config.CertDirectory,
@@ -86,9 +60,8 @@ func NewResourceSet(config ResourceSetConfig) (*controller.ResourceSet, error) {
 	var configMapResource resource.Interface
 	{
 		c := configmap.Config{
-			K8sClient:          config.K8sClient,
-			Logger:             config.Logger,
-			PrometheusReloader: prometheusReloader,
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
 
 			CertDirectory:      config.CertDirectory,
 			ConfigMapKey:       config.ConfigMapKey,
@@ -102,21 +75,7 @@ func NewResourceSet(config ResourceSetConfig) (*controller.ResourceSet, error) {
 		}
 	}
 
-	var reloadOnceResouce resource.Interface
-	{
-		c := reloadonce.Config{
-			Logger:             config.Logger,
-			PrometheusReloader: prometheusReloader,
-		}
-
-		reloadOnceResouce, err = reloadonce.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	resources := []resource.Interface{
-		reloadOnceResouce,
 		certificateResource,
 		configMapResource,
 	}

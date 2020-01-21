@@ -1,4 +1,4 @@
-package reloadonce
+package reload
 
 import (
 	"context"
