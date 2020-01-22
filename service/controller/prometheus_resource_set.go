@@ -15,6 +15,7 @@ import (
 
 	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/resource/certificate"
 	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/resource/configmap"
+	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/resource/reload"
 )
 
 type prometheusResourceSetConfig struct {
@@ -28,6 +29,7 @@ type prometheusResourceSetConfig struct {
 	CertDirectory      string
 	CertNamespace      string
 	CertPermission     int
+	PrometheusAddress  string
 }
 
 func newPrometheusResourceSet(config prometheusResourceSetConfig) (*controller.ResourceSet, error) {
@@ -75,9 +77,27 @@ func newPrometheusResourceSet(config prometheusResourceSetConfig) (*controller.R
 		}
 	}
 
+	var reloadResource resource.Interface
+	{
+		c := reload.Config{
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
+
+			ConfigMapName:      config.ConfigMapName,
+			ConfigMapNamespace: config.ConfigMapNamespace,
+			PrometheusAddress:  config.PrometheusAddress,
+		}
+
+		reloadResource, err = reload.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	resources := []resource.Interface{
 		certificateResource,
 		configMapResource,
+		reloadResource,
 	}
 
 	{

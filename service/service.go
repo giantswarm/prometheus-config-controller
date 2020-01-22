@@ -44,7 +44,6 @@ type Service struct {
 	bootOnce             sync.Once
 	prometheusAddress    string
 	prometheusController *controller.Prometheus
-	reloaderController   *controller.Reloader
 }
 
 func New(config Config) (*Service, error) {
@@ -119,28 +118,13 @@ func New(config Config) (*Service, error) {
 			CertDirectory:      config.Viper.GetString(config.Flag.Service.Resource.Certificate.Directory),
 			CertNamespace:      config.Viper.GetString(config.Flag.Service.Resource.Certificate.Namespace),
 			CertPermission:     config.Viper.GetInt(config.Flag.Service.Resource.Certificate.Permission),
+			PrometheusAddress:  config.Viper.GetString(config.Flag.Service.Prometheus.Address),
 		}
 
 		prometheusController, err = controller.NewPrometheus(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-	}
-
-	var reloaderController *controller.Reloader
-	{
-		c := controller.ReloaderConfig{
-			K8sClient: k8sClient,
-			Logger:    config.Logger,
-
-			PrometheusAddress: config.Viper.GetString(config.Flag.Service.Prometheus.Address),
-		}
-
-		reloaderController, err = controller.NewReloader(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
 	}
 
 	var versionService *version.Service
@@ -170,7 +154,6 @@ func New(config Config) (*Service, error) {
 
 		prometheusAddress:    config.Viper.GetString(config.Flag.Service.Prometheus.Address),
 		prometheusController: prometheusController,
-		reloaderController:   reloaderController,
 	}
 
 	return s, nil
@@ -223,7 +206,6 @@ func (s *Service) boot(ctx context.Context) error {
 
 	s.bootOnce.Do(func() {
 		go s.prometheusController.Boot(ctx)
-		go s.reloaderController.Boot(ctx)
 	})
 
 	return nil

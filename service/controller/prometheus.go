@@ -23,6 +23,7 @@ type PrometheusConfig struct {
 	CertDirectory      string
 	CertNamespace      string
 	CertPermission     int
+	PrometheusAddress  string
 }
 
 type Prometheus struct {
@@ -32,6 +33,34 @@ type Prometheus struct {
 func NewPrometheus(config PrometheusConfig) (*Prometheus, error) {
 	if config.K8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
+	}
+	if config.Logger == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
+	}
+
+	if config.ConfigMapKey == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.ConfigMapKey must not be empty", config)
+	}
+	if config.ConfigMapName == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.ConfigMapName must not be empty", config)
+	}
+	if config.ConfigMapNamespace == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.ConfigMapNamespace must not be empty", config)
+	}
+	if config.CertComponentName == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CertComponentName must not be empty", config)
+	}
+	if config.CertDirectory == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CertDirectory must not be empty", config)
+	}
+	if config.CertNamespace == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CertNamespace must not be empty", config)
+	}
+	if config.CertPermission == 0 {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CertPermission must not be empty", config)
+	}
+	if config.PrometheusAddress == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.PrometheusAddress must not be empty", config)
 	}
 
 	var err error
@@ -49,6 +78,7 @@ func NewPrometheus(config PrometheusConfig) (*Prometheus, error) {
 			CertDirectory:      config.CertDirectory,
 			CertNamespace:      config.CertNamespace,
 			CertPermission:     config.CertPermission,
+			PrometheusAddress:  config.PrometheusAddress,
 		}
 
 		resourceSet, err = newPrometheusResourceSet(c)
