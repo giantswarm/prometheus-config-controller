@@ -6,11 +6,8 @@ import (
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/kubernetes"
-
-	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/prometheus"
 )
 
 const (
@@ -18,9 +15,8 @@ const (
 )
 
 type Config struct {
-	K8sClient          kubernetes.Interface
-	Logger             micrologger.Logger
-	PrometheusReloader prometheus.PrometheusReloader
+	K8sClient kubernetes.Interface
+	Logger    micrologger.Logger
 
 	CertDirectory string
 	// ConfigMapKey is the key in the configmap under which the prometheus configuration is held.
@@ -30,9 +26,8 @@ type Config struct {
 }
 
 type Resource struct {
-	k8sClient          kubernetes.Interface
-	logger             micrologger.Logger
-	prometheusReloader prometheus.PrometheusReloader
+	k8sClient kubernetes.Interface
+	logger    micrologger.Logger
 
 	certDirectory      string
 	configMapKey       string
@@ -46,9 +41,6 @@ func New(config Config) (*Resource, error) {
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
-	}
-	if config.PrometheusReloader == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.PrometheusReloader must not be empty")
 	}
 
 	if config.CertDirectory == "" {
@@ -65,9 +57,8 @@ func New(config Config) (*Resource, error) {
 	}
 
 	r := &Resource{
-		k8sClient:          config.K8sClient,
-		logger:             config.Logger,
-		prometheusReloader: config.PrometheusReloader,
+		k8sClient: config.K8sClient,
+		logger:    config.Logger,
 
 		certDirectory:      config.CertDirectory,
 		configMapKey:       config.ConfigMapKey,
@@ -118,25 +109,6 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updated ConfigMap %#q in namespace %#q", currentCM.GetName(), currentCM.GetNamespace()))
-	}
-
-	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "reloading prometheus configuration")
-
-		// We attempt to reload Prometheus even if the configmap hasn't updated,
-		// as the PrometheusReloader takes care that we don't reload too often.
-		err := r.prometheusReloader.Reload(ctx)
-		if prometheus.IsReloadThrottle(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not reload prometheus configuration")
-
-			r.logger.LogCtx(ctx, "level", "debug", "message", err.Error())
-			r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
-			finalizerskeptcontext.SetKept(ctx)
-		} else if err != nil {
-			return microerror.Mask(err)
-		} else {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "reloaded prometheus configuration")
-		}
 	}
 
 	return nil

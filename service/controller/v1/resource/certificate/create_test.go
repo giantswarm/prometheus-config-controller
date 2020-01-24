@@ -6,10 +6,8 @@ import (
 
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/spf13/afero"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes/fake"
-
-	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/prometheus/prometheustest"
 )
 
 // Test_Resource_Certificate_ApplyCreateChange tests the ApplyCreateChange method.
@@ -22,7 +20,6 @@ func Test_Resource_Certificate_ApplyCreateChange(t *testing.T) {
 	resourceConfig.Fs = fs
 	resourceConfig.K8sClient = fakeK8sClient
 	resourceConfig.Logger = microloggertest.New()
-	resourceConfig.PrometheusReloader = prometheustest.New()
 
 	resourceConfig.CertComponentName = "prometheus"
 	resourceConfig.CertDirectory = "/certs"

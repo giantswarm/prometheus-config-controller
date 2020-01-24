@@ -2,30 +2,14 @@ package certificate
 
 import (
 	"testing"
-	"time"
 
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/spf13/afero"
 	"k8s.io/client-go/kubernetes/fake"
-
-	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/prometheus"
 )
 
 // Test_Resource_Certificate_New tests the New function.
 func Test_Resource_Certificate_New(t *testing.T) {
-	prometheusReloaderConfig := prometheus.DefaultConfig()
-
-	prometheusReloaderConfig.K8sClient = fake.NewSimpleClientset()
-	prometheusReloaderConfig.Logger = microloggertest.New()
-
-	prometheusReloaderConfig.Address = "http://127.0.0.1:9090"
-	prometheusReloaderConfig.ConfigMapKey = "prometheus.yml"
-	prometheusReloaderConfig.ConfigMapName = "prometheus"
-	prometheusReloaderConfig.ConfigMapNamespace = "monitoring"
-	prometheusReloaderConfig.MinimumReloadTime = 2 * time.Minute
-
-	prometheusReloader, _ := prometheus.New(prometheusReloaderConfig)
-
 	tests := []struct {
 		config func() Config
 
@@ -42,10 +26,9 @@ func Test_Resource_Certificate_New(t *testing.T) {
 		{
 			config: func() Config {
 				return Config{
-					Fs:                 nil,
-					K8sClient:          fake.NewSimpleClientset(),
-					Logger:             microloggertest.New(),
-					PrometheusReloader: prometheusReloader,
+					Fs:        nil,
+					K8sClient: fake.NewSimpleClientset(),
+					Logger:    microloggertest.New(),
 
 					CertComponentName: "prometheus",
 					CertDirectory:     "/certs",
@@ -61,10 +44,9 @@ func Test_Resource_Certificate_New(t *testing.T) {
 		{
 			config: func() Config {
 				return Config{
-					Fs:                 afero.NewMemMapFs(),
-					K8sClient:          nil,
-					Logger:             microloggertest.New(),
-					PrometheusReloader: prometheusReloader,
+					Fs:        afero.NewMemMapFs(),
+					K8sClient: nil,
+					Logger:    microloggertest.New(),
 
 					CertComponentName: "prometheus",
 					CertDirectory:     "/certs",
@@ -80,29 +62,9 @@ func Test_Resource_Certificate_New(t *testing.T) {
 		{
 			config: func() Config {
 				return Config{
-					Fs:                 afero.NewMemMapFs(),
-					K8sClient:          fake.NewSimpleClientset(),
-					Logger:             nil,
-					PrometheusReloader: prometheusReloader,
-
-					CertComponentName: "prometheus",
-					CertDirectory:     "/certs",
-					CertNamespace:     "default",
-					CertPermission:    0600,
-				}
-			},
-
-			expectedErrorHandler: IsInvalidConfig,
-		},
-
-		// Test that the reloader must not be empty.
-		{
-			config: func() Config {
-				return Config{
-					Fs:                 afero.NewMemMapFs(),
-					K8sClient:          fake.NewSimpleClientset(),
-					Logger:             microloggertest.New(),
-					PrometheusReloader: nil,
+					Fs:        afero.NewMemMapFs(),
+					K8sClient: fake.NewSimpleClientset(),
+					Logger:    nil,
 
 					CertComponentName: "prometheus",
 					CertDirectory:     "/certs",
@@ -118,10 +80,9 @@ func Test_Resource_Certificate_New(t *testing.T) {
 		{
 			config: func() Config {
 				return Config{
-					Fs:                 afero.NewMemMapFs(),
-					K8sClient:          fake.NewSimpleClientset(),
-					Logger:             microloggertest.New(),
-					PrometheusReloader: prometheusReloader,
+					Fs:        afero.NewMemMapFs(),
+					K8sClient: fake.NewSimpleClientset(),
+					Logger:    microloggertest.New(),
 
 					CertComponentName: "",
 					CertDirectory:     "/certs",
@@ -137,10 +98,9 @@ func Test_Resource_Certificate_New(t *testing.T) {
 		{
 			config: func() Config {
 				return Config{
-					Fs:                 afero.NewMemMapFs(),
-					K8sClient:          fake.NewSimpleClientset(),
-					Logger:             microloggertest.New(),
-					PrometheusReloader: prometheusReloader,
+					Fs:        afero.NewMemMapFs(),
+					K8sClient: fake.NewSimpleClientset(),
+					Logger:    microloggertest.New(),
 
 					CertComponentName: "prometheus",
 					CertDirectory:     "",
@@ -156,10 +116,9 @@ func Test_Resource_Certificate_New(t *testing.T) {
 		{
 			config: func() Config {
 				return Config{
-					Fs:                 afero.NewMemMapFs(),
-					K8sClient:          fake.NewSimpleClientset(),
-					Logger:             microloggertest.New(),
-					PrometheusReloader: prometheusReloader,
+					Fs:        afero.NewMemMapFs(),
+					K8sClient: fake.NewSimpleClientset(),
+					Logger:    microloggertest.New(),
 
 					CertComponentName: "prometheus",
 					CertDirectory:     "/certs",
@@ -175,10 +134,9 @@ func Test_Resource_Certificate_New(t *testing.T) {
 		{
 			config: func() Config {
 				return Config{
-					Fs:                 afero.NewMemMapFs(),
-					K8sClient:          fake.NewSimpleClientset(),
-					Logger:             microloggertest.New(),
-					PrometheusReloader: prometheusReloader,
+					Fs:        afero.NewMemMapFs(),
+					K8sClient: fake.NewSimpleClientset(),
+					Logger:    microloggertest.New(),
 
 					CertComponentName: "prometheus",
 					CertDirectory:     "/certs",
@@ -194,10 +152,9 @@ func Test_Resource_Certificate_New(t *testing.T) {
 		{
 			config: func() Config {
 				return Config{
-					Fs:                 afero.NewMemMapFs(),
-					K8sClient:          fake.NewSimpleClientset(),
-					Logger:             microloggertest.New(),
-					PrometheusReloader: prometheusReloader,
+					Fs:        afero.NewMemMapFs(),
+					K8sClient: fake.NewSimpleClientset(),
+					Logger:    microloggertest.New(),
 
 					CertComponentName: "prometheus",
 					CertDirectory:     "/certs",
