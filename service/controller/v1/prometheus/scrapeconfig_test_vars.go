@@ -587,6 +587,11 @@ var (
 				SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 			},
 			{
+				SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringAppTypeLabel},
+				Regex:        config.MustNewRegexp(`(optional|default)`),
+				TargetLabel:  AppTypeLabel,
+			},
+			{
 				TargetLabel: ClusterIDLabel,
 				Replacement: "xa5ly",
 			},
