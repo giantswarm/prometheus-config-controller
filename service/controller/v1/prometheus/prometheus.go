@@ -50,6 +50,10 @@ var (
 	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes service presenting the annotation giantswarm_io_monitoring as true.
 	KubernetesSDServiceGiantSwarmMonitoringLabel = model.LabelName("__meta_kubernetes_service_annotation_giantswarm_io_monitoring")
 
+	// KubernetesSDServiceGiantSwarmMonitoringAppTypeLabel is the label applied to the target
+	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes service type of managed application (default, optional).
+	KubernetesSDServiceGiantSwarmMonitoringAppTypeLabel = model.LabelName("__meta_kubernetes_service_annotation_giantswarm_io_monitoring_app_type")
+
 	// KubernetesSDServiceGiantSwarmMonitoringPathLabel is the label applied to the target
 	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes service path.
 	KubernetesSDServiceGiantSwarmMonitoringPathLabel = model.LabelName("__meta_kubernetes_service_annotation_giantswarm_io_monitoring_path")
@@ -102,8 +106,12 @@ var (
 var (
 	// AddressLabel is the label used to hold target ip and port.
 	AddressLabel = "__address__"
+
 	// AppLabel is the label used to hold the application's name.
 	AppLabel = "app"
+
+	// AppTypeLabel is the label used to hold the type of managed application (optional, default), if applicable.
+	AppTypeLabel = "app_type"
 
 	// ClusterIDLabel is the label used to hold the cluster's ID.
 	ClusterIDLabel = "cluster_id"

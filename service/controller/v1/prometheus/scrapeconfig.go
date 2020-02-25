@@ -577,6 +577,12 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					TargetLabel:  PodNameLabel,
 					SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 				},
+				// Add application type label.
+				{
+					SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringAppTypeLabel},
+					Regex:        config.MustNewRegexp(`(optional|default)`),
+					TargetLabel:  AppTypeLabel,
+				},
 				// Add cluster_id label.
 				clusterIDLabelRelabelConfig,
 				// Add cluster_type label.
