@@ -647,7 +647,6 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				rewriteManagedAppMetricPath,
 			},
 		},
-
 	}
 	// check if we can add etcd monitoring
 
