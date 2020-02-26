@@ -39,6 +39,8 @@ const (
 	NodeExporterJobType = "node-exporter"
 	// WorkloadJobType is the job type for scraping general workloads.
 	WorkloadJobType = "workload"
+	// KubeStateManagedAppJobType is the job type for scraping kube-state-metrics-provided endpoints for managed apps.
+	KubeStateManagedAppJobType = "kube-state-managed-app"
 
 	// ActionKeep is action type that keeps only matching metrics.
 	ActionKeep = "keep"
@@ -397,6 +399,58 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 		},
 
 		{
+			JobName:                getJobName(service, KubeStateManagedAppJobType),
+			HTTPClientConfig:       secureHTTPClientConfig,
+			Scheme:                 HttpsScheme,
+			ServiceDiscoveryConfig: endpointSDConfig,
+			RelabelConfigs: []*config.RelabelConfig{
+				// Only keep kube-state-metrics targets.
+				{
+					SourceLabels: model.LabelNames{KubernetesSDNamespaceLabel, KubernetesSDServiceNameLabel},
+					Regex:        KubeStateMetricsServiceNameRegexp,
+					Action:       config.RelabelKeep,
+				},
+				// Add app label.
+				{
+					TargetLabel:  AppLabel,
+					SourceLabels: model.LabelNames{KubernetesSDServiceNameLabel},
+				},
+				// Add namespace label.
+				{
+					TargetLabel:  NamespaceLabel,
+					SourceLabels: model.LabelNames{KubernetesSDNamespaceLabel},
+				},
+				// Add pod_name label.
+				{
+					TargetLabel:  PodNameLabel,
+					SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
+				},
+				// Add app_type label.
+				{
+					SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringAppTypeLabel},
+					Regex:        config.MustNewRegexp(`(optional|default)`),
+					TargetLabel:  AppTypeLabel,
+				},
+				// Add cluster_id label.
+				clusterIDLabelRelabelConfig,
+				// Add cluster_type label.
+				clusterTypeLabelRelabelConfig,
+				// rewrite host to api proxy
+				rewriteAddress,
+				// rewrite metrics scrape path to connect pods
+				rewriteKubeStateMetricPath,
+			},
+			MetricRelabelConfigs: []*config.RelabelConfig{
+				// keep only kube-system cadvisor metrics
+				{
+					SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringPresentLabel},
+					Regex:        config.MustNewRegexp(`(true)`),
+					Action:       config.RelabelKeep,
+				},
+			},
+		},
+
+		{
 			JobName:                getJobName(service, NodeExporterJobType),
 			Scheme:                 HttpScheme,
 			ServiceDiscoveryConfig: endpointSDConfig,
@@ -593,6 +647,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				rewriteManagedAppMetricPath,
 			},
 		},
+
 	}
 	// check if we can add etcd monitoring
 

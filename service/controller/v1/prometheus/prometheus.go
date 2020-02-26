@@ -231,6 +231,9 @@ var (
 	// KubeStateMetricsPodNameRegexp is the regular expression to match kube-state-metrics pod name.
 	KubeStateMetricsPodNameRegexp = config.MustNewRegexp(`(kube-state-metrics.*)`)
 
+	// KubeStateMetricsServiceNameRegexpis the regular expression to match kube-state-metrics service name.
+	KubeStateMetricsServiceNameRegexp = config.MustNewRegexp(`(kube-system;kube-state-metrics)`)
+
 	// ChartOperatorPodNameRegexp is the regular expression to match chart-operator pod name.
 	ChartOperatorPodNameRegexp = config.MustNewRegexp(`(chart-operator.*)`)
 
