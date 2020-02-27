@@ -140,12 +140,8 @@
     target_label: namespace
   - source_labels: [__meta_kubernetes_pod_name]
     target_label: pod_name
-  - source_labels: [__meta_kubernetes_service_annotation_giantswarm_io_monitoring_app_type]
-    regex: (optional|default)
-    target_label: app_type
-  - source_labels: [__meta_kubernetes_service_annotationpresent_giantswarm_io_monitoring]
-    regex: (true)
-    target_label: is_managed_app
+  - target_label: is_managed_app
+    replacement: extra_ksm
   - target_label: cluster_id
     replacement: xa5ly
   - target_label: cluster_type
@@ -156,10 +152,6 @@
     regex: (kube-state-metrics.*)
     target_label: __metrics_path__
     replacement: /api/v1/namespaces/kube-system/pods/${1}:10301/proxy/metrics
-  metric_relabel_configs:
-  - source_labels: [is_managed_app]
-    regex: (true)
-    action: keep
 - job_name: guest-cluster-xa5ly-kubelet
   scheme: https
   kubernetes_sd_configs:

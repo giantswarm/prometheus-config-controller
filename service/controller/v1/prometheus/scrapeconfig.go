@@ -425,17 +425,10 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					TargetLabel:  PodNameLabel,
 					SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 				},
-				// Add app_type label.
-				{
-					SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringAppTypeLabel},
-					Regex:        config.MustNewRegexp(`(optional|default)`),
-					TargetLabel:  AppTypeLabel,
-				},
 				// Add is_managed_app label.
 				{
-					SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringPresentLabel},
-					Regex:        config.MustNewRegexp(`(true)`),
-					TargetLabel:  AppIsManaged,
+					TargetLabel: AppIsManaged,
+					Replacement: "extra_ksm",
 				},
 				// Add cluster_id label.
 				clusterIDLabelRelabelConfig,
@@ -445,14 +438,6 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				rewriteAddress,
 				// rewrite metrics scrape path to connect pods
 				rewriteKubeStateMetricPath,
-			},
-			MetricRelabelConfigs: []*config.RelabelConfig{
-				// keep only kube-state-metrics stuff that has AppIsManaged label.
-				{
-					SourceLabels: model.LabelNames{model.LabelName(AppIsManaged)},
-					Regex:        config.MustNewRegexp(`(true)`),
-					Action:       config.RelabelKeep,
-				},
 			},
 		},
 

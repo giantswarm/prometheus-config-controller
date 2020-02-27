@@ -669,14 +669,8 @@ var (
 				SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 			},
 			{
-				SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringAppTypeLabel},
-				Regex:        config.MustNewRegexp(`(optional|default)`),
-				TargetLabel:  AppTypeLabel,
-			},
-			{
-				SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringPresentLabel},
-				Regex:        config.MustNewRegexp(`(true)`),
-				TargetLabel:  AppIsManaged,
+				TargetLabel: AppIsManaged,
+				Replacement: "extra_ksm",
 			},
 			{
 				TargetLabel: ClusterIDLabel,
@@ -695,13 +689,6 @@ var (
 				Regex:        KubeStateMetricsPodNameRegexp,
 				TargetLabel:  MetricPathLabel,
 				Replacement:  key.APIProxyPodMetricsPath(key.KubeStateMetricsNamespace, key.KubeStateMetricsPort),
-			},
-		},
-		MetricRelabelConfigs: []*config.RelabelConfig{
-			{
-				SourceLabels: model.LabelNames{model.LabelName(AppIsManaged)},
-				Regex:        config.MustNewRegexp(`(true)`),
-				Action:       config.RelabelKeep,
 			},
 		},
 	}
