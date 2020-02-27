@@ -674,6 +674,11 @@ var (
 				TargetLabel:  AppTypeLabel,
 			},
 			{
+				SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringPresentLabel},
+				Regex:        config.MustNewRegexp(`(true)`),
+				TargetLabel:  AppIsManaged,
+			},
+			{
 				TargetLabel: ClusterIDLabel,
 				Replacement: "xa5ly",
 			},
@@ -694,7 +699,7 @@ var (
 		},
 		MetricRelabelConfigs: []*config.RelabelConfig{
 			{
-				SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringPresentLabel},
+				SourceLabels: model.LabelNames{model.LabelName(AppIsManaged)},
 				Regex:        config.MustNewRegexp(`(true)`),
 				Action:       config.RelabelKeep,
 			},

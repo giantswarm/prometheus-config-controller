@@ -431,6 +431,12 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					Regex:        config.MustNewRegexp(`(optional|default)`),
 					TargetLabel:  AppTypeLabel,
 				},
+				// Add is_managed_app label.
+				{
+					SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringPresentLabel},
+					Regex:        config.MustNewRegexp(`(true)`),
+					TargetLabel:  AppIsManaged,
+				},
 				// Add cluster_id label.
 				clusterIDLabelRelabelConfig,
 				// Add cluster_type label.
@@ -441,9 +447,9 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				rewriteKubeStateMetricPath,
 			},
 			MetricRelabelConfigs: []*config.RelabelConfig{
-				// keep only kube-system cadvisor metrics
+				// keep only kube-state-metrics stuff that has AppIsManaged label.
 				{
-					SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringPresentLabel},
+					SourceLabels: model.LabelNames{model.LabelName(AppIsManaged)},
 					Regex:        config.MustNewRegexp(`(true)`),
 					Action:       config.RelabelKeep,
 				},
