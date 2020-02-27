@@ -232,6 +232,9 @@
   - source_labels: [__meta_kubernetes_service_annotation_giantswarm_io_monitoring_app_type]
     regex: (optional|default)
     target_label: app_type
+  - source_labels: [__meta_kubernetes_service_annotationpresent_giantswarm_io_monitoring]
+    regex: (true)
+    target_label: is_managed_app
   - target_label: cluster_id
     replacement: xa5ly
   - target_label: cluster_type

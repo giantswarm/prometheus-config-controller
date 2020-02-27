@@ -592,6 +592,11 @@ var (
 				TargetLabel:  AppTypeLabel,
 			},
 			{
+				SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringPresentLabel},
+				Regex:        config.MustNewRegexp(`(true)`),
+				TargetLabel:  AppIsManaged,
+			},
+			{
 				TargetLabel: ClusterIDLabel,
 				Replacement: "xa5ly",
 			},

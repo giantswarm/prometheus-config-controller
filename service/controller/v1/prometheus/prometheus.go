@@ -107,6 +107,10 @@ var (
 	// AddressLabel is the label used to hold target ip and port.
 	AddressLabel = "__address__"
 
+	// AppIsManaged is the label used to mark metrics coming from managed apps marked with "giantswarm.io/monitoring"
+	// k8s annotation.
+	AppIsManaged = "is_managed_app"
+
 	// AppLabel is the label used to hold the application's name.
 	AppLabel = "app"
 
