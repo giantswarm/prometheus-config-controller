@@ -691,6 +691,11 @@ var (
 				Replacement:  key.APIProxyPodMetricsPath(key.KubeStateMetricsNamespace, key.KubeStateMetricsPort),
 			},
 		},
+		MetricRelabelConfigs: []*config.RelabelConfig{
+			{
+				Action: ActionDrop,
+			},
+		},
 	}
 )
 

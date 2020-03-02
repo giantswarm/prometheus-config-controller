@@ -439,6 +439,11 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				// rewrite metrics scrape path to connect pods
 				rewriteKubeStateMetricPath,
 			},
+			MetricRelabelConfigs: []*config.RelabelConfig{
+				{
+					Action: ActionDrop,
+				},
+			},
 		},
 
 		{
