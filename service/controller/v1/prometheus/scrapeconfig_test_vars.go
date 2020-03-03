@@ -669,8 +669,8 @@ var (
 				SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 			},
 			{
-				TargetLabel: AppIsManaged,
-				Replacement: "extra_ksm",
+				TargetLabel: KubeStateMetricsForManagedApps,
+				Replacement: "true",
 			},
 			{
 				TargetLabel: ClusterIDLabel,
@@ -693,7 +693,27 @@ var (
 		},
 		MetricRelabelConfigs: []*config.RelabelConfig{
 			{
-				Action: ActionDrop,
+				SourceLabels: model.LabelNames{MetricNameLabel},
+				Regex:        KubeStateMetricsManagedAppMetricsNameRegexp,
+				Action:       ActionKeep,
+			},
+			{
+				SourceLabels: model.LabelNames{DeploymentTypeLabel},
+				Regex:        NonEmptyRegexp,
+				TargetLabel:  ManagedAppWorkloadTypeLabel,
+				Replacement:  ManagedAppsDeployment,
+			},
+			{
+				SourceLabels: model.LabelNames{DaemonSetTypeLabel},
+				Regex:        NonEmptyRegexp,
+				TargetLabel:  ManagedAppWorkloadTypeLabel,
+				Replacement:  ManagedAppsDaemonSet,
+			},
+			{
+				SourceLabels: model.LabelNames{StatefulSetTypeLabel},
+				Regex:        NonEmptyRegexp,
+				TargetLabel:  ManagedAppWorkloadTypeLabel,
+				Replacement:  ManagedAppsStatefulSet,
 			},
 		},
 	}

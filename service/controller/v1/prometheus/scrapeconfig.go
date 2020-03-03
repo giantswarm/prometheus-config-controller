@@ -425,10 +425,10 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					TargetLabel:  PodNameLabel,
 					SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 				},
-				// Add is_managed_app label.
+				// Add kube_state_metrics_for_managed_apps label.
 				{
-					TargetLabel: AppIsManaged,
-					Replacement: "extra_ksm",
+					TargetLabel: KubeStateMetricsForManagedApps,
+					Replacement: "true",
 				},
 				// Add cluster_id label.
 				clusterIDLabelRelabelConfig,
@@ -440,8 +440,30 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				rewriteKubeStateMetricPath,
 			},
 			MetricRelabelConfigs: []*config.RelabelConfig{
+				// keep only metrics with names listed in KubeStateMetricsManagedAppMetricsNameRegexp
 				{
-					Action: ActionDrop,
+					SourceLabels: model.LabelNames{MetricNameLabel},
+					Regex:        KubeStateMetricsManagedAppMetricsNameRegexp,
+					Action:       ActionKeep,
+				},
+				// apply correct workload type label
+				{
+					SourceLabels: model.LabelNames{DeploymentTypeLabel},
+					Regex: NonEmptyRegexp,
+					TargetLabel: ManagedAppWorkloadTypeLabel,
+					Replacement: ManagedAppsDeployment,
+				},
+				{
+					SourceLabels: model.LabelNames{DaemonSetTypeLabel},
+					Regex: NonEmptyRegexp,
+					TargetLabel: ManagedAppWorkloadTypeLabel,
+					Replacement: ManagedAppsDaemonSet,
+				},
+				{
+					SourceLabels: model.LabelNames{StatefulSetTypeLabel},
+					Regex: NonEmptyRegexp,
+					TargetLabel: ManagedAppWorkloadTypeLabel,
+					Replacement: ManagedAppsStatefulSet,
 				},
 			},
 		},
