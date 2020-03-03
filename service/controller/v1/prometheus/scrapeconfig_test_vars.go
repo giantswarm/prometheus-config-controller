@@ -657,18 +657,6 @@ var (
 				Action:       config.RelabelKeep,
 			},
 			{
-				TargetLabel:  AppLabel,
-				SourceLabels: model.LabelNames{KubernetesSDServiceNameLabel},
-			},
-			{
-				TargetLabel:  NamespaceLabel,
-				SourceLabels: model.LabelNames{KubernetesSDNamespaceLabel},
-			},
-			{
-				TargetLabel:  PodNameLabel,
-				SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
-			},
-			{
 				TargetLabel: KubeStateMetricsForManagedApps,
 				Replacement: "true",
 			},
@@ -696,6 +684,10 @@ var (
 				SourceLabels: model.LabelNames{MetricNameLabel},
 				Regex:        KubeStateMetricsManagedAppMetricsNameRegexp,
 				Action:       ActionKeep,
+			},
+			{
+				SourceLabels: model.LabelNames{MetricExportedNamespaceLabel},
+				TargetLabel:  NamespaceLabel,
 			},
 			{
 				SourceLabels: model.LabelNames{DeploymentTypeLabel},

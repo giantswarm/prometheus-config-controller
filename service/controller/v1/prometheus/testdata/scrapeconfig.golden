@@ -134,12 +134,6 @@
   - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name]
     regex: (kube-system;kube-state-metrics)
     action: keep
-  - source_labels: [__meta_kubernetes_service_name]
-    target_label: app
-  - source_labels: [__meta_kubernetes_namespace]
-    target_label: namespace
-  - source_labels: [__meta_kubernetes_pod_name]
-    target_label: pod_name
   - target_label: kube_state_metrics_for_managed_app
     replacement: "true"
   - target_label: cluster_id
@@ -156,6 +150,8 @@
   - source_labels: [__name__]
     regex: (kube_deployment_status_replicas_unavailable|kube_deployment_labels|kube_daemonset_status_number_unavailable|kube_daemonset_labels|kube_statefulset_status_replicas|kube_statefulset_status_replicas_current|kube_statefulset_labels)
     action: keep
+  - source_labels: [exported_namespace]
+    target_label: namespace
   - source_labels: [deployment]
     regex: (.+)
     target_label: workload_type

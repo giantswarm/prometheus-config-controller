@@ -410,21 +410,6 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					Regex:        KubeStateMetricsServiceNameRegexp,
 					Action:       config.RelabelKeep,
 				},
-				// Add app label.
-				{
-					TargetLabel:  AppLabel,
-					SourceLabels: model.LabelNames{KubernetesSDServiceNameLabel},
-				},
-				// Add namespace label.
-				{
-					TargetLabel:  NamespaceLabel,
-					SourceLabels: model.LabelNames{KubernetesSDNamespaceLabel},
-				},
-				// Add pod_name label.
-				{
-					TargetLabel:  PodNameLabel,
-					SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
-				},
 				// Add kube_state_metrics_for_managed_apps label.
 				{
 					TargetLabel: KubeStateMetricsForManagedApps,
@@ -445,6 +430,11 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					SourceLabels: model.LabelNames{MetricNameLabel},
 					Regex:        KubeStateMetricsManagedAppMetricsNameRegexp,
 					Action:       ActionKeep,
+				},
+				// copy exported_namespace as namespace
+				{
+					SourceLabels: model.LabelNames{MetricExportedNamespaceLabel},
+					TargetLabel:  NamespaceLabel,
 				},
 				// apply correct workload type label
 				{
