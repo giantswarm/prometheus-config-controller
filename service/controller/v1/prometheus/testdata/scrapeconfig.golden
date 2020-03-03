@@ -154,28 +154,20 @@
     replacement: /api/v1/namespaces/kube-system/pods/${1}:10301/proxy/metrics
   metric_relabel_configs:
   - source_labels: [__name__]
-    separator: ;
     regex: (kube_deployment_status_replicas_unavailable|kube_deployment_labels|kube_daemonset_status_number_unavailable|kube_daemonse    t_labels|kube_statefulset_status_replicas|kube_statefulset_status_replicas_current|kube_statefulset_labels)
-    replacement: $1
     action: keep
   - source_labels: [deployment]
-    separator: ;
     regex: (.+)
     target_label: workload_type
     replacement: deployment
-    action: replace
   - source_labels: [daemonset]
-    separator: ;
     regex: (.+)
     target_label: workload_type
     replacement: daemonset
-    action: replace
   - source_labels: [statefulset]
-    separator: ;
     regex: (.+)
     target_label: workload_type
     replacement: statefulset
-    action: replace
 - job_name: guest-cluster-xa5ly-kubelet
   scheme: https
   kubernetes_sd_configs:
