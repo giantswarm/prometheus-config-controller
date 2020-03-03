@@ -265,7 +265,7 @@ var (
 	KubeStateMetricsServiceNameRegexp = config.MustNewRegexp(`(kube-system;kube-state-metrics)`)
 
 	// KubeStateMetricsManagedAppMetricsNameRegexp is the regular expression to keep only KSM metrics realted to SLI of managed apps.
-	KubeStateMetricsManagedAppMetricsNameRegexp = config.MustNewRegexp(`(kube_deployment_status_replicas_unavailable|kube_deployment_labels|kube_daemonset_status_number_unavailable|kube_daemonse    t_labels|kube_statefulset_status_replicas|kube_statefulset_status_replicas_current|kube_statefulset_labels)`)
+	KubeStateMetricsManagedAppMetricsNameRegexp = config.MustNewRegexp(`(kube_deployment_status_replicas_unavailable|kube_deployment_labels|kube_daemonset_status_number_unavailable|kube_daemonset_labels|kube_statefulset_status_replicas|kube_statefulset_status_replicas_current|kube_statefulset_labels)`)
 
 	// ChartOperatorPodNameRegexp is the regular expression to match chart-operator pod name.
 	ChartOperatorPodNameRegexp = config.MustNewRegexp(`(chart-operator.*)`)
