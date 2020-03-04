@@ -462,6 +462,12 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 			Scheme:                 HttpsScheme,
 			ServiceDiscoveryConfig: endpointSDConfig,
 			RelabelConfigs: []*config.RelabelConfig{
+				// Add Node Label
+				{
+					SourceLabels: model.LabelNames{KubernetesSDNamespaceLabel, KubernetesSDServiceNameLabel},
+					Regex:        ServiceWhitelistRegexp,
+					Action:       config.RelabelKeep,
+				},
 				// Only keep kube-state-metrics targets.
 				{
 					SourceLabels: model.LabelNames{KubernetesSDNamespaceLabel, KubernetesSDServiceNameLabel},
@@ -482,6 +488,11 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				{
 					TargetLabel:  PodNameLabel,
 					SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
+				},
+				// Add node label.
+				{
+					TargetLabel:  NodeLabel,
+					SourceLabels: model.LabelNames{KubernetesSDPodNodeNameLabel},
 				},
 				// Add cluster_id label.
 				clusterIDLabelRelabelConfig,

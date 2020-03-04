@@ -34,6 +34,10 @@ var (
 	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes pod name.
 	KubernetesSDPodNameLabel = model.LabelName("__meta_kubernetes_pod_name")
 
+	// KubernetesSDPodNodeNameLabel is the label applied to the target
+	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes pod node name.
+	KubernetesSDPodNodeNameLabel = model.LabelName("__meta_kubernetes_pod_node_name")
+
 	// KubernetesSDServiceNameLabel is the label applied to the target
 	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes service.
 	KubernetesSDServiceNameLabel = model.LabelName("__meta_kubernetes_service_name")
@@ -122,8 +126,11 @@ var (
 	// MetricPathLabel is the label used to hold the scrape metrics path.
 	MetricPathLabel = "__metrics_path__"
 
-	// NamespaceLabel is the label used to hold the pod name.
+	// PodNameLabel is the label used to hold the pod name.
 	PodNameLabel = "pod_name"
+
+	// Node is the label used to hold the node name.
+	NodeLabel = "node"
 
 	// RoleLabel is the label used to hold the machine's role.
 	RoleLabel = "role"
