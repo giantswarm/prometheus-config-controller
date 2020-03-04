@@ -129,7 +129,7 @@ var (
 	// PodNameLabel is the label used to hold the pod name.
 	PodNameLabel = "pod_name"
 
-	// Node is the label used to hold the node name.
+	// NodeLabel is the label used to hold the node name.
 	NodeLabel = "node"
 
 	// RoleLabel is the label used to hold the machine's role.
