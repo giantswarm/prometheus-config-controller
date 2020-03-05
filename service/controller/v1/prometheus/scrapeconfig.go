@@ -455,6 +455,25 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					TargetLabel:  ManagedAppWorkloadTypeLabel,
 					Replacement:  ManagedAppsStatefulSet,
 				},
+				// copy type-specific workload name label into generic "workload_name"
+				{
+					SourceLabels: model.LabelNames{DeploymentTypeLabel},
+					Regex:        NonEmptyRegexp,
+					TargetLabel:  ManagedAppWorkloadNameLabel,
+					Replacement:  GroupCapture,
+				},
+				{
+					SourceLabels: model.LabelNames{DaemonSetTypeLabel},
+					Regex:        NonEmptyRegexp,
+					TargetLabel:  ManagedAppWorkloadNameLabel,
+					Replacement:  GroupCapture,
+				},
+				{
+					SourceLabels: model.LabelNames{StatefulSetTypeLabel},
+					Regex:        NonEmptyRegexp,
+					TargetLabel:  ManagedAppWorkloadNameLabel,
+					Replacement:  GroupCapture,
+				},
 			},
 		},
 

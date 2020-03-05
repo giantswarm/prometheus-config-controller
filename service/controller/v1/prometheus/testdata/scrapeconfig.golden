@@ -148,7 +148,7 @@
     replacement: /api/v1/namespaces/kube-system/pods/${1}:10301/proxy/metrics
   metric_relabel_configs:
   - source_labels: [__name__]
-    regex: (kube_deployment_status_replicas_unavailable|kube_deployment_labels|kube_daemonset_status_number_unavailable|kube_daemonset_labels|kube_statefulset_status_replicas|kube_statefulset_status_replicas_current|kube_statefulset_labels|kube_poddisruptionbudget_.*)
+    regex: (kube_deployment_status_replicas_unavailable|kube_deployment_labels|kube_daemonset_status_number_unavailable|kube_daemonset_labels|kube_statefulset_status_replicas|kube_statefulset_status_replicas_current|kube_statefulset_labels)
     action: keep
   - source_labels: [exported_namespace]
     target_label: namespace

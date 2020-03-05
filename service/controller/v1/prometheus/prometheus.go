@@ -149,6 +149,9 @@ var (
 	// of a managed app.
 	ManagedAppWorkloadTypeLabel = "workload_type"
 
+	// ManagedAppWorkloadNameLabel is the label for storing any workload's name.
+	ManagedAppWorkloadNameLabel = "workload_name"
+
 	// MetricPathLabel is the label used to hold the scrape metrics path.
 	MetricPathLabel = "__metrics_path__"
 
@@ -265,7 +268,7 @@ var (
 	KubeStateMetricsServiceNameRegexp = config.MustNewRegexp(`(kube-system;kube-state-metrics)`)
 
 	// KubeStateMetricsManagedAppMetricsNameRegexp is the regular expression to keep only KSM metrics realted to SLI of managed apps.
-	KubeStateMetricsManagedAppMetricsNameRegexp = config.MustNewRegexp(`(kube_deployment_status_replicas_unavailable|kube_deployment_labels|kube_daemonset_status_number_unavailable|kube_daemonset_labels|kube_statefulset_status_replicas|kube_statefulset_status_replicas_current|kube_statefulset_labels|kube_poddisruptionbudget_.*)`)
+	KubeStateMetricsManagedAppMetricsNameRegexp = config.MustNewRegexp(`(kube_deployment_status_replicas_unavailable|kube_deployment_labels|kube_daemonset_status_number_unavailable|kube_daemonset_labels|kube_statefulset_status_replicas|kube_statefulset_status_replicas_current|kube_statefulset_labels)`)
 
 	// ChartOperatorPodNameRegexp is the regular expression to match chart-operator pod name.
 	ChartOperatorPodNameRegexp = config.MustNewRegexp(`(chart-operator.*)`)
