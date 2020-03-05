@@ -38,8 +38,6 @@ const (
 	PrefixApiServer = "apiserver"
 
 	AnnotationEtcdDomain = "giantswarm.io/etcd-domain"
-
-	LabelVersionBundle = "giantswarm.io/version-bundle"
 )
 
 func certPath(certificateDirectory, clusterID, suffix string) string {
