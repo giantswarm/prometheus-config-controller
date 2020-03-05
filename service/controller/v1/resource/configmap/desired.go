@@ -41,7 +41,7 @@ func (r *Resource) getDesiredState(ctx context.Context) (*corev1.ConfigMap, erro
 	r.logger.LogCtx(ctx, "debug", fmt.Sprintf("fetching all services"))
 
 	services, err := r.k8sClient.CoreV1().Services("").List(metav1.ListOptions{
-		LabelSelector: key.ServiceLabelSelector().String(),
+		LabelSelector: key.LabelSelectorService().String(),
 	})
 
 	if err != nil {

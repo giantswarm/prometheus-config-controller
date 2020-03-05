@@ -419,6 +419,10 @@ var (
 				SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 			},
 			{
+				TargetLabel:  NodeLabel,
+				SourceLabels: model.LabelNames{KubernetesSDPodNodeNameLabel},
+			},
+			{
 				TargetLabel: ClusterIDLabel,
 				Replacement: "xa5ly",
 			},

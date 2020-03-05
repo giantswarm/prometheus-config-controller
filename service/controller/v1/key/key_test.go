@@ -134,7 +134,31 @@ func Test_Key_KeyPath(t *testing.T) {
 	}
 }
 
-func Test_ServiceLabelSelector(t *testing.T) {
+func Test_LabelSelectorConfigMap(t *testing.T) {
+	testCases := []struct {
+		name                   string
+		expectedSelectorString string
+	}{
+		{
+			name:                   "case 0",
+			expectedSelectorString: "app=prometheus",
+		},
+	}
+
+	for i, tc := range testCases {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			t.Log(tc.name)
+
+			selectorString := LabelSelectorConfigMap().String()
+			if !reflect.DeepEqual(tc.expectedSelectorString, selectorString) {
+				t.Fatalf("tc.expectedSelectorString = %v, want %v", tc.expectedSelectorString, selectorString)
+			}
+
+		})
+	}
+}
+
+func Test_LabelSelectorService(t *testing.T) {
 	testCases := []struct {
 		name                   string
 		expectedSelectorString string
@@ -149,7 +173,7 @@ func Test_ServiceLabelSelector(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Log(tc.name)
 
-			selectorString := ServiceLabelSelector().String()
+			selectorString := LabelSelectorService().String()
 			if !reflect.DeepEqual(tc.expectedSelectorString, selectorString) {
 				t.Fatalf("tc.expectedSelectorString = %v, want %v", tc.expectedSelectorString, selectorString)
 			}

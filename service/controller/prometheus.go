@@ -1,8 +1,6 @@
 package controller
 
 import (
-	"time"
-
 	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -10,7 +8,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
-	v1 "github.com/giantswarm/prometheus-config-controller/service/controller/v1"
+	"github.com/giantswarm/prometheus-config-controller/pkg/project"
 	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/key"
 )
 
@@ -25,10 +23,7 @@ type PrometheusConfig struct {
 	CertDirectory      string
 	CertNamespace      string
 	CertPermission     int
-	MinReloadTime      time.Duration
-	ProjectName        string
 	PrometheusAddress  string
-	ResyncPeriod       time.Duration
 }
 
 type Prometheus struct {
@@ -39,12 +34,40 @@ func NewPrometheus(config PrometheusConfig) (*Prometheus, error) {
 	if config.K8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
 	}
+	if config.Logger == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
+	}
+
+	if config.ConfigMapKey == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.ConfigMapKey must not be empty", config)
+	}
+	if config.ConfigMapName == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.ConfigMapName must not be empty", config)
+	}
+	if config.ConfigMapNamespace == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.ConfigMapNamespace must not be empty", config)
+	}
+	if config.CertComponentName == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CertComponentName must not be empty", config)
+	}
+	if config.CertDirectory == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CertDirectory must not be empty", config)
+	}
+	if config.CertNamespace == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CertNamespace must not be empty", config)
+	}
+	if config.CertPermission == 0 {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CertPermission must not be empty", config)
+	}
+	if config.PrometheusAddress == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.PrometheusAddress must not be empty", config)
+	}
 
 	var err error
 
-	var resourceSetV1 *controller.ResourceSet
+	var resourceSet *controller.ResourceSet
 	{
-		c := v1.ResourceSetConfig{
+		c := prometheusResourceSetConfig{
 			K8sClient: config.K8sClient.K8sClient(),
 			Logger:    config.Logger,
 
@@ -55,12 +78,10 @@ func NewPrometheus(config PrometheusConfig) (*Prometheus, error) {
 			CertDirectory:      config.CertDirectory,
 			CertNamespace:      config.CertNamespace,
 			CertPermission:     config.CertPermission,
-			MinReloadTime:      config.MinReloadTime,
-			ProjectName:        config.ProjectName,
 			PrometheusAddress:  config.PrometheusAddress,
 		}
 
-		resourceSetV1, err = v1.NewResourceSet(c)
+		resourceSet, err = newPrometheusResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -75,11 +96,11 @@ func NewPrometheus(config PrometheusConfig) (*Prometheus, error) {
 			},
 			Logger: config.Logger,
 			ResourceSets: []*controller.ResourceSet{
-				resourceSetV1,
+				resourceSet,
 			},
-			Selector: key.ServiceLabelSelector(),
+			Selector: key.LabelSelectorService(),
 
-			Name: config.ProjectName,
+			Name: project.Name(),
 		}
 
 		operatorkitController, err = controller.New(c)

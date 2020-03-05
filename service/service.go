@@ -118,10 +118,7 @@ func New(config Config) (*Service, error) {
 			CertDirectory:      config.Viper.GetString(config.Flag.Service.Resource.Certificate.Directory),
 			CertNamespace:      config.Viper.GetString(config.Flag.Service.Resource.Certificate.Namespace),
 			CertPermission:     config.Viper.GetInt(config.Flag.Service.Resource.Certificate.Permission),
-			MinReloadTime:      config.Viper.GetDuration(config.Flag.Service.Resource.ConfigMap.MinimumReloadTime),
-			ProjectName:        config.ProjectName,
 			PrometheusAddress:  config.Viper.GetString(config.Flag.Service.Prometheus.Address),
-			ResyncPeriod:       config.Viper.GetDuration(config.Flag.Service.Controller.ResyncPeriod),
 		}
 
 		prometheusController, err = controller.NewPrometheus(c)

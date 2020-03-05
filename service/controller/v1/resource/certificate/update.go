@@ -91,8 +91,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 		}
 	}
 
-	r.logger.LogCtx(ctx, "debug", "certificates have been updated, requesting reload")
-	r.prometheusReloader.RequestReload(ctx)
+	r.logger.LogCtx(ctx, "debug", "certificates have been updated")
 
 	return nil
 }
