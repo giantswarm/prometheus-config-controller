@@ -587,6 +587,16 @@ var (
 				SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 			},
 			{
+				SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringAppTypeLabel},
+				Regex:        config.MustNewRegexp(`(optional|default)`),
+				TargetLabel:  AppTypeLabel,
+			},
+			{
+				SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringPresentLabel},
+				Regex:        config.MustNewRegexp(`(true)`),
+				TargetLabel:  AppIsManaged,
+			},
+			{
 				TargetLabel: ClusterIDLabel,
 				Replacement: "xa5ly",
 			},
@@ -610,16 +620,124 @@ var (
 			},
 		},
 	}
+	TestConfigOneKubeStateManagedApp = config.ScrapeConfig{
+		JobName: "guest-cluster-xa5ly-kube-state-managed-app",
+		HTTPClientConfig: config.HTTPClientConfig{
+			TLSConfig: config.TLSConfig{
+				CAFile:             "/certs/xa5ly-ca.pem",
+				CertFile:           "/certs/xa5ly-crt.pem",
+				KeyFile:            "/certs/xa5ly-key.pem",
+				InsecureSkipVerify: false,
+			},
+		},
+		Scheme: "https",
+		ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
+			KubernetesSDConfigs: []*config.KubernetesSDConfig{
+				{
+					APIServer: config.URL{
+						URL: &url.URL{
+							Scheme: "https",
+							Host:   "apiserver.xa5ly",
+						},
+					},
+					Role: config.KubernetesRoleEndpoint,
+					TLSConfig: config.TLSConfig{
+						CAFile:             "/certs/xa5ly-ca.pem",
+						CertFile:           "/certs/xa5ly-crt.pem",
+						KeyFile:            "/certs/xa5ly-key.pem",
+						InsecureSkipVerify: false,
+					},
+				},
+			},
+		},
+		RelabelConfigs: []*config.RelabelConfig{
+			{
+				SourceLabels: model.LabelNames{KubernetesSDNamespaceLabel, KubernetesSDServiceNameLabel},
+				Regex:        KubeStateMetricsServiceNameRegexp,
+				Action:       config.RelabelKeep,
+			},
+			{
+				TargetLabel: KubeStateMetricsForManagedApps,
+				Replacement: "true",
+			},
+			{
+				TargetLabel: ClusterIDLabel,
+				Replacement: "xa5ly",
+			},
+			{
+				TargetLabel: ClusterTypeLabel,
+				Replacement: GuestClusterType,
+			},
+			{
+				TargetLabel: AddressLabel,
+				Replacement: key.APIServiceHost(key.PrefixMaster, "xa5ly"),
+			},
+			{
+				SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
+				Regex:        KubeStateMetricsPodNameRegexp,
+				TargetLabel:  MetricPathLabel,
+				Replacement:  key.APIProxyPodMetricsPath(key.KubeStateMetricsNamespace, key.KubeStateMetricsPort),
+			},
+		},
+		MetricRelabelConfigs: []*config.RelabelConfig{
+			{
+				SourceLabels: model.LabelNames{MetricNameLabel},
+				Regex:        KubeStateMetricsManagedAppMetricsNameRegexp,
+				Action:       ActionKeep,
+			},
+			{
+				SourceLabels: model.LabelNames{MetricExportedNamespaceLabel},
+				TargetLabel:  NamespaceLabel,
+			},
+			{
+				SourceLabels: model.LabelNames{DeploymentTypeLabel},
+				Regex:        NonEmptyRegexp,
+				TargetLabel:  ManagedAppWorkloadTypeLabel,
+				Replacement:  ManagedAppsDeployment,
+			},
+			{
+				SourceLabels: model.LabelNames{DaemonSetTypeLabel},
+				Regex:        NonEmptyRegexp,
+				TargetLabel:  ManagedAppWorkloadTypeLabel,
+				Replacement:  ManagedAppsDaemonSet,
+			},
+			{
+				SourceLabels: model.LabelNames{StatefulSetTypeLabel},
+				Regex:        NonEmptyRegexp,
+				TargetLabel:  ManagedAppWorkloadTypeLabel,
+				Replacement:  ManagedAppsStatefulSet,
+			},
+			{
+				SourceLabels: model.LabelNames{DeploymentTypeLabel},
+				Regex:        NonEmptyRegexp,
+				TargetLabel:  ManagedAppWorkloadNameLabel,
+				Replacement:  GroupCapture,
+			},
+			{
+				SourceLabels: model.LabelNames{DaemonSetTypeLabel},
+				Regex:        NonEmptyRegexp,
+				TargetLabel:  ManagedAppWorkloadNameLabel,
+				Replacement:  GroupCapture,
+			},
+			{
+				SourceLabels: model.LabelNames{StatefulSetTypeLabel},
+				Regex:        NonEmptyRegexp,
+				TargetLabel:  ManagedAppWorkloadNameLabel,
+				Replacement:  GroupCapture,
+			},
+		},
+	}
 )
 
 var (
-	TestConfigTwoApiserver    config.ScrapeConfig
-	TestConfigTwoCadvisor     config.ScrapeConfig
-	TestConfigTwoCalicoNode   config.ScrapeConfig
-	TestConfigTwoKubelet      config.ScrapeConfig
-	TestConfigTwoNodeExporter config.ScrapeConfig
-	TestConfigTwoWorkload     config.ScrapeConfig
-	TestConfigTwoManagedApp   config.ScrapeConfig
+	TestConfigTwoApiserver           config.ScrapeConfig
+	TestConfigTwoCadvisor            config.ScrapeConfig
+	TestConfigTwoCalicoNode          config.ScrapeConfig
+	TestConfigTwoKubelet             config.ScrapeConfig
+	TestConfigTwoNodeExporter        config.ScrapeConfig
+	TestConfigTwoWorkload            config.ScrapeConfig
+	TestConfigTwoManagedApp          config.ScrapeConfig
+	TestConfigTwoKubeStateManagedApp config.ScrapeConfig
 )
 
 func init() {
@@ -632,6 +750,7 @@ func init() {
 	TestConfigTwoNodeExporter = TestConfigOneNodeExporter
 	TestConfigTwoWorkload = TestConfigOneWorkload
 	TestConfigTwoManagedApp = TestConfigOneManagedApp
+	TestConfigTwoKubeStateManagedApp = TestConfigOneKubeStateManagedApp
 
 	apiServer := config.URL{URL: &url.URL{
 		Scheme: "https",
@@ -766,7 +885,9 @@ func init() {
 			newRelabelConfig.Replacement = strings.ReplaceAll(r.Replacement, "xa5ly", clusterID)
 			TestConfigTwoWorkload.RelabelConfigs = append(TestConfigTwoWorkload.RelabelConfigs, &newRelabelConfig)
 		}
+	}
 
+	{
 		{
 			TestConfigTwoManagedApp.JobName = "guest-cluster-0ba9v-managed-app"
 			TestConfigTwoManagedApp.HTTPClientConfig.TLSConfig = tlsConfig
@@ -784,6 +905,28 @@ func init() {
 				newRelabelConfig := *r
 				newRelabelConfig.Replacement = strings.ReplaceAll(r.Replacement, "xa5ly", clusterID)
 				TestConfigTwoManagedApp.RelabelConfigs = append(TestConfigTwoManagedApp.RelabelConfigs, &newRelabelConfig)
+			}
+		}
+	}
+
+	{
+		{
+			TestConfigTwoKubeStateManagedApp.JobName = "guest-cluster-0ba9v-kube-state-managed-app"
+			TestConfigTwoKubeStateManagedApp.HTTPClientConfig.TLSConfig = tlsConfig
+			TestConfigTwoKubeStateManagedApp.ServiceDiscoveryConfig.KubernetesSDConfigs = []*config.KubernetesSDConfig{
+				{
+					APIServer: apiServer,
+					Role:      config.KubernetesRoleEndpoint,
+					TLSConfig: tlsConfig,
+				},
+			}
+
+			// Deepcopy relabel configs and change clusterID to match second test config.
+			TestConfigTwoKubeStateManagedApp.RelabelConfigs = nil
+			for _, r := range TestConfigOneKubeStateManagedApp.RelabelConfigs {
+				newRelabelConfig := *r
+				newRelabelConfig.Replacement = strings.ReplaceAll(r.Replacement, "xa5ly", clusterID)
+				TestConfigTwoKubeStateManagedApp.RelabelConfigs = append(TestConfigTwoKubeStateManagedApp.RelabelConfigs, &newRelabelConfig)
 			}
 		}
 	}

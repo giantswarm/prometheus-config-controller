@@ -50,6 +50,10 @@ var (
 	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes service presenting the annotation giantswarm_io_monitoring as true.
 	KubernetesSDServiceGiantSwarmMonitoringLabel = model.LabelName("__meta_kubernetes_service_annotation_giantswarm_io_monitoring")
 
+	// KubernetesSDServiceGiantSwarmMonitoringAppTypeLabel is the label applied to the target
+	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes service type of managed application (default, optional).
+	KubernetesSDServiceGiantSwarmMonitoringAppTypeLabel = model.LabelName("__meta_kubernetes_service_annotation_giantswarm_io_monitoring_app_type")
+
 	// KubernetesSDServiceGiantSwarmMonitoringPathLabel is the label applied to the target
 	// by Prometheus Kubernetes service discovery that holds the target's Kubernetes service path.
 	KubernetesSDServiceGiantSwarmMonitoringPathLabel = model.LabelName("__meta_kubernetes_service_annotation_giantswarm_io_monitoring_path")
@@ -81,6 +85,12 @@ var (
 	MetricSystemdStateLabel = model.LabelName("state")
 	// MetricFSTypeLabel is a label for filtering by mount filesystem type.
 	MetricFSTypeLabel = model.LabelName("fstype")
+	// DeploymentTypeLabel is a label added by kube-state-metrics to Deployment related metrics.
+	DeploymentTypeLabel = model.LabelName("deployment")
+	// DaemonSetTypeLabel is a label added by kube-state-metrics to DaemonSet related metrics.
+	DaemonSetTypeLabel = model.LabelName("daemonset")
+	// StatefulSetTypeLabel is a label added by kube-state-metrics to StatefulSet related metrics.
+	StatefulSetTypeLabel = model.LabelName("statefulset")
 )
 
 // Prometheus POD service discovery labels.
@@ -102,8 +112,16 @@ var (
 var (
 	// AddressLabel is the label used to hold target ip and port.
 	AddressLabel = "__address__"
+
+	// AppIsManaged is the label used to mark metrics coming from managed apps marked with "giantswarm.io/monitoring"
+	// k8s annotation.
+	AppIsManaged = "is_managed_app"
+
 	// AppLabel is the label used to hold the application's name.
 	AppLabel = "app"
+
+	// AppTypeLabel is the label used to hold the type of managed application (optional, default), if applicable.
+	AppTypeLabel = "app_type"
 
 	// ClusterIDLabel is the label used to hold the cluster's ID.
 	ClusterIDLabel = "cluster_id"
@@ -117,11 +135,22 @@ var (
 	// IPLabel is the label used to hold the machine's IP.
 	IPLabel = "ip"
 
+	// KubeStateMetricsForManagedApps is the label used to mark metrics coming from kube-state-metrics
+	// for use with managed apps. They are used to show the basic "is deployment OK" metric.
+	KubeStateMetricsForManagedApps = "kube_state_metrics_for_managed_app"
+
 	// NamespaceLabel is the label used to hold the application's namespace.
 	NamespaceLabel = "namespace"
 
 	// NamespaceKubeSystemLabel is the label for kube-system namespace.
 	NamespaceKubeSystemLabel = "kube-system"
+
+	// ManagedAppWorkloadTypeLabel is the label for showing the workload type (deployment, statefulset, daemonset)
+	// of a managed app.
+	ManagedAppWorkloadTypeLabel = "workload_type"
+
+	// ManagedAppWorkloadNameLabel is the label for storing any workload's name.
+	ManagedAppWorkloadNameLabel = "workload_name"
 
 	// MetricPathLabel is the label used to hold the scrape metrics path.
 	MetricPathLabel = "__metrics_path__"
@@ -158,6 +187,15 @@ const (
 
 	// WorkerRole is the label value used for Kubernetes workers.
 	WorkerRole = "worker"
+
+	// ManagedAppsDeployment is the value used to indicate a managed app workload of type Deployment.
+	ManagedAppsDeployment = "deployment"
+
+	// ManagedAppsDaemonSet is the value used to indicate a managed app workload of type DaemonSet.
+	ManagedAppsDaemonSet = "daemonset"
+
+	// ManagedAppsStatefulSet is the value used to indicate a managed app workload of type StatefulSet.
+	ManagedAppsStatefulSet = "statefulset"
 )
 
 // Path replacements.
@@ -185,6 +223,9 @@ var (
 
 	// EmptyRegexp is the regular expression to match against the empty string.
 	EmptyRegexp = config.MustNewRegexp(``)
+
+	// NonEmptyRegexp is the regular expression to match against the non-empty string.
+	NonEmptyRegexp = config.MustNewRegexp(`(.+)`)
 
 	// KubeletPortRegexp is the regular expression to match against the
 	// Kubelet IP (including port), and capture the IP.
@@ -222,6 +263,12 @@ var (
 
 	// KubeStateMetricsPodNameRegexp is the regular expression to match kube-state-metrics pod name.
 	KubeStateMetricsPodNameRegexp = config.MustNewRegexp(`(kube-state-metrics.*)`)
+
+	// KubeStateMetricsServiceNameRegexpis the regular expression to match kube-state-metrics service name.
+	KubeStateMetricsServiceNameRegexp = config.MustNewRegexp(`(kube-system;kube-state-metrics)`)
+
+	// KubeStateMetricsManagedAppMetricsNameRegexp is the regular expression to keep only KSM metrics realted to SLI of managed apps.
+	KubeStateMetricsManagedAppMetricsNameRegexp = config.MustNewRegexp(`(kube_deployment_status_replicas_unavailable|kube_deployment_labels|kube_daemonset_status_number_unavailable|kube_daemonset_labels|kube_statefulset_status_replicas|kube_statefulset_status_replicas_current|kube_statefulset_labels)`)
 
 	// ChartOperatorPodNameRegexp is the regular expression to match chart-operator pod name.
 	ChartOperatorPodNameRegexp = config.MustNewRegexp(`(chart-operator.*)`)

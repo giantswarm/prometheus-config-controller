@@ -113,6 +113,69 @@
     regex: (calico-node.*)
     target_label: __metrics_path__
     replacement: /api/v1/namespaces/kube-system/pods/${1}:9091/proxy/metrics
+- job_name: guest-cluster-xa5ly-kube-state-managed-app
+  scheme: https
+  kubernetes_sd_configs:
+  - api_server: https://apiserver.xa5ly
+    role: endpoints
+    tls_config:
+      ca_file: /certs/xa5ly-ca.pem
+      cert_file: /certs/xa5ly-crt.pem
+      key_file: /certs/xa5ly-key.pem
+      insecure_skip_verify: false
+    namespaces:
+      names: []
+  tls_config:
+    ca_file: /certs/xa5ly-ca.pem
+    cert_file: /certs/xa5ly-crt.pem
+    key_file: /certs/xa5ly-key.pem
+    insecure_skip_verify: false
+  relabel_configs:
+  - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name]
+    regex: (kube-system;kube-state-metrics)
+    action: keep
+  - target_label: kube_state_metrics_for_managed_app
+    replacement: "true"
+  - target_label: cluster_id
+    replacement: xa5ly
+  - target_label: cluster_type
+    replacement: guest
+  - target_label: __address__
+    replacement: master.xa5ly:443
+  - source_labels: [__meta_kubernetes_pod_name]
+    regex: (kube-state-metrics.*)
+    target_label: __metrics_path__
+    replacement: /api/v1/namespaces/kube-system/pods/${1}:10301/proxy/metrics
+  metric_relabel_configs:
+  - source_labels: [__name__]
+    regex: (kube_deployment_status_replicas_unavailable|kube_deployment_labels|kube_daemonset_status_number_unavailable|kube_daemonset_labels|kube_statefulset_status_replicas|kube_statefulset_status_replicas_current|kube_statefulset_labels)
+    action: keep
+  - source_labels: [exported_namespace]
+    target_label: namespace
+  - source_labels: [deployment]
+    regex: (.+)
+    target_label: workload_type
+    replacement: deployment
+  - source_labels: [daemonset]
+    regex: (.+)
+    target_label: workload_type
+    replacement: daemonset
+  - source_labels: [statefulset]
+    regex: (.+)
+    target_label: workload_type
+    replacement: statefulset
+  - source_labels: [deployment]
+    regex: (.+)
+    target_label: workload_name
+    replacement: ${1}
+  - source_labels: [daemonset]
+    regex: (.+)
+    target_label: workload_name
+    replacement: ${1}
+  - source_labels: [statefulset]
+    regex: (.+)
+    target_label: workload_name
+    replacement: ${1}
 - job_name: guest-cluster-xa5ly-kubelet
   scheme: https
   kubernetes_sd_configs:
@@ -185,6 +248,12 @@
     target_label: namespace
   - source_labels: [__meta_kubernetes_pod_name]
     target_label: pod_name
+  - source_labels: [__meta_kubernetes_service_annotation_giantswarm_io_monitoring_app_type]
+    regex: (optional|default)
+    target_label: app_type
+  - source_labels: [__meta_kubernetes_service_annotationpresent_giantswarm_io_monitoring]
+    regex: (true)
+    target_label: is_managed_app
   - target_label: cluster_id
     replacement: xa5ly
   - target_label: cluster_type
