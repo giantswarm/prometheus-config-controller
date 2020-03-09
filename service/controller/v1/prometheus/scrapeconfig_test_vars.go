@@ -707,6 +707,24 @@ var (
 				TargetLabel:  ManagedAppWorkloadTypeLabel,
 				Replacement:  ManagedAppsStatefulSet,
 			},
+			{
+				SourceLabels: model.LabelNames{DeploymentTypeLabel},
+				Regex:        NonEmptyRegexp,
+				TargetLabel:  ManagedAppWorkloadNameLabel,
+				Replacement:  GroupCapture,
+			},
+			{
+				SourceLabels: model.LabelNames{DaemonSetTypeLabel},
+				Regex:        NonEmptyRegexp,
+				TargetLabel:  ManagedAppWorkloadNameLabel,
+				Replacement:  GroupCapture,
+			},
+			{
+				SourceLabels: model.LabelNames{StatefulSetTypeLabel},
+				Regex:        NonEmptyRegexp,
+				TargetLabel:  ManagedAppWorkloadNameLabel,
+				Replacement:  GroupCapture,
+			},
 		},
 	}
 )
