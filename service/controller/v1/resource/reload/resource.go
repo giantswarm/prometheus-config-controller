@@ -3,13 +3,15 @@ package reload
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"path"
 	"time"
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"gopkg.in/yaml.v2"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/key"
@@ -87,13 +89,17 @@ func (r *Resource) Name() string {
 }
 
 func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
-	var err error
-
 	var cm *corev1.ConfigMap
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding %#q ConfigMap in namespace %#q", r.configMapName, r.configMapNamespace))
+		filePath := path.Join(r.configMapPath, r.configMapName)
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding ConfigMap at %#q", filePath))
 
-		cm, err = r.k8sClient.CoreV1().ConfigMaps(r.configMapNamespace).Get(r.configMapName, metav1.GetOptions{})
+		content, err := ioutil.ReadFile(filePath)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		err = yaml.Unmarshal(content, cm)
 		if err != nil {
 			return microerror.Mask(err)
 		}
