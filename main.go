@@ -132,6 +132,7 @@ func mainError() error {
 	daemonCommand.PersistentFlags().String(f.Service.Resource.ConfigMap.Key, "prometheus.yml", "Key in configmap under which prometheus configuration is held.")
 	daemonCommand.PersistentFlags().String(f.Service.Resource.ConfigMap.Name, "prometheus", "Name of prometheus configmap to control.")
 	daemonCommand.PersistentFlags().String(f.Service.Resource.ConfigMap.Namespace, "monitoring", "Namespace of prometheus configmap to control.")
+	daemonCommand.PersistentFlags().String(f.Service.Resource.ConfigMap.Path, "/etc/prometheus", "Path of prometheus configmap to control.")
 
 	newCommand.CobraCommand().Execute()
 

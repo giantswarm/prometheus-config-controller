@@ -114,6 +114,7 @@ func New(config Config) (*Service, error) {
 			ConfigMapKey:       config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Key),
 			ConfigMapName:      config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Name),
 			ConfigMapNamespace: config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Namespace),
+			ConfigMapPath:      config.Viper.GetString(config.Flag.Service.Resource.ConfigMap.Path),
 			CertComponentName:  config.Viper.GetString(config.Flag.Service.Resource.Certificate.ComponentName),
 			CertDirectory:      config.Viper.GetString(config.Flag.Service.Resource.Certificate.Directory),
 			CertNamespace:      config.Viper.GetString(config.Flag.Service.Resource.Certificate.Namespace),

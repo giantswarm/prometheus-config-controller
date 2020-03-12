@@ -29,6 +29,7 @@ type Config struct {
 
 	ConfigMapName      string
 	ConfigMapNamespace string
+	ConfigMapPath      string
 	PrometheusAddress  string
 }
 
@@ -41,6 +42,7 @@ type Resource struct {
 
 	configMapName      string
 	configMapNamespace string
+	configMapPath      string
 	prometheusAddress  string
 }
 
@@ -58,6 +60,9 @@ func New(config Config) (*Resource, error) {
 	if config.ConfigMapNamespace == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.ConfigMapNamespace must not be empty", config)
 	}
+	if config.ConfigMapPath == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.ConfigMapPath must not be empty", config)
+	}
 	if config.PrometheusAddress == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.PrometheusAddress must not be empty", config)
 	}
@@ -70,6 +75,7 @@ func New(config Config) (*Resource, error) {
 
 		configMapName:      config.ConfigMapName,
 		configMapNamespace: config.ConfigMapNamespace,
+		configMapPath:      config.ConfigMapPath,
 		prometheusAddress:  config.PrometheusAddress,
 	}
 

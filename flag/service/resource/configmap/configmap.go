@@ -4,4 +4,5 @@ type ConfigMap struct {
 	Key       string
 	Name      string
 	Namespace string
+	Path      string
 }

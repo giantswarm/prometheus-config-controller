@@ -19,6 +19,7 @@ type PrometheusConfig struct {
 	ConfigMapKey       string
 	ConfigMapName      string
 	ConfigMapNamespace string
+	ConfigMapPath      string
 	CertComponentName  string
 	CertDirectory      string
 	CertNamespace      string
@@ -47,6 +48,9 @@ func NewPrometheus(config PrometheusConfig) (*Prometheus, error) {
 	if config.ConfigMapNamespace == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.ConfigMapNamespace must not be empty", config)
 	}
+	if config.ConfigMapPath == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.ConfigMapPath must not be empty", config)
+	}
 	if config.CertComponentName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.CertComponentName must not be empty", config)
 	}
@@ -74,6 +78,7 @@ func NewPrometheus(config PrometheusConfig) (*Prometheus, error) {
 			ConfigMapKey:       config.ConfigMapKey,
 			ConfigMapName:      config.ConfigMapName,
 			ConfigMapNamespace: config.ConfigMapNamespace,
+			ConfigMapPath:      config.ConfigMapPath,
 			CertComponentName:  config.CertComponentName,
 			CertDirectory:      config.CertDirectory,
 			CertNamespace:      config.CertNamespace,

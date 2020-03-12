@@ -25,6 +25,7 @@ type prometheusResourceSetConfig struct {
 	ConfigMapKey       string
 	ConfigMapName      string
 	ConfigMapNamespace string
+	ConfigMapPath      string
 	CertComponentName  string
 	CertDirectory      string
 	CertNamespace      string
@@ -85,6 +86,7 @@ func newPrometheusResourceSet(config prometheusResourceSetConfig) (*controller.R
 
 			ConfigMapName:      config.ConfigMapName,
 			ConfigMapNamespace: config.ConfigMapNamespace,
+			ConfigMapPath:      config.ConfigMapPath,
 			PrometheusAddress:  config.PrometheusAddress,
 		}
 
