@@ -84,6 +84,7 @@ func newPrometheusResourceSet(config prometheusResourceSetConfig) (*controller.R
 			K8sClient: config.K8sClient,
 			Logger:    config.Logger,
 
+			ConfigMapKey:       config.ConfigMapKey,
 			ConfigMapName:      config.ConfigMapName,
 			ConfigMapNamespace: config.ConfigMapNamespace,
 			ConfigMapPath:      config.ConfigMapPath,

@@ -29,6 +29,7 @@ type Config struct {
 	K8sClient kubernetes.Interface
 	Logger    micrologger.Logger
 
+	ConfigMapKey       string
 	ConfigMapName      string
 	ConfigMapNamespace string
 	ConfigMapPath      string
@@ -42,6 +43,7 @@ type Resource struct {
 	lastReloadTime                   time.Time
 	lastSeenConfigMapResourceVersion string
 
+	configMapKey       string
 	configMapName      string
 	configMapNamespace string
 	configMapPath      string
@@ -56,6 +58,9 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
+	if config.ConfigMapKey == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.ConfigMapKey must not be empty", config)
+	}
 	if config.ConfigMapName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.ConfigMapName must not be empty", config)
 	}
@@ -75,6 +80,7 @@ func New(config Config) (*Resource, error) {
 
 		lastReloadTime: time.Now().Add(-minReloadInterval),
 
+		configMapKey:       config.ConfigMapKey,
 		configMapName:      config.ConfigMapName,
 		configMapNamespace: config.ConfigMapNamespace,
 		configMapPath:      config.ConfigMapPath,
@@ -91,7 +97,7 @@ func (r *Resource) Name() string {
 func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 	var cm *corev1.ConfigMap
 	{
-		filePath := path.Join(r.configMapPath, r.configMapName)
+		filePath := path.Join(r.configMapPath, r.configMapKey)
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding ConfigMap at %#q", filePath))
 
 		content, err := ioutil.ReadFile(filePath)
