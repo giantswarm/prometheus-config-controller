@@ -122,8 +122,6 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		switch {
 		case cm.ResourceVersion != r.lastSeenConfigMapResourceVersion:
 			reloadRequired = true
-		case time.Now().Sub(r.lastReloadTime) > minReloadInterval:
-			reloadRequired = true
 		}
 
 		if reloadRequired {
