@@ -105,10 +105,12 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		err = yaml.Unmarshal(content, cm)
+		var configMap corev1.ConfigMap
+		err = yaml.Unmarshal(content, &configMap)
 		if err != nil {
 			return microerror.Mask(err)
 		}
+		cm = &configMap
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %#q ConfigMap in namespace %#q", r.configMapName, r.configMapNamespace))
 	}
