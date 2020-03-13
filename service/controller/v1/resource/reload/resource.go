@@ -130,7 +130,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "found out that prometheus configuration does not need to be reloaded")
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-			return nil
+			return microerror.Maskf(executionFailedError, "not reloading")
 		}
 	}
 
