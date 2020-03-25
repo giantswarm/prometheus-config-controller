@@ -12,12 +12,14 @@ const releaseTimestampFormat = "2006-01-02T15:04:05.000000Z"
 
 type ReleaseConfig struct {
 	Active  bool
+	Apps    []App
 	Bundles []Bundle
 	Date    time.Time
 	Version string
 }
 
 type Release struct {
+	apps       []App
 	bundles    []Bundle
 	changelogs []Changelog
 	components []Component
@@ -31,29 +33,12 @@ func NewRelease(config ReleaseConfig) (Release, error) {
 		return Release{}, microerror.Maskf(invalidConfigError, "%T.Bundles must not be empty", config)
 	}
 
-	var err error
-
-	var changelogs []Changelog
-	{
-		changelogs, err = aggregateReleaseChangelogs(config.Bundles)
-		if err != nil {
-			return Release{}, microerror.Maskf(invalidConfigError, err.Error())
-		}
-	}
-
-	var components []Component
-	{
-		components, err = aggregateReleaseComponents(config.Bundles)
-		if err != nil {
-			return Release{}, microerror.Maskf(invalidConfigError, err.Error())
-		}
-	}
-
 	r := Release{
 		active:     config.Active,
+		apps:       config.Apps,
 		bundles:    config.Bundles,
-		changelogs: changelogs,
-		components: components,
+		changelogs: aggregateReleaseChangelogs(config.Bundles),
+		components: aggregateReleaseComponents(config.Bundles),
 		timestamp:  config.Date,
 		version:    config.Version,
 	}
@@ -63,6 +48,10 @@ func NewRelease(config ReleaseConfig) (Release, error) {
 
 func (r Release) Active() bool {
 	return r.active
+}
+
+func (r Release) Apps() []App {
+	return CopyApps(r.apps)
 }
 
 func (r Release) Bundles() []Bundle {
@@ -97,21 +86,19 @@ func (r *Release) removeChangelogEntry(clog Changelog) {
 			break
 		}
 	}
-
-	return
 }
 
-func aggregateReleaseChangelogs(bundles []Bundle) ([]Changelog, error) {
+func aggregateReleaseChangelogs(bundles []Bundle) []Changelog {
 	var changelogs []Changelog
 
 	for _, b := range bundles {
 		changelogs = append(changelogs, b.Changelogs...)
 	}
 
-	return changelogs, nil
+	return changelogs
 }
 
-func aggregateReleaseComponents(bundles []Bundle) ([]Component, error) {
+func aggregateReleaseComponents(bundles []Bundle) []Component {
 	var components []Component
 
 	for _, b := range bundles {
@@ -125,7 +112,7 @@ func aggregateReleaseComponents(bundles []Bundle) ([]Component, error) {
 
 	sort.Sort(SortComponentsByName(components))
 
-	return components, nil
+	return components
 }
 
 func GetNewestRelease(releases []Release) (Release, error) {

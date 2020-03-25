@@ -6,8 +6,13 @@ import (
 	"sort"
 	"time"
 
+	config_util "github.com/prometheus/common/config"
 	"github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/config"
+	sd_config "github.com/prometheus/prometheus/discovery/config"
+	"github.com/prometheus/prometheus/discovery/kubernetes"
+	"github.com/prometheus/prometheus/discovery/targetgroup"
+	"github.com/prometheus/prometheus/pkg/relabel"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -81,167 +86,173 @@ func getEtcdTarget(etcdUrl string) model.LabelSet {
 func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.ScrapeConfig {
 	clusterID := GetClusterID(service)
 
-	secureTLSConfig := config.TLSConfig{
+	secureTLSConfig := config_util.TLSConfig{
 		CAFile:             key.CAPath(certificateDirectory, clusterID),
 		CertFile:           key.CrtPath(certificateDirectory, clusterID),
 		KeyFile:            key.KeyPath(certificateDirectory, clusterID),
 		InsecureSkipVerify: false,
 	}
-	secureHTTPClientConfig := config.HTTPClientConfig{
+	secureHTTPClientConfig := config_util.HTTPClientConfig{
 		TLSConfig: secureTLSConfig,
 	}
-	insecureTLSConfig := config.TLSConfig{
+	insecureTLSConfig := config_util.TLSConfig{
 		CAFile:             key.CAPath(certificateDirectory, clusterID),
 		CertFile:           key.CrtPath(certificateDirectory, clusterID),
 		KeyFile:            key.KeyPath(certificateDirectory, clusterID),
 		InsecureSkipVerify: true,
 	}
-	insecureHTTPClientConfig := config.HTTPClientConfig{
+	insecureHTTPClientConfig := config_util.HTTPClientConfig{
 		TLSConfig: insecureTLSConfig,
 	}
 
-	endpointSDConfig := config.ServiceDiscoveryConfig{
-		KubernetesSDConfigs: []*config.KubernetesSDConfig{
+	endpointSDConfig := sd_config.ServiceDiscoveryConfig{
+		KubernetesSDConfigs: []*kubernetes.SDConfig{
 			{
-				APIServer: config.URL{
+				APIServer: config_util.URL{
 					URL: &url.URL{
 						Scheme: HttpsScheme,
 						Host:   getTargetHost(service),
 					},
 				},
-				Role:      config.KubernetesRoleEndpoint,
-				TLSConfig: secureTLSConfig,
+				Role: kubernetes.RoleEndpoint,
+				HTTPClientConfig: config_util.HTTPClientConfig{
+					TLSConfig: secureTLSConfig,
+				},
 			},
 		},
 	}
-	nodeSDConfig := config.ServiceDiscoveryConfig{
-		KubernetesSDConfigs: []*config.KubernetesSDConfig{
+	nodeSDConfig := sd_config.ServiceDiscoveryConfig{
+		KubernetesSDConfigs: []*kubernetes.SDConfig{
 			{
-				APIServer: config.URL{
+				APIServer: config_util.URL{
 					URL: &url.URL{
 						Scheme: HttpsScheme,
 						Host:   getTargetHost(service),
 					},
 				},
-				Role:      config.KubernetesRoleNode,
-				TLSConfig: secureTLSConfig,
+				Role: kubernetes.RoleNode,
+				HTTPClientConfig: config_util.HTTPClientConfig{
+					TLSConfig: secureTLSConfig,
+				},
 			},
 		},
 	}
-	podSDConfig := config.ServiceDiscoveryConfig{
-		KubernetesSDConfigs: []*config.KubernetesSDConfig{
+	podSDConfig := sd_config.ServiceDiscoveryConfig{
+		KubernetesSDConfigs: []*kubernetes.SDConfig{
 			{
-				APIServer: config.URL{
+				APIServer: config_util.URL{
 					URL: &url.URL{
 						Scheme: HttpsScheme,
 						Host:   getTargetHost(service),
 					},
 				},
-				Role:      config.KubernetesRolePod,
-				TLSConfig: secureTLSConfig,
+				Role: kubernetes.RolePod,
+				HTTPClientConfig: config_util.HTTPClientConfig{
+					TLSConfig: secureTLSConfig,
+				},
 			},
 		},
 	}
 
-	clusterIDLabelRelabelConfig := &config.RelabelConfig{
+	clusterIDLabelRelabelConfig := &relabel.Config{
 		TargetLabel: ClusterIDLabel,
 		Replacement: clusterID,
 	}
-	clusterTypeLabelRelabelConfig := &config.RelabelConfig{
+	clusterTypeLabelRelabelConfig := &relabel.Config{
 		TargetLabel: ClusterTypeLabel,
 		Replacement: GuestClusterType,
 	}
-	reflectorRelabelConfig := &config.RelabelConfig{
+	reflectorRelabelConfig := &relabel.Config{
 		Action:       ActionDrop,
 		SourceLabels: model.LabelNames{MetricNameLabel},
 		Regex:        MetricsDropReflectorRegexp,
 	}
-	rewriteAddress := &config.RelabelConfig{
+	rewriteAddress := &relabel.Config{
 		TargetLabel: AddressLabel,
 		Replacement: key.APIServiceHost(key.PrefixMaster, clusterID),
 	}
-	rewriteManagedAppMetricPath := &config.RelabelConfig{
+	rewriteManagedAppMetricPath := &relabel.Config{
 		SourceLabels: model.LabelNames{model.LabelName(NamespaceLabel), model.LabelName(PodNameLabel), KubernetesSDServiceGiantSwarmMonitoringPortLabel, KubernetesSDServiceGiantSwarmMonitoringPathLabel},
 		Regex:        ManagedAppSourceRegexp,
 		TargetLabel:  MetricPathLabel,
 		Replacement:  key.ManagedAppPodMetricsPath(),
 	}
-	rewriteKubeStateMetricPath := &config.RelabelConfig{
+	rewriteKubeStateMetricPath := &relabel.Config{
 		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 		Regex:        KubeStateMetricsPodNameRegexp,
 		TargetLabel:  MetricPathLabel,
 		Replacement:  key.APIProxyPodMetricsPath(key.KubeStateMetricsNamespace, key.KubeStateMetricsPort),
 	}
-	rewriteICMetricPath := &config.RelabelConfig{
+	rewriteICMetricPath := &relabel.Config{
 		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 		Regex:        NginxIngressControllerPodNameRegexp,
 		TargetLabel:  MetricPathLabel,
 		Replacement:  key.APIProxyPodMetricsPath(key.NginxIngressControllerNamespace, key.NginxIngressControllerMetricPort),
 	}
-	rewriteCalicoNodePath := &config.RelabelConfig{
+	rewriteCalicoNodePath := &relabel.Config{
 		SourceLabels: model.LabelNames{PodSDPodNameLabel},
 		Regex:        CalicoNodePodNameRegexp,
 		TargetLabel:  MetricPathLabel,
 		Replacement:  key.APIProxyPodMetricsPath(key.CalicoNodeNamespace, key.CalicoNodeMetricPort),
 	}
-	rewriteChartOperatorPath := &config.RelabelConfig{
+	rewriteChartOperatorPath := &relabel.Config{
 		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 		Regex:        ChartOperatorPodNameRegexp,
 		TargetLabel:  MetricPathLabel,
 		Replacement:  key.APIProxyPodMetricsPath(key.ChartOperatorNamespace, key.ChartOperatorMetricPort),
 	}
-	rewriteCertExporterPath := &config.RelabelConfig{
+	rewriteCertExporterPath := &relabel.Config{
 		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 		Regex:        CertExporterPodNameRegexp,
 		TargetLabel:  MetricPathLabel,
 		Replacement:  key.APIProxyPodMetricsPath(key.CertExporterNamespace, key.CertExporterMetricPort),
 	}
-	rewriteClusterAutoscalerPath := &config.RelabelConfig{
+	rewriteClusterAutoscalerPath := &relabel.Config{
 		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 		Regex:        ClusterAutoscalerPodNameRegexp,
 		TargetLabel:  MetricPathLabel,
 		Replacement:  key.APIProxyPodMetricsPath(key.ClusterAutoscalerNamespace, key.ClusterAutoscalerMetricPort),
 	}
-	rewriteCoreDNSPath := &config.RelabelConfig{
+	rewriteCoreDNSPath := &relabel.Config{
 		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 		Regex:        CoreDNSPodNameRegexp,
 		TargetLabel:  MetricPathLabel,
 		Replacement:  key.APIProxyPodMetricsPath(key.CoreDNSNamespace, key.CoreDNSMetricPort),
 	}
-	rewriteElasticLoggingMetricPath := &config.RelabelConfig{
+	rewriteElasticLoggingMetricPath := &relabel.Config{
 		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 		Regex:        ElasticLoggingPodNameRegexp,
 		TargetLabel:  MetricPathLabel,
 		Replacement:  key.APIProxyPodMetricsPath(key.ElasticLoggingNamespace, key.ElasticLoggingMetricPort),
 	}
-	rewriteNetExporterPath := &config.RelabelConfig{
+	rewriteNetExporterPath := &relabel.Config{
 		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 		Regex:        NetExporterPodNameRegexp,
 		TargetLabel:  MetricPathLabel,
 		Replacement:  key.APIProxyPodMetricsPath(key.NetExporterNamespace, key.NetExporterMetricPort),
 	}
-	rewriteNicExporterPath := &config.RelabelConfig{
+	rewriteNicExporterPath := &relabel.Config{
 		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 		Regex:        NicExporterPodNameRegexp,
 		TargetLabel:  MetricPathLabel,
 		Replacement:  key.APIProxyPodMetricsPath(key.NicExporterNamespace, key.NicExporterMetricPort),
 	}
-	rewriteVaultExporterPath := &config.RelabelConfig{
+	rewriteVaultExporterPath := &relabel.Config{
 		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 		Regex:        VaultExporterPodNameRegexp,
 		TargetLabel:  MetricPathLabel,
 		Replacement:  key.APIProxyPodMetricsPath(key.VaultExporterNamespace, key.VaultExporterMetricPort),
 	}
 
-	ipLabelRelabelConfig := &config.RelabelConfig{
+	ipLabelRelabelConfig := &relabel.Config{
 		TargetLabel:  IPLabel,
 		SourceLabels: model.LabelNames{KubernetesSDNodeAddressInternalIPLabel},
 	}
-	roleLabelRelabelConfig := &config.RelabelConfig{
+	roleLabelRelabelConfig := &relabel.Config{
 		TargetLabel:  RoleLabel,
 		SourceLabels: model.LabelNames{KubernetesSDNodeLabelRole},
 	}
-	missingRoleLabelRelabelConfig := &config.RelabelConfig{
+	missingRoleLabelRelabelConfig := &relabel.Config{
 		SourceLabels: model.LabelNames{KubernetesSDNodeLabelRole},
 		Regex:        EmptyRegexp,
 		Replacement:  WorkerRole,
@@ -254,7 +265,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 			Scheme:                 HttpsScheme,
 			HTTPClientConfig:       insecureHTTPClientConfig,
 			ServiceDiscoveryConfig: endpointSDConfig,
-			RelabelConfigs: []*config.RelabelConfig{
+			RelabelConfigs: []*relabel.Config{
 				// Only keep api server endpoints.
 				{
 					SourceLabels: model.LabelNames{
@@ -262,7 +273,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 						KubernetesSDServiceNameLabel,
 					},
 					Regex:  APIServerRegexp,
-					Action: config.RelabelKeep,
+					Action: relabel.Keep,
 				},
 				// Add app label.
 				{
@@ -274,7 +285,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				// Add cluster_type label.
 				clusterTypeLabelRelabelConfig,
 			},
-			MetricRelabelConfigs: []*config.RelabelConfig{
+			MetricRelabelConfigs: []*relabel.Config{
 				// drop several bucket latency metric
 				{
 					Action:       ActionDrop,
@@ -290,7 +301,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 			Scheme:                 HttpsScheme,
 			HTTPClientConfig:       secureHTTPClientConfig,
 			ServiceDiscoveryConfig: nodeSDConfig,
-			RelabelConfigs: []*config.RelabelConfig{
+			RelabelConfigs: []*relabel.Config{
 				// Relabel address to kubernetes service.
 				{
 					TargetLabel: model.AddressLabel,
@@ -317,7 +328,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				roleLabelRelabelConfig,
 				missingRoleLabelRelabelConfig,
 			},
-			MetricRelabelConfigs: []*config.RelabelConfig{
+			MetricRelabelConfigs: []*relabel.Config{
 				// keep only kube-system cadvisor metrics
 				{
 					Action:       ActionKeep,
@@ -338,7 +349,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 			Scheme:                 HttpsScheme,
 			HTTPClientConfig:       insecureHTTPClientConfig,
 			ServiceDiscoveryConfig: nodeSDConfig,
-			RelabelConfigs: []*config.RelabelConfig{
+			RelabelConfigs: []*relabel.Config{
 				// Add app label.
 				{
 					TargetLabel: AppLabel,
@@ -354,7 +365,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				roleLabelRelabelConfig,
 				missingRoleLabelRelabelConfig,
 			},
-			MetricRelabelConfigs: []*config.RelabelConfig{
+			MetricRelabelConfigs: []*relabel.Config{
 				reflectorRelabelConfig,
 			},
 		},
@@ -364,12 +375,12 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 			HTTPClientConfig:       secureHTTPClientConfig,
 			Scheme:                 HttpsScheme,
 			ServiceDiscoveryConfig: podSDConfig,
-			RelabelConfigs: []*config.RelabelConfig{
+			RelabelConfigs: []*relabel.Config{
 				// Only keep kube-state-metrics targets.
 				{
 					SourceLabels: model.LabelNames{PodSDNamespaceLabel, PodSDPodNameLabel},
 					Regex:        CalicoNodePodRegexp,
-					Action:       config.RelabelKeep,
+					Action:       relabel.Keep,
 				},
 				// Add app label.
 				{
@@ -395,7 +406,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				// rewrite metrics scrape path to connect pods
 				rewriteCalicoNodePath,
 			},
-			MetricRelabelConfigs: []*config.RelabelConfig{},
+			MetricRelabelConfigs: []*relabel.Config{},
 		},
 
 		{
@@ -403,12 +414,12 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 			HTTPClientConfig:       secureHTTPClientConfig,
 			Scheme:                 HttpsScheme,
 			ServiceDiscoveryConfig: endpointSDConfig,
-			RelabelConfigs: []*config.RelabelConfig{
+			RelabelConfigs: []*relabel.Config{
 				// Only keep kube-state-metrics targets.
 				{
 					SourceLabels: model.LabelNames{KubernetesSDNamespaceLabel, KubernetesSDServiceNameLabel},
 					Regex:        KubeStateMetricsServiceNameRegexp,
-					Action:       config.RelabelKeep,
+					Action:       relabel.Keep,
 				},
 				// Add kube_state_metrics_for_managed_apps label.
 				{
@@ -424,7 +435,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				// rewrite metrics scrape path to connect pods
 				rewriteKubeStateMetricPath,
 			},
-			MetricRelabelConfigs: []*config.RelabelConfig{
+			MetricRelabelConfigs: []*relabel.Config{
 				// keep only metrics with names listed in KubeStateMetricsManagedAppMetricsNameRegexp
 				{
 					SourceLabels: model.LabelNames{MetricNameLabel},
@@ -481,7 +492,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 			JobName:                getJobName(service, NodeExporterJobType),
 			Scheme:                 HttpScheme,
 			ServiceDiscoveryConfig: endpointSDConfig,
-			RelabelConfigs: []*config.RelabelConfig{
+			RelabelConfigs: []*relabel.Config{
 				// Only keep node-exporter endpoints.
 				{
 					SourceLabels: model.LabelNames{
@@ -489,7 +500,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 						KubernetesSDServiceNameLabel,
 					},
 					Regex:  NodeExporterRegexp,
-					Action: config.RelabelKeep,
+					Action: relabel.Keep,
 				},
 				// Relabel address to node-exporter port.
 				{
@@ -515,7 +526,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					TargetLabel:  IPLabel,
 				},
 			},
-			MetricRelabelConfigs: []*config.RelabelConfig{
+			MetricRelabelConfigs: []*relabel.Config{
 				// Drop many mounts that are not interesting based on fstype.
 				{
 					Action:       ActionDrop,
@@ -542,12 +553,12 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 			HTTPClientConfig:       secureHTTPClientConfig,
 			Scheme:                 HttpsScheme,
 			ServiceDiscoveryConfig: endpointSDConfig,
-			RelabelConfigs: []*config.RelabelConfig{
+			RelabelConfigs: []*relabel.Config{
 				// Only keep kube-state-metrics targets.
 				{
 					SourceLabels: model.LabelNames{KubernetesSDNamespaceLabel, KubernetesSDServiceNameLabel},
 					Regex:        ServiceWhitelistRegexp,
-					Action:       config.RelabelKeep,
+					Action:       relabel.Keep,
 				},
 				// Add app label.
 				{
@@ -588,7 +599,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				rewriteNicExporterPath,
 				rewriteVaultExporterPath,
 			},
-			MetricRelabelConfigs: []*config.RelabelConfig{
+			MetricRelabelConfigs: []*relabel.Config{
 				// relabel namespace to exported_namespace for endpoints in kube-system namespace.
 				// this keeps metrics from nginx ingress controller from being dropped by filter below
 				{
@@ -618,30 +629,30 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 			HTTPClientConfig:       secureHTTPClientConfig,
 			Scheme:                 HttpsScheme,
 			ServiceDiscoveryConfig: endpointSDConfig,
-			RelabelConfigs: []*config.RelabelConfig{
+			RelabelConfigs: []*relabel.Config{
 				// Only keep monitoring label presents
 				{
 					SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringPresentLabel},
-					Regex:        config.MustNewRegexp(`(true)`),
-					Action:       config.RelabelKeep,
+					Regex:        relabel.MustNewRegexp(`(true)`),
+					Action:       relabel.Keep,
 				},
 				// Only keep monitoring label as true
 				{
 					SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringLabel},
-					Regex:        config.MustNewRegexp(`(true)`),
-					Action:       config.RelabelKeep,
+					Regex:        relabel.MustNewRegexp(`(true)`),
+					Action:       relabel.Keep,
 				},
 				// Only keep when monitoring port presents in annotation.
 				{
 					SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringPortPresentLabel},
-					Regex:        config.MustNewRegexp(`(true)`),
-					Action:       config.RelabelKeep,
+					Regex:        relabel.MustNewRegexp(`(true)`),
+					Action:       relabel.Keep,
 				},
 				// Only keep when monitoring path presents in annotation.
 				{
 					SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringPathPresentLabel},
-					Regex:        config.MustNewRegexp(`(true)`),
-					Action:       config.RelabelKeep,
+					Regex:        relabel.MustNewRegexp(`(true)`),
+					Action:       relabel.Keep,
 				},
 				// Add app label.
 				{
@@ -661,13 +672,13 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				// Add application type label.
 				{
 					SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringAppTypeLabel},
-					Regex:        config.MustNewRegexp(`(optional|default)`),
+					Regex:        relabel.MustNewRegexp(`(optional|default)`),
 					TargetLabel:  AppTypeLabel,
 				},
 				// Add is_managed_app label.
 				{
 					SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringPresentLabel},
-					Regex:        config.MustNewRegexp(`(true)`),
+					Regex:        relabel.MustNewRegexp(`(true)`),
 					TargetLabel:  AppIsManaged,
 				},
 				// Add cluster_id label.
@@ -689,8 +700,8 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 	if service.CreationTimestamp.Before(&etcdScrapeDelay) {
 		if _, ok := service.Annotations[key.AnnotationEtcdDomain]; ok {
 			// prepare etcd static discovery config
-			etcdStaticConfig := config.ServiceDiscoveryConfig{
-				StaticConfigs: []*config.TargetGroup{
+			etcdStaticConfig := sd_config.ServiceDiscoveryConfig{
+				StaticConfigs: []*targetgroup.Group{
 					{
 						Targets: []model.LabelSet{
 							getEtcdTarget(service.Annotations[key.AnnotationEtcdDomain]),

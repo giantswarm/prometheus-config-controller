@@ -39,10 +39,6 @@
   branch = "master"
 
 [[constraint]]
-  name = "github.com/giantswarm/k8shealthz"
-  branch = "master"
-
-[[constraint]]
   name = "github.com/giantswarm/microendpoint"
   branch = "master"
 
@@ -80,7 +76,7 @@
 
 [[constraint]]
   name = "github.com/prometheus/prometheus"
-  version = "1.6.3"
+  version = "2.15.2"
 
 [[constraint]]
   name = "github.com/spf13/afero"

@@ -1,9 +1,5 @@
 package v1alpha2
 
-import (
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
-
 const (
 	// ClusterConditionLimit is the maximum amount of conditions tracked in the
 	// condition list of a tenant cluster's status. The limit here is applied to
@@ -91,32 +87,29 @@ var (
 	}
 )
 
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
-type CommonCluster struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Status            CommonClusterStatus `json:"status,omitempty" yaml:"status,omitempty"`
-}
-
+// CommonClusterStatus is shared type to contain provider independent cluster
+// status information.
 type CommonClusterStatus struct {
-	Cluster CommonClusterStatusCluster `json:"cluster" yaml:"cluster"`
+	// One or several conditions that are currently applicable to the cluster.
+	Conditions []CommonClusterStatusCondition `json:"conditions,omitempty" yaml:"conditions,omitempty"`
+	// Identifier of the cluster.
+	ID string `json:"id" yaml:"id"`
+	// Release versions the cluster used so far.
+	Versions []CommonClusterStatusVersion `json:"versions,omitempty" yaml:"versions,omitempty"`
 }
 
-// CommonClusterStatusCluster is shared type to contain provider independent cluster status
-// information.
-type CommonClusterStatusCluster struct {
-	Conditions []CommonClusterStatusClusterCondition `json:"conditions" yaml:"conditions"`
-	ID         string                                `json:"id" yaml:"id"`
-	Versions   []CommonClusterStatusClusterVersion   `json:"versions" yaml:"versions"`
-}
-
-type CommonClusterStatusClusterCondition struct {
+// CommonClusterStatusCondition explains the current condition(s) of the cluster.
+type CommonClusterStatusCondition struct {
+	// Time the condition occurred.
 	LastTransitionTime DeepCopyTime `json:"lastTransitionTime" yaml:"lastTransitionTime"`
-	Condition          string       `json:"condition" yaml:"condition"`
+	// Condition string, e. g. `Creating`, `Created`, `Upgraded`
+	Condition string `json:"condition" yaml:"condition"`
 }
 
-type CommonClusterStatusClusterVersion struct {
+// CommonClusterStatusVersion informs which aws-operator version was/responsible for this cluster.
+type CommonClusterStatusVersion struct {
+	// Time the cluster assumed the given version.
 	LastTransitionTime DeepCopyTime `json:"lastTransitionTime" yaml:"lastTransitionTime"`
-	Version            string       `json:"version" yaml:"version"`
+	// The aws-operator version responsible for handling the cluster.
+	Version string `json:"version" yaml:"version"`
 }

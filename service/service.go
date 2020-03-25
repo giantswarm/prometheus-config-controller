@@ -20,7 +20,6 @@ import (
 	"github.com/giantswarm/prometheus-config-controller/flag"
 	"github.com/giantswarm/prometheus-config-controller/service/controller"
 	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/key"
-	"github.com/giantswarm/prometheus-config-controller/service/healthz"
 )
 
 type Config struct {
@@ -36,7 +35,6 @@ type Config struct {
 }
 
 type Service struct {
-	Healthz *healthz.Service
 	Version *version.Service
 
 	logger micrologger.Logger
@@ -92,19 +90,6 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var healthzService *healthz.Service
-	{
-		c := healthz.Config{
-			K8sClient: k8sClient,
-			Logger:    config.Logger,
-		}
-
-		healthzService, err = healthz.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var prometheusController *controller.Prometheus
 	{
 		c := controller.PrometheusConfig{
@@ -145,7 +130,6 @@ func New(config Config) (*Service, error) {
 	}
 
 	s := &Service{
-		Healthz: healthzService,
 		Version: versionService,
 
 		logger: config.Logger,

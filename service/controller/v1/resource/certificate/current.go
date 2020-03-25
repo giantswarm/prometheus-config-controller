@@ -14,7 +14,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 	fileInfos, err := afero.ReadDir(r.fs, r.certDirectory)
 	if err != nil {
-		return nil, microerror.Maskf(err, "could not read certificate directory")
+		return nil, microerror.Mask(err)
 	}
 
 	certificateFiles := []certificateFile{}
@@ -23,7 +23,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		filePath := path.Join(r.certDirectory, fileInfo.Name())
 		fileData, err := afero.ReadFile(r.fs, filePath)
 		if err != nil {
-			return nil, microerror.Maskf(err, "could not read certificate")
+			return nil, microerror.Mask(err)
 		}
 
 		certificateFiles = append(certificateFiles, certificateFile{

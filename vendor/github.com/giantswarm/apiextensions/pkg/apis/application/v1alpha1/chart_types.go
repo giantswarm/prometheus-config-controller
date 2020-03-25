@@ -1,9 +1,9 @@
 package v1alpha1
 
 import (
-	"github.com/ghodss/yaml"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/yaml"
 )
 
 const (
@@ -27,6 +27,7 @@ spec:
     status: {}
   validation:
     openAPIV3Schema:
+      type: object
       properties:
         spec:
           type: object
@@ -61,7 +62,9 @@ spec:
             tarballURL:
               type: string
               format: uri
-          required: ["name", "namespace", "tarballURL"]
+            version:
+              type: string
+          required: ["name", "namespace", "tarballURL", "version"]
 `
 
 var chartCRD *apiextensionsv1beta1.CustomResourceDefinition
@@ -125,6 +128,7 @@ func NewChartTypeMeta() metav1.TypeMeta {
 //        namespace: "monitoring"
 //        resourceVersion: ""
 //      tarballURL: "https://giantswarm.github.com/app-catalog/prometheus-1-0-0.tgz"
+//      version: "1.0.0"
 //
 //    status:
 //      appVersion: "2.4.3" # Optional value from Chart.yaml with the version of the deployed app.
@@ -152,6 +156,9 @@ type ChartSpec struct {
 	// TarballURL is the URL for the Helm chart tarball to be deployed.
 	// e.g. https://path/to/prom-1-0-0.tgz"
 	TarballURL string `json:"tarballURL" yaml:"tarballURL"`
+	// Version is the version of the chart that should be deployed.
+	// e.g. 1.0.0
+	Version string `json:"version" yaml:"version"`
 }
 
 type ChartSpecConfig struct {

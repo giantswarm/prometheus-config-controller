@@ -25,7 +25,7 @@ func (r *Resource) getDesiredState(ctx context.Context) (*corev1.ConfigMap, erro
 	if errors.IsNotFound(err) {
 		return nil, microerror.Maskf(configMapNotFoundError, "%s/%s", r.configMapNamespace, r.configMapName)
 	} else if err != nil {
-		return nil, microerror.Maskf(err, "an error occurred fetching the configmap %s/%s", r.configMapNamespace, r.configMapName)
+		return nil, microerror.Mask(err)
 	}
 
 	configMapData, ok := configMap.Data[r.configMapKey]
@@ -45,23 +45,23 @@ func (r *Resource) getDesiredState(ctx context.Context) (*corev1.ConfigMap, erro
 	})
 
 	if err != nil {
-		return nil, microerror.Maskf(err, "an error occurred listing all services")
+		return nil, microerror.Mask(err)
 	}
 
 	r.logger.LogCtx(ctx, "debug", fmt.Sprintf("computing desired state of configmap"))
 	scrapeConfigs, err := prometheus.GetScrapeConfigs(services.Items, r.certDirectory)
 	if err != nil {
-		return nil, microerror.Maskf(err, "an error occurred creating scrape configs")
+		return nil, microerror.Mask(err)
 	}
 
 	newPrometheusConfig, err := prometheus.UpdateConfig(*prometheusConfig, scrapeConfigs)
 	if err != nil {
-		return nil, microerror.Maskf(err, "an error occurred merging prometheus config")
+		return nil, microerror.Mask(err)
 	}
 
 	newConfigMapData, err := yaml.Marshal(newPrometheusConfig)
 	if err != nil {
-		return nil, microerror.Maskf(err, "an error occurred marshaling yaml")
+		return nil, microerror.Mask(err)
 	}
 
 	configMap.Data[r.configMapKey] = string(newConfigMapData)

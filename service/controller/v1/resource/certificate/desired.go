@@ -31,7 +31,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	servicesTimer.ObserveDuration()
 
 	if err != nil {
-		return nil, microerror.Maskf(err, "an error occurred listing all services")
+		return nil, microerror.Mask(err)
 	}
 
 	r.logger.LogCtx(ctx, "debug", "filtering services")
@@ -54,7 +54,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		certificatesTimer.ObserveDuration()
 
 		if err != nil {
-			return nil, microerror.Maskf(err, "an error occurred fetching certificate for cluster: %s", clusterID)
+			return nil, microerror.Mask(err)
 		}
 
 		if len(certificates.Items) == 0 {
@@ -69,18 +69,18 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 
 		for _, certificateKey := range []string{caKey, crtKey, keyKey} {
 			if data, ok := certificate.Data[certificateKey]; ok {
-				var path string
+				var p string
 				switch certificateKey {
 				case caKey:
-					path = key.CAPath(r.certDirectory, clusterID)
+					p = key.CAPath(r.certDirectory, clusterID)
 				case crtKey:
-					path = key.CrtPath(r.certDirectory, clusterID)
+					p = key.CrtPath(r.certDirectory, clusterID)
 				case keyKey:
-					path = key.KeyPath(r.certDirectory, clusterID)
+					p = key.KeyPath(r.certDirectory, clusterID)
 				}
 
 				certificateFiles = append(certificateFiles, certificateFile{
-					path: path,
+					path: p,
 					data: string(data),
 				})
 			}
