@@ -3,6 +3,7 @@ package configmap
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/giantswarm/microerror"
 	"github.com/prometheus/prometheus/config"
@@ -59,9 +60,22 @@ func (r *Resource) getDesiredState(ctx context.Context) (*corev1.ConfigMap, erro
 		return nil, microerror.Mask(err)
 	}
 
+	// Prometheus YAML marshalling obscures remote write passwords for security,
+	// so we store the Cortex password, and write it back after marshalling.
+	var remoteWritePassword string
+	if len(newPrometheusConfig.RemoteWriteConfigs) == 1 {
+		remoteWritePassword = string(newPrometheusConfig.RemoteWriteConfigs[0].HTTPClientConfig.BasicAuth.Password)
+	}
+
 	newConfigMapData, err := yaml.Marshal(newPrometheusConfig)
 	if err != nil {
 		return nil, microerror.Mask(err)
+	}
+
+	if remoteWritePassword != "" && strings.Count(string(newConfigMapData), "password: <secret>") == 1 {
+		newConfigMapData = []byte(
+			strings.Replace(string(newConfigMapData), "password: <secret>", fmt.Sprintf("password: %s", remoteWritePassword), 1),
+		)
 	}
 
 	configMap.Data[r.configMapKey] = string(newConfigMapData)
