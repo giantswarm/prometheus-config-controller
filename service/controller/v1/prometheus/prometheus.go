@@ -2,7 +2,7 @@ package prometheus
 
 import (
 	"github.com/prometheus/common/model"
-	"github.com/prometheus/prometheus/config"
+	"github.com/prometheus/prometheus/pkg/relabel"
 	v1 "k8s.io/api/core/v1"
 )
 
@@ -213,100 +213,100 @@ const (
 // Regular expressions.
 var (
 	// APIServerRegexp is the regular expression to match against Kubernetes API servers.
-	APIServerRegexp = config.MustNewRegexp(`default;kubernetes`)
+	APIServerRegexp = relabel.MustNewRegexp(`default;kubernetes`)
 
 	// CalicoNodePodRegexp is the regular expression to match calico-node pod name and namespace.
-	CalicoNodePodRegexp = config.MustNewRegexp(`kube-system;calico-node.*`)
+	CalicoNodePodRegexp = relabel.MustNewRegexp(`kube-system;calico-node.*`)
 
 	// CalicoNodePodNameRegexp is the regular expression to match calico-node pod name.
-	CalicoNodePodNameRegexp = config.MustNewRegexp(`(calico-node.*)`)
+	CalicoNodePodNameRegexp = relabel.MustNewRegexp(`(calico-node.*)`)
 
 	// EmptyRegexp is the regular expression to match against the empty string.
-	EmptyRegexp = config.MustNewRegexp(``)
+	EmptyRegexp = relabel.MustNewRegexp(``)
 
 	// NonEmptyRegexp is the regular expression to match against the non-empty string.
-	NonEmptyRegexp = config.MustNewRegexp(`(.+)`)
+	NonEmptyRegexp = relabel.MustNewRegexp(`(.+)`)
 
 	// KubeletPortRegexp is the regular expression to match against the
 	// Kubelet IP (including port), and capture the IP.
-	KubeletPortRegexp = config.MustNewRegexp(`(.*):10250`)
+	KubeletPortRegexp = relabel.MustNewRegexp(`(.*):10250`)
 
 	// NSRegexp is the regular expression to match against the specified namespaces.
-	NSRegexp = config.MustNewRegexp(`(kube-system|giantswarm.*|vault-exporter)`)
+	NSRegexp = relabel.MustNewRegexp(`(kube-system|giantswarm.*|vault-exporter)`)
 
 	// MetricDropBucketLatencies is the regular expression to match against the several bucket latencies metrics.
-	MetricDropBucketLatencies = config.MustNewRegexp(`(apiserver_admission_controller_admission_latencies_seconds_.*|apiserver_admission_step_admission_latencies_seconds_.*|apiserver_request_count|apiserver_request_duration_seconds_.*|apiserver_request_latencies_.*|apiserver_request_total|apiserver_response_sizes_.*|rest_client_request_latency_seconds_.*)`)
+	MetricDropBucketLatencies = relabel.MustNewRegexp(`(apiserver_admission_controller_admission_latencies_seconds_.*|apiserver_admission_step_admission_latencies_seconds_.*|apiserver_request_count|apiserver_request_duration_seconds_.*|apiserver_request_latencies_.*|apiserver_request_total|apiserver_response_sizes_.*|rest_client_request_latency_seconds_.*)`)
 
 	// MetricDropContainerNetworkRegexp is the regular expression to match againts cadvisor container network metrics.
-	MetricDropContainerNetworkRegexp = config.MustNewRegexp(`container_network_.*`)
+	MetricDropContainerNetworkRegexp = relabel.MustNewRegexp(`container_network_.*`)
 
 	// MetricDropFStypeRegexp is the regular expression to match againts not interesting filesystem (for node exporter metrics).
-	MetricDropFStypeRegexp = config.MustNewRegexp(`(cgroup|devpts|mqueue|nsfs|overlay|tmpfs)`)
+	MetricDropFStypeRegexp = relabel.MustNewRegexp(`(cgroup|devpts|mqueue|nsfs|overlay|tmpfs)`)
 
 	// MetricDropICRegexp is the regular expression to match against useless metric exposed by IC.
-	MetricDropICRegexp = config.MustNewRegexp(`(ingress_controller_ssl_expire_time_seconds|nginx.*)`)
+	MetricDropICRegexp = relabel.MustNewRegexp(`(ingress_controller_ssl_expire_time_seconds|nginx.*)`)
 
 	// MetricDropSystemdStateRegexp is the regular expression to match against not interesting systemd unit (for node exporter metrics).
-	MetricDropSystemdStateRegexp = config.MustNewRegexp(`node_systemd_unit_state;(active|activating|deactivating|inactive)`)
+	MetricDropSystemdStateRegexp = relabel.MustNewRegexp(`node_systemd_unit_state;(active|activating|deactivating|inactive)`)
 
 	// MetricDropSystemdNameRegexp is the regular expression to match against not interesting systemd units(docker mounts and calico network devices).
-	MetricDropSystemdNameRegexp = config.MustNewRegexp(`node_systemd_unit_state;(dev-disk-by|run-docker-netns|sys-devices|sys-subsystem-net|var-lib-docker-overlay2|var-lib-docker-containers|var-lib-kubelet-pods).*`)
+	MetricDropSystemdNameRegexp = relabel.MustNewRegexp(`node_systemd_unit_state;(dev-disk-by|run-docker-netns|sys-devices|sys-subsystem-net|var-lib-docker-overlay2|var-lib-docker-containers|var-lib-kubelet-pods).*`)
 
 	// MetricsDropReflectorRegexp is the regular expression to match against spammy reflector metrics returned by the Kubelet.
-	MetricsDropReflectorRegexp = config.MustNewRegexp(`(reflector.*)`)
+	MetricsDropReflectorRegexp = relabel.MustNewRegexp(`(reflector.*)`)
 
 	// ElasticLoggingPodNameRegexp is the regular expression to match elastic-logging-elasticsearch-exporter pod name.
-	ElasticLoggingPodNameRegexp = config.MustNewRegexp(`(elastic-logging-elasticsearch-exporter.*)`)
+	ElasticLoggingPodNameRegexp = relabel.MustNewRegexp(`(elastic-logging-elasticsearch-exporter.*)`)
 
 	// NginxIngressControllerPodNameRegexp is the regular expression to match nginx ic pod name.
-	NginxIngressControllerPodNameRegexp = config.MustNewRegexp(`(nginx-ingress-controller.*)`)
+	NginxIngressControllerPodNameRegexp = relabel.MustNewRegexp(`(nginx-ingress-controller.*)`)
 
 	// KubeStateMetricsPodNameRegexp is the regular expression to match kube-state-metrics pod name.
-	KubeStateMetricsPodNameRegexp = config.MustNewRegexp(`(kube-state-metrics.*)`)
+	KubeStateMetricsPodNameRegexp = relabel.MustNewRegexp(`(kube-state-metrics.*)`)
 
 	// KubeStateMetricsServiceNameRegexpis the regular expression to match kube-state-metrics service name.
-	KubeStateMetricsServiceNameRegexp = config.MustNewRegexp(`(kube-system;kube-state-metrics)`)
+	KubeStateMetricsServiceNameRegexp = relabel.MustNewRegexp(`(kube-system;kube-state-metrics)`)
 
 	// KubeStateMetricsManagedAppMetricsNameRegexp is the regular expression to keep only KSM metrics realted to SLI of managed apps.
-	KubeStateMetricsManagedAppMetricsNameRegexp = config.MustNewRegexp(`(kube_deployment_status_replicas_unavailable|kube_deployment_labels|kube_daemonset_status_number_unavailable|kube_daemonset_labels|kube_statefulset_status_replicas|kube_statefulset_status_replicas_current|kube_statefulset_labels)`)
+	KubeStateMetricsManagedAppMetricsNameRegexp = relabel.MustNewRegexp(`(kube_deployment_status_replicas_unavailable|kube_deployment_labels|kube_daemonset_status_number_unavailable|kube_daemonset_labels|kube_statefulset_status_replicas|kube_statefulset_status_replicas_current|kube_statefulset_labels)`)
 
 	// ChartOperatorPodNameRegexp is the regular expression to match chart-operator pod name.
-	ChartOperatorPodNameRegexp = config.MustNewRegexp(`(chart-operator.*)`)
+	ChartOperatorPodNameRegexp = relabel.MustNewRegexp(`(chart-operator.*)`)
 
 	// CertExporterPodNameRegexp is the regular expression to match cert-exporter pod name.
-	CertExporterPodNameRegexp = config.MustNewRegexp(`(cert-exporter.*)`)
+	CertExporterPodNameRegexp = relabel.MustNewRegexp(`(cert-exporter.*)`)
 
 	// ClusterAutoscalerPodNameRegexp is the regular expression to match cluster-autoscaler pod name.
-	ClusterAutoscalerPodNameRegexp = config.MustNewRegexp(`(cluster-autoscaler.*)`)
+	ClusterAutoscalerPodNameRegexp = relabel.MustNewRegexp(`(cluster-autoscaler.*)`)
 
 	// CoreDNSPodNameRegexp is the regular expression to match coredns pod name.
-	CoreDNSPodNameRegexp = config.MustNewRegexp(`(coredns.*)`)
+	CoreDNSPodNameRegexp = relabel.MustNewRegexp(`(coredns.*)`)
 
 	// NetExporterPodNameRegexp is the regular expression to match net-exporter pod name.
-	NetExporterPodNameRegexp = config.MustNewRegexp(`(net-exporter.*)`)
+	NetExporterPodNameRegexp = relabel.MustNewRegexp(`(net-exporter.*)`)
 
 	// NicExporterPodNameRegexp is the regular expression to match nic-exporter pod name.
-	NicExporterPodNameRegexp = config.MustNewRegexp(`(nic-exporter.*)`)
+	NicExporterPodNameRegexp = relabel.MustNewRegexp(`(nic-exporter.*)`)
 
 	// VaultExporterPodNameRegexp is the regular expression to match against the
 	// vault-exporter name.
-	VaultExporterPodNameRegexp = config.MustNewRegexp(`(vault-exporter.*)`)
+	VaultExporterPodNameRegexp = relabel.MustNewRegexp(`(vault-exporter.*)`)
 
 	// RelabelNamespaceRegexp is the regular expression to match against metrics with empty exported_namespace and namespace kube-system.
-	RelabelNamespaceRegexp = config.MustNewRegexp(`;(kube-system|giantswarm.*|vault-exporter)`)
+	RelabelNamespaceRegexp = relabel.MustNewRegexp(`;(kube-system|giantswarm.*|vault-exporter)`)
 
-	ManagedAppSourceRegexp = config.MustNewRegexp(`(.*);(.*);(.*);(.*)`)
+	ManagedAppSourceRegexp = relabel.MustNewRegexp(`(.*);(.*);(.*);(.*)`)
 
 	// NodeExporterRegexp is the regular expression to match against the
 	// node-exporter name.
-	NodeExporterRegexp = config.MustNewRegexp(`kube-system;node-exporter`)
+	NodeExporterRegexp = relabel.MustNewRegexp(`kube-system;node-exporter`)
 
 	// NodeExporterPortRegexp is the regular expression to match against the
 	// node-exporter IP (including port), and capture the IP.
-	NodeExporterPortRegexp = config.MustNewRegexp(`(.*):10300`)
+	NodeExporterPortRegexp = relabel.MustNewRegexp(`(.*):10300`)
 
 	// ServiceWhitelistRegexp is the regular expression to match workload targets to scrape.
-	ServiceWhitelistRegexp = config.MustNewRegexp(`(kube-system;(cert-exporter|cluster-autoscaler|coredns|kube-state-metrics|net-exporter|nic-exporter|nginx-ingress-controller))|(giantswarm;chart-operator)|(giantswarm-elastic-logging;elastic-logging-elasticsearch-exporter)|(vault-exporter;vault-exporter)`)
+	ServiceWhitelistRegexp = relabel.MustNewRegexp(`(kube-system;(cert-exporter|cluster-autoscaler|coredns|kube-state-metrics|net-exporter|nic-exporter|nginx-ingress-controller))|(giantswarm;chart-operator)|(giantswarm-elastic-logging;elastic-logging-elasticsearch-exporter)|(vault-exporter;vault-exporter)`)
 )
 
 // GetClusterID returns the value of the cluster annotation.

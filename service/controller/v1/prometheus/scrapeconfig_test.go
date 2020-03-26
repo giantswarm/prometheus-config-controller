@@ -13,6 +13,7 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/config"
+	"github.com/prometheus/prometheus/pkg/relabel"
 	"gopkg.in/yaml.v2"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -224,11 +225,11 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 			t.Fatalf("%d: error returned creating scrape configs: %s\n", index, err)
 		}
 
-		if !cmp.Equal(test.expectedScrapeConfigs, scrapeConfigs, cmpopts.IgnoreUnexported(config.Regexp{}, regexp.Regexp{})) {
+		if !cmp.Equal(test.expectedScrapeConfigs, scrapeConfigs, cmpopts.IgnoreUnexported(relabel.Regexp{}, regexp.Regexp{})) {
 			t.Fatalf(
 				"%d: expected scrape configs do not match returned scrape configs.\ndiff: %s\n",
 				index,
-				cmp.Diff(test.expectedScrapeConfigs, scrapeConfigs, cmpopts.IgnoreUnexported(config.Regexp{}, regexp.Regexp{})),
+				cmp.Diff(test.expectedScrapeConfigs, scrapeConfigs, cmpopts.IgnoreUnexported(relabel.Regexp{}, regexp.Regexp{})),
 			)
 		}
 	}
@@ -284,7 +285,7 @@ func Test_Prometheus_GetScrapeConfigs_Deterministic(t *testing.T) {
 			t.Fatalf("%d: error returned creating scrape configs: %s\n", index, err)
 		}
 
-		if !cmp.Equal(expectedScrapeConfigs, scrapeConfigs, cmpopts.IgnoreUnexported(config.Regexp{}, regexp.Regexp{})) {
+		if !cmp.Equal(expectedScrapeConfigs, scrapeConfigs, cmpopts.IgnoreUnexported(relabel.Regexp{}, regexp.Regexp{})) {
 			t.Fatalf(
 				"%d: expected scrape configs do not match returned scrape configs. GetScrapeConfigs not deterministic.\ndiff: %s\n",
 				index,

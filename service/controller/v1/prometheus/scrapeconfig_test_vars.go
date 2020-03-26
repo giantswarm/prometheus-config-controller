@@ -6,48 +6,55 @@ import (
 
 	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/key"
 	"github.com/prometheus/common/model"
+
+	config_util "github.com/prometheus/common/config"
 	"github.com/prometheus/prometheus/config"
+	sd_config "github.com/prometheus/prometheus/discovery/config"
+	"github.com/prometheus/prometheus/discovery/kubernetes"
+	"github.com/prometheus/prometheus/pkg/relabel"
 )
 
 var (
 	TestConfigOneApiserver = config.ScrapeConfig{
 		JobName: "guest-cluster-xa5ly-apiserver",
 		Scheme:  "https",
-		HTTPClientConfig: config.HTTPClientConfig{
-			TLSConfig: config.TLSConfig{
+		HTTPClientConfig: config_util.HTTPClientConfig{
+			TLSConfig: config_util.TLSConfig{
 				CAFile:             "/certs/xa5ly-ca.pem",
 				CertFile:           "/certs/xa5ly-crt.pem",
 				KeyFile:            "/certs/xa5ly-key.pem",
 				InsecureSkipVerify: true,
 			},
 		},
-		ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-			KubernetesSDConfigs: []*config.KubernetesSDConfig{
+		ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
+			KubernetesSDConfigs: []*kubernetes.SDConfig{
 				{
-					APIServer: config.URL{
+					APIServer: config_util.URL{
 						URL: &url.URL{
 							Scheme: "https",
 							Host:   "apiserver.xa5ly",
 						},
 					},
-					Role: config.KubernetesRoleEndpoint,
-					TLSConfig: config.TLSConfig{
-						CAFile:             "/certs/xa5ly-ca.pem",
-						CertFile:           "/certs/xa5ly-crt.pem",
-						KeyFile:            "/certs/xa5ly-key.pem",
-						InsecureSkipVerify: false,
+					Role: kubernetes.RoleEndpoint,
+					HTTPClientConfig: config_util.HTTPClientConfig{
+						TLSConfig: config_util.TLSConfig{
+							CAFile:             "/certs/xa5ly-ca.pem",
+							CertFile:           "/certs/xa5ly-crt.pem",
+							KeyFile:            "/certs/xa5ly-key.pem",
+							InsecureSkipVerify: false,
+						},
 					},
 				},
 			},
 		},
-		RelabelConfigs: []*config.RelabelConfig{
+		RelabelConfigs: []*relabel.Config{
 			{
 				SourceLabels: model.LabelNames{
 					KubernetesSDNamespaceLabel,
 					KubernetesSDServiceNameLabel,
 				},
 				Regex:  APIServerRegexp,
-				Action: config.RelabelKeep,
+				Action: relabel.Keep,
 			},
 			{
 				TargetLabel: AppLabel,
@@ -62,7 +69,7 @@ var (
 				Replacement: GuestClusterType,
 			},
 		},
-		MetricRelabelConfigs: []*config.RelabelConfig{
+		MetricRelabelConfigs: []*relabel.Config{
 			// drop several bucket latency metric
 			{
 				Action:       ActionDrop,
@@ -79,34 +86,36 @@ var (
 	TestConfigOneCadvisor = config.ScrapeConfig{
 		JobName: "guest-cluster-xa5ly-cadvisor",
 		Scheme:  "https",
-		HTTPClientConfig: config.HTTPClientConfig{
-			TLSConfig: config.TLSConfig{
+		HTTPClientConfig: config_util.HTTPClientConfig{
+			TLSConfig: config_util.TLSConfig{
 				CAFile:             "/certs/xa5ly-ca.pem",
 				CertFile:           "/certs/xa5ly-crt.pem",
 				KeyFile:            "/certs/xa5ly-key.pem",
 				InsecureSkipVerify: false,
 			},
 		},
-		ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-			KubernetesSDConfigs: []*config.KubernetesSDConfig{
+		ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
+			KubernetesSDConfigs: []*kubernetes.SDConfig{
 				{
-					APIServer: config.URL{
+					APIServer: config_util.URL{
 						URL: &url.URL{
 							Scheme: "https",
 							Host:   "apiserver.xa5ly",
 						},
 					},
-					Role: config.KubernetesRoleNode,
-					TLSConfig: config.TLSConfig{
-						CAFile:             "/certs/xa5ly-ca.pem",
-						CertFile:           "/certs/xa5ly-crt.pem",
-						KeyFile:            "/certs/xa5ly-key.pem",
-						InsecureSkipVerify: false,
+					Role: kubernetes.RoleNode,
+					HTTPClientConfig: config_util.HTTPClientConfig{
+						TLSConfig: config_util.TLSConfig{
+							CAFile:             "/certs/xa5ly-ca.pem",
+							CertFile:           "/certs/xa5ly-crt.pem",
+							KeyFile:            "/certs/xa5ly-key.pem",
+							InsecureSkipVerify: false,
+						},
 					},
 				},
 			},
 		},
-		RelabelConfigs: []*config.RelabelConfig{
+		RelabelConfigs: []*relabel.Config{
 			{
 				TargetLabel: model.AddressLabel,
 				Replacement: "apiserver.xa5ly",
@@ -143,7 +152,7 @@ var (
 				TargetLabel:  RoleLabel,
 			},
 		},
-		MetricRelabelConfigs: []*config.RelabelConfig{
+		MetricRelabelConfigs: []*relabel.Config{
 			// keep only kube-system cadvisor metrics
 			{
 				Action:       ActionKeep,
@@ -161,38 +170,40 @@ var (
 	TestConfigOneCalicoNode = config.ScrapeConfig{
 		JobName: "guest-cluster-xa5ly-calico-node",
 		Scheme:  "https",
-		HTTPClientConfig: config.HTTPClientConfig{
-			TLSConfig: config.TLSConfig{
+		HTTPClientConfig: config_util.HTTPClientConfig{
+			TLSConfig: config_util.TLSConfig{
 				CAFile:             "/certs/xa5ly-ca.pem",
 				CertFile:           "/certs/xa5ly-crt.pem",
 				KeyFile:            "/certs/xa5ly-key.pem",
 				InsecureSkipVerify: false,
 			},
 		},
-		ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-			KubernetesSDConfigs: []*config.KubernetesSDConfig{
+		ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
+			KubernetesSDConfigs: []*kubernetes.SDConfig{
 				{
-					APIServer: config.URL{
+					APIServer: config_util.URL{
 						URL: &url.URL{
 							Scheme: "https",
 							Host:   "apiserver.xa5ly",
 						},
 					},
-					Role: config.KubernetesRolePod,
-					TLSConfig: config.TLSConfig{
-						CAFile:             "/certs/xa5ly-ca.pem",
-						CertFile:           "/certs/xa5ly-crt.pem",
-						KeyFile:            "/certs/xa5ly-key.pem",
-						InsecureSkipVerify: false,
+					Role: kubernetes.RolePod,
+					HTTPClientConfig: config_util.HTTPClientConfig{
+						TLSConfig: config_util.TLSConfig{
+							CAFile:             "/certs/xa5ly-ca.pem",
+							CertFile:           "/certs/xa5ly-crt.pem",
+							KeyFile:            "/certs/xa5ly-key.pem",
+							InsecureSkipVerify: false,
+						},
 					},
 				},
 			},
 		},
-		RelabelConfigs: []*config.RelabelConfig{
+		RelabelConfigs: []*relabel.Config{
 			{
 				SourceLabels: model.LabelNames{PodSDNamespaceLabel, PodSDPodNameLabel},
 				Regex:        CalicoNodePodRegexp,
-				Action:       config.RelabelKeep,
+				Action:       relabel.Keep,
 			},
 			{
 				TargetLabel:  AppLabel,
@@ -225,39 +236,41 @@ var (
 				Replacement:  key.APIProxyPodMetricsPath(key.CalicoNodeNamespace, key.CalicoNodeMetricPort),
 			},
 		},
-		MetricRelabelConfigs: []*config.RelabelConfig{},
+		MetricRelabelConfigs: []*relabel.Config{},
 	}
 	TestConfigOneKubelet = config.ScrapeConfig{
 		JobName: "guest-cluster-xa5ly-kubelet",
 		Scheme:  "https",
-		HTTPClientConfig: config.HTTPClientConfig{
-			TLSConfig: config.TLSConfig{
+		HTTPClientConfig: config_util.HTTPClientConfig{
+			TLSConfig: config_util.TLSConfig{
 				CAFile:             "/certs/xa5ly-ca.pem",
 				CertFile:           "/certs/xa5ly-crt.pem",
 				KeyFile:            "/certs/xa5ly-key.pem",
 				InsecureSkipVerify: true,
 			},
 		},
-		ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-			KubernetesSDConfigs: []*config.KubernetesSDConfig{
+		ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
+			KubernetesSDConfigs: []*kubernetes.SDConfig{
 				{
-					APIServer: config.URL{
+					APIServer: config_util.URL{
 						URL: &url.URL{
 							Scheme: "https",
 							Host:   "apiserver.xa5ly",
 						},
 					},
-					Role: config.KubernetesRoleNode,
-					TLSConfig: config.TLSConfig{
-						CAFile:             "/certs/xa5ly-ca.pem",
-						CertFile:           "/certs/xa5ly-crt.pem",
-						KeyFile:            "/certs/xa5ly-key.pem",
-						InsecureSkipVerify: false,
+					Role: kubernetes.RoleNode,
+					HTTPClientConfig: config_util.HTTPClientConfig{
+						TLSConfig: config_util.TLSConfig{
+							CAFile:             "/certs/xa5ly-ca.pem",
+							CertFile:           "/certs/xa5ly-crt.pem",
+							KeyFile:            "/certs/xa5ly-key.pem",
+							InsecureSkipVerify: false,
+						},
 					},
 				},
 			},
 		},
-		RelabelConfigs: []*config.RelabelConfig{
+		RelabelConfigs: []*relabel.Config{
 			{
 				TargetLabel: AppLabel,
 				Replacement: KubeletAppName,
@@ -285,7 +298,7 @@ var (
 				TargetLabel:  RoleLabel,
 			},
 		},
-		MetricRelabelConfigs: []*config.RelabelConfig{
+		MetricRelabelConfigs: []*relabel.Config{
 			{
 				Action:       ActionDrop,
 				SourceLabels: model.LabelNames{MetricNameLabel},
@@ -296,33 +309,35 @@ var (
 	TestConfigOneNodeExporter = config.ScrapeConfig{
 		JobName: "guest-cluster-xa5ly-node-exporter",
 		Scheme:  "http",
-		ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-			KubernetesSDConfigs: []*config.KubernetesSDConfig{
+		ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
+			KubernetesSDConfigs: []*kubernetes.SDConfig{
 				{
-					APIServer: config.URL{
+					APIServer: config_util.URL{
 						URL: &url.URL{
 							Scheme: "https",
 							Host:   "apiserver.xa5ly",
 						},
 					},
-					Role: config.KubernetesRoleEndpoint,
-					TLSConfig: config.TLSConfig{
-						CAFile:             "/certs/xa5ly-ca.pem",
-						CertFile:           "/certs/xa5ly-crt.pem",
-						KeyFile:            "/certs/xa5ly-key.pem",
-						InsecureSkipVerify: false,
+					Role: kubernetes.RoleEndpoint,
+					HTTPClientConfig: config_util.HTTPClientConfig{
+						TLSConfig: config_util.TLSConfig{
+							CAFile:             "/certs/xa5ly-ca.pem",
+							CertFile:           "/certs/xa5ly-crt.pem",
+							KeyFile:            "/certs/xa5ly-key.pem",
+							InsecureSkipVerify: false,
+						},
 					},
 				},
 			},
 		},
-		RelabelConfigs: []*config.RelabelConfig{
+		RelabelConfigs: []*relabel.Config{
 			{
 				SourceLabels: model.LabelNames{
 					KubernetesSDNamespaceLabel,
 					KubernetesSDServiceNameLabel,
 				},
 				Regex:  NodeExporterRegexp,
-				Action: config.RelabelKeep,
+				Action: relabel.Keep,
 			},
 			{
 				SourceLabels: model.LabelNames{model.AddressLabel},
@@ -349,7 +364,7 @@ var (
 				TargetLabel:  IPLabel,
 			},
 		},
-		MetricRelabelConfigs: []*config.RelabelConfig{
+		MetricRelabelConfigs: []*relabel.Config{
 			// Drop many mounts that are not interesting based on fstype.
 			{
 				Action:       ActionDrop,
@@ -372,8 +387,8 @@ var (
 	}
 	TestConfigOneWorkload = config.ScrapeConfig{
 		JobName: "guest-cluster-xa5ly-workload",
-		HTTPClientConfig: config.HTTPClientConfig{
-			TLSConfig: config.TLSConfig{
+		HTTPClientConfig: config_util.HTTPClientConfig{
+			TLSConfig: config_util.TLSConfig{
 				CAFile:             "/certs/xa5ly-ca.pem",
 				CertFile:           "/certs/xa5ly-crt.pem",
 				KeyFile:            "/certs/xa5ly-key.pem",
@@ -381,30 +396,32 @@ var (
 			},
 		},
 		Scheme: "https",
-		ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-			KubernetesSDConfigs: []*config.KubernetesSDConfig{
+		ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
+			KubernetesSDConfigs: []*kubernetes.SDConfig{
 				{
-					APIServer: config.URL{
+					APIServer: config_util.URL{
 						URL: &url.URL{
 							Scheme: "https",
 							Host:   "apiserver.xa5ly",
 						},
 					},
-					Role: config.KubernetesRoleEndpoint,
-					TLSConfig: config.TLSConfig{
-						CAFile:             "/certs/xa5ly-ca.pem",
-						CertFile:           "/certs/xa5ly-crt.pem",
-						KeyFile:            "/certs/xa5ly-key.pem",
-						InsecureSkipVerify: false,
+					Role: kubernetes.RoleEndpoint,
+					HTTPClientConfig: config_util.HTTPClientConfig{
+						TLSConfig: config_util.TLSConfig{
+							CAFile:             "/certs/xa5ly-ca.pem",
+							CertFile:           "/certs/xa5ly-crt.pem",
+							KeyFile:            "/certs/xa5ly-key.pem",
+							InsecureSkipVerify: false,
+						},
 					},
 				},
 			},
 		},
-		RelabelConfigs: []*config.RelabelConfig{
+		RelabelConfigs: []*relabel.Config{
 			{
 				SourceLabels: model.LabelNames{KubernetesSDNamespaceLabel, KubernetesSDServiceNameLabel},
 				Regex:        ServiceWhitelistRegexp,
-				Action:       config.RelabelKeep,
+				Action:       relabel.Keep,
 			},
 			{
 				TargetLabel:  AppLabel,
@@ -501,7 +518,7 @@ var (
 				Replacement:  key.APIProxyPodMetricsPath(key.VaultExporterNamespace, key.VaultExporterMetricPort),
 			},
 		},
-		MetricRelabelConfigs: []*config.RelabelConfig{
+		MetricRelabelConfigs: []*relabel.Config{
 			{
 				Action:       ActionRelabel,
 				SourceLabels: model.LabelNames{MetricExportedNamespaceLabel, MetricNamespaceLabel},
@@ -525,8 +542,8 @@ var (
 	}
 	TestConfigOneManagedApp = config.ScrapeConfig{
 		JobName: "guest-cluster-xa5ly-managed-app",
-		HTTPClientConfig: config.HTTPClientConfig{
-			TLSConfig: config.TLSConfig{
+		HTTPClientConfig: config_util.HTTPClientConfig{
+			TLSConfig: config_util.TLSConfig{
 				CAFile:             "/certs/xa5ly-ca.pem",
 				CertFile:           "/certs/xa5ly-crt.pem",
 				KeyFile:            "/certs/xa5ly-key.pem",
@@ -534,45 +551,47 @@ var (
 			},
 		},
 		Scheme: "https",
-		ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-			KubernetesSDConfigs: []*config.KubernetesSDConfig{
+		ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
+			KubernetesSDConfigs: []*kubernetes.SDConfig{
 				{
-					APIServer: config.URL{
+					APIServer: config_util.URL{
 						URL: &url.URL{
 							Scheme: "https",
 							Host:   "apiserver.xa5ly",
 						},
 					},
-					Role: config.KubernetesRoleEndpoint,
-					TLSConfig: config.TLSConfig{
-						CAFile:             "/certs/xa5ly-ca.pem",
-						CertFile:           "/certs/xa5ly-crt.pem",
-						KeyFile:            "/certs/xa5ly-key.pem",
-						InsecureSkipVerify: false,
+					Role: kubernetes.RoleEndpoint,
+					HTTPClientConfig: config_util.HTTPClientConfig{
+						TLSConfig: config_util.TLSConfig{
+							CAFile:             "/certs/xa5ly-ca.pem",
+							CertFile:           "/certs/xa5ly-crt.pem",
+							KeyFile:            "/certs/xa5ly-key.pem",
+							InsecureSkipVerify: false,
+						},
 					},
 				},
 			},
 		},
-		RelabelConfigs: []*config.RelabelConfig{
+		RelabelConfigs: []*relabel.Config{
 			{
 				SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringPresentLabel},
-				Regex:        config.MustNewRegexp(`(true)`),
-				Action:       config.RelabelKeep,
+				Regex:        relabel.MustNewRegexp(`(true)`),
+				Action:       relabel.Keep,
 			},
 			{
 				SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringLabel},
-				Regex:        config.MustNewRegexp(`(true)`),
-				Action:       config.RelabelKeep,
+				Regex:        relabel.MustNewRegexp(`(true)`),
+				Action:       relabel.Keep,
 			},
 			{
 				SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringPortPresentLabel},
-				Regex:        config.MustNewRegexp(`(true)`),
-				Action:       config.RelabelKeep,
+				Regex:        relabel.MustNewRegexp(`(true)`),
+				Action:       relabel.Keep,
 			},
 			{
 				SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringPathPresentLabel},
-				Regex:        config.MustNewRegexp(`(true)`),
-				Action:       config.RelabelKeep,
+				Regex:        relabel.MustNewRegexp(`(true)`),
+				Action:       relabel.Keep,
 			},
 			{
 				TargetLabel:  AppLabel,
@@ -588,12 +607,12 @@ var (
 			},
 			{
 				SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringAppTypeLabel},
-				Regex:        config.MustNewRegexp(`(optional|default)`),
+				Regex:        relabel.MustNewRegexp(`(optional|default)`),
 				TargetLabel:  AppTypeLabel,
 			},
 			{
 				SourceLabels: model.LabelNames{KubernetesSDServiceGiantSwarmMonitoringPresentLabel},
-				Regex:        config.MustNewRegexp(`(true)`),
+				Regex:        relabel.MustNewRegexp(`(true)`),
 				TargetLabel:  AppIsManaged,
 			},
 			{
@@ -622,8 +641,8 @@ var (
 	}
 	TestConfigOneKubeStateManagedApp = config.ScrapeConfig{
 		JobName: "guest-cluster-xa5ly-kube-state-managed-app",
-		HTTPClientConfig: config.HTTPClientConfig{
-			TLSConfig: config.TLSConfig{
+		HTTPClientConfig: config_util.HTTPClientConfig{
+			TLSConfig: config_util.TLSConfig{
 				CAFile:             "/certs/xa5ly-ca.pem",
 				CertFile:           "/certs/xa5ly-crt.pem",
 				KeyFile:            "/certs/xa5ly-key.pem",
@@ -631,30 +650,32 @@ var (
 			},
 		},
 		Scheme: "https",
-		ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-			KubernetesSDConfigs: []*config.KubernetesSDConfig{
+		ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
+			KubernetesSDConfigs: []*kubernetes.SDConfig{
 				{
-					APIServer: config.URL{
+					APIServer: config_util.URL{
 						URL: &url.URL{
 							Scheme: "https",
 							Host:   "apiserver.xa5ly",
 						},
 					},
-					Role: config.KubernetesRoleEndpoint,
-					TLSConfig: config.TLSConfig{
-						CAFile:             "/certs/xa5ly-ca.pem",
-						CertFile:           "/certs/xa5ly-crt.pem",
-						KeyFile:            "/certs/xa5ly-key.pem",
-						InsecureSkipVerify: false,
+					Role: kubernetes.RoleEndpoint,
+					HTTPClientConfig: config_util.HTTPClientConfig{
+						TLSConfig: config_util.TLSConfig{
+							CAFile:             "/certs/xa5ly-ca.pem",
+							CertFile:           "/certs/xa5ly-crt.pem",
+							KeyFile:            "/certs/xa5ly-key.pem",
+							InsecureSkipVerify: false,
+						},
 					},
 				},
 			},
 		},
-		RelabelConfigs: []*config.RelabelConfig{
+		RelabelConfigs: []*relabel.Config{
 			{
 				SourceLabels: model.LabelNames{KubernetesSDNamespaceLabel, KubernetesSDServiceNameLabel},
 				Regex:        KubeStateMetricsServiceNameRegexp,
-				Action:       config.RelabelKeep,
+				Action:       relabel.Keep,
 			},
 			{
 				TargetLabel: KubeStateMetricsForManagedApps,
@@ -679,7 +700,7 @@ var (
 				Replacement:  key.APIProxyPodMetricsPath(key.KubeStateMetricsNamespace, key.KubeStateMetricsPort),
 			},
 		},
-		MetricRelabelConfigs: []*config.RelabelConfig{
+		MetricRelabelConfigs: []*relabel.Config{
 			{
 				SourceLabels: model.LabelNames{MetricNameLabel},
 				Regex:        KubeStateMetricsManagedAppMetricsNameRegexp,
@@ -752,14 +773,14 @@ func init() {
 	TestConfigTwoManagedApp = TestConfigOneManagedApp
 	TestConfigTwoKubeStateManagedApp = TestConfigOneKubeStateManagedApp
 
-	apiServer := config.URL{URL: &url.URL{
+	apiServer := config_util.URL{URL: &url.URL{
 		Scheme: "https",
 		Host:   "apiserver.0ba9v",
 	}}
 
 	clusterID := "0ba9v"
 
-	tlsConfig := config.TLSConfig{
+	tlsConfig := config_util.TLSConfig{
 		CAFile:             "/certs/0ba9v-ca.pem",
 		CertFile:           "/certs/0ba9v-crt.pem",
 		KeyFile:            "/certs/0ba9v-key.pem",
@@ -770,11 +791,13 @@ func init() {
 		TestConfigTwoApiserver.JobName = "guest-cluster-0ba9v-apiserver"
 		TestConfigTwoApiserver.HTTPClientConfig.TLSConfig = tlsConfig
 		TestConfigTwoApiserver.HTTPClientConfig.TLSConfig.InsecureSkipVerify = true
-		TestConfigTwoApiserver.ServiceDiscoveryConfig.KubernetesSDConfigs = []*config.KubernetesSDConfig{
-			&config.KubernetesSDConfig{
+		TestConfigTwoApiserver.ServiceDiscoveryConfig.KubernetesSDConfigs = []*kubernetes.SDConfig{
+			{
 				APIServer: apiServer,
-				Role:      config.KubernetesRoleEndpoint,
-				TLSConfig: tlsConfig,
+				Role:      kubernetes.RoleEndpoint,
+				HTTPClientConfig: config_util.HTTPClientConfig{
+					TLSConfig: tlsConfig,
+				},
 			},
 		}
 
@@ -790,11 +813,13 @@ func init() {
 	{
 		TestConfigTwoCadvisor.JobName = "guest-cluster-0ba9v-cadvisor"
 		TestConfigTwoCadvisor.HTTPClientConfig.TLSConfig = tlsConfig
-		TestConfigTwoCadvisor.ServiceDiscoveryConfig.KubernetesSDConfigs = []*config.KubernetesSDConfig{
-			&config.KubernetesSDConfig{
+		TestConfigTwoCadvisor.ServiceDiscoveryConfig.KubernetesSDConfigs = []*kubernetes.SDConfig{
+			{
 				APIServer: apiServer,
-				Role:      config.KubernetesRoleNode,
-				TLSConfig: tlsConfig,
+				Role:      kubernetes.RoleNode,
+				HTTPClientConfig: config_util.HTTPClientConfig{
+					TLSConfig: tlsConfig,
+				},
 			},
 		}
 
@@ -810,11 +835,13 @@ func init() {
 	{
 		TestConfigTwoCalicoNode.JobName = "guest-cluster-0ba9v-calico-node"
 		TestConfigTwoCalicoNode.HTTPClientConfig.TLSConfig = tlsConfig
-		TestConfigTwoCalicoNode.ServiceDiscoveryConfig.KubernetesSDConfigs = []*config.KubernetesSDConfig{
-			&config.KubernetesSDConfig{
+		TestConfigTwoCalicoNode.ServiceDiscoveryConfig.KubernetesSDConfigs = []*kubernetes.SDConfig{
+			{
 				APIServer: apiServer,
-				Role:      config.KubernetesRolePod,
-				TLSConfig: tlsConfig,
+				Role:      kubernetes.RolePod,
+				HTTPClientConfig: config_util.HTTPClientConfig{
+					TLSConfig: tlsConfig,
+				},
 			},
 		}
 
@@ -831,11 +858,13 @@ func init() {
 		TestConfigTwoKubelet.JobName = "guest-cluster-0ba9v-kubelet"
 		TestConfigTwoKubelet.HTTPClientConfig.TLSConfig = tlsConfig
 		TestConfigTwoKubelet.HTTPClientConfig.TLSConfig.InsecureSkipVerify = true
-		TestConfigTwoKubelet.ServiceDiscoveryConfig.KubernetesSDConfigs = []*config.KubernetesSDConfig{
-			&config.KubernetesSDConfig{
+		TestConfigTwoKubelet.ServiceDiscoveryConfig.KubernetesSDConfigs = []*kubernetes.SDConfig{
+			{
 				APIServer: apiServer,
-				Role:      config.KubernetesRoleNode,
-				TLSConfig: tlsConfig,
+				Role:      kubernetes.RoleNode,
+				HTTPClientConfig: config_util.HTTPClientConfig{
+					TLSConfig: tlsConfig,
+				},
 			},
 		}
 
@@ -850,11 +879,13 @@ func init() {
 
 	{
 		TestConfigTwoNodeExporter.JobName = "guest-cluster-0ba9v-node-exporter"
-		TestConfigTwoNodeExporter.ServiceDiscoveryConfig.KubernetesSDConfigs = []*config.KubernetesSDConfig{
-			&config.KubernetesSDConfig{
+		TestConfigTwoNodeExporter.ServiceDiscoveryConfig.KubernetesSDConfigs = []*kubernetes.SDConfig{
+			{
 				APIServer: apiServer,
-				Role:      config.KubernetesRoleEndpoint,
-				TLSConfig: tlsConfig,
+				Role:      kubernetes.RoleEndpoint,
+				HTTPClientConfig: config_util.HTTPClientConfig{
+					TLSConfig: tlsConfig,
+				},
 			},
 		}
 
@@ -870,11 +901,13 @@ func init() {
 	{
 		TestConfigTwoWorkload.JobName = "guest-cluster-0ba9v-workload"
 		TestConfigTwoWorkload.HTTPClientConfig.TLSConfig = tlsConfig
-		TestConfigTwoWorkload.ServiceDiscoveryConfig.KubernetesSDConfigs = []*config.KubernetesSDConfig{
-			&config.KubernetesSDConfig{
+		TestConfigTwoWorkload.ServiceDiscoveryConfig.KubernetesSDConfigs = []*kubernetes.SDConfig{
+			{
 				APIServer: apiServer,
-				Role:      config.KubernetesRoleEndpoint,
-				TLSConfig: tlsConfig,
+				Role:      kubernetes.RoleEndpoint,
+				HTTPClientConfig: config_util.HTTPClientConfig{
+					TLSConfig: tlsConfig,
+				},
 			},
 		}
 
@@ -891,11 +924,13 @@ func init() {
 		{
 			TestConfigTwoManagedApp.JobName = "guest-cluster-0ba9v-managed-app"
 			TestConfigTwoManagedApp.HTTPClientConfig.TLSConfig = tlsConfig
-			TestConfigTwoManagedApp.ServiceDiscoveryConfig.KubernetesSDConfigs = []*config.KubernetesSDConfig{
+			TestConfigTwoManagedApp.ServiceDiscoveryConfig.KubernetesSDConfigs = []*kubernetes.SDConfig{
 				{
 					APIServer: apiServer,
-					Role:      config.KubernetesRoleEndpoint,
-					TLSConfig: tlsConfig,
+					Role:      kubernetes.RoleEndpoint,
+					HTTPClientConfig: config_util.HTTPClientConfig{
+						TLSConfig: tlsConfig,
+					},
 				},
 			}
 
@@ -913,11 +948,13 @@ func init() {
 		{
 			TestConfigTwoKubeStateManagedApp.JobName = "guest-cluster-0ba9v-kube-state-managed-app"
 			TestConfigTwoKubeStateManagedApp.HTTPClientConfig.TLSConfig = tlsConfig
-			TestConfigTwoKubeStateManagedApp.ServiceDiscoveryConfig.KubernetesSDConfigs = []*config.KubernetesSDConfig{
+			TestConfigTwoKubeStateManagedApp.ServiceDiscoveryConfig.KubernetesSDConfigs = []*kubernetes.SDConfig{
 				{
 					APIServer: apiServer,
-					Role:      config.KubernetesRoleEndpoint,
-					TLSConfig: tlsConfig,
+					Role:      kubernetes.RoleEndpoint,
+					HTTPClientConfig: config_util.HTTPClientConfig{
+						TLSConfig: tlsConfig,
+					},
 				},
 			}
 

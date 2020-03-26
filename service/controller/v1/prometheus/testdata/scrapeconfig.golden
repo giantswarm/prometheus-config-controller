@@ -1,4 +1,5 @@
 - job_name: guest-cluster-xa5ly-apiserver
+  honor_timestamps: false
   scheme: https
   kubernetes_sd_configs:
   - api_server: https://apiserver.xa5ly
@@ -8,8 +9,6 @@
       cert_file: /certs/xa5ly-crt.pem
       key_file: /certs/xa5ly-key.pem
       insecure_skip_verify: false
-    namespaces:
-      names: []
   tls_config:
     ca_file: /certs/xa5ly-ca.pem
     cert_file: /certs/xa5ly-crt.pem
@@ -33,6 +32,7 @@
     regex: (reflector.*)
     action: drop
 - job_name: guest-cluster-xa5ly-cadvisor
+  honor_timestamps: false
   scheme: https
   kubernetes_sd_configs:
   - api_server: https://apiserver.xa5ly
@@ -42,8 +42,6 @@
       cert_file: /certs/xa5ly-crt.pem
       key_file: /certs/xa5ly-key.pem
       insecure_skip_verify: false
-    namespaces:
-      names: []
   tls_config:
     ca_file: /certs/xa5ly-ca.pem
     cert_file: /certs/xa5ly-crt.pem
@@ -77,6 +75,7 @@
     regex: container_network_.*
     action: drop
 - job_name: guest-cluster-xa5ly-calico-node
+  honor_timestamps: false
   scheme: https
   kubernetes_sd_configs:
   - api_server: https://apiserver.xa5ly
@@ -86,8 +85,6 @@
       cert_file: /certs/xa5ly-crt.pem
       key_file: /certs/xa5ly-key.pem
       insecure_skip_verify: false
-    namespaces:
-      names: []
   tls_config:
     ca_file: /certs/xa5ly-ca.pem
     cert_file: /certs/xa5ly-crt.pem
@@ -114,6 +111,7 @@
     target_label: __metrics_path__
     replacement: /api/v1/namespaces/kube-system/pods/${1}:9091/proxy/metrics
 - job_name: guest-cluster-xa5ly-kube-state-managed-app
+  honor_timestamps: false
   scheme: https
   kubernetes_sd_configs:
   - api_server: https://apiserver.xa5ly
@@ -123,8 +121,6 @@
       cert_file: /certs/xa5ly-crt.pem
       key_file: /certs/xa5ly-key.pem
       insecure_skip_verify: false
-    namespaces:
-      names: []
   tls_config:
     ca_file: /certs/xa5ly-ca.pem
     cert_file: /certs/xa5ly-crt.pem
@@ -177,6 +173,7 @@
     target_label: workload_name
     replacement: ${1}
 - job_name: guest-cluster-xa5ly-kubelet
+  honor_timestamps: false
   scheme: https
   kubernetes_sd_configs:
   - api_server: https://apiserver.xa5ly
@@ -186,8 +183,6 @@
       cert_file: /certs/xa5ly-crt.pem
       key_file: /certs/xa5ly-key.pem
       insecure_skip_verify: false
-    namespaces:
-      names: []
   tls_config:
     ca_file: /certs/xa5ly-ca.pem
     cert_file: /certs/xa5ly-crt.pem
@@ -213,6 +208,7 @@
     regex: (reflector.*)
     action: drop
 - job_name: guest-cluster-xa5ly-managed-app
+  honor_timestamps: false
   scheme: https
   kubernetes_sd_configs:
   - api_server: https://apiserver.xa5ly
@@ -222,8 +218,6 @@
       cert_file: /certs/xa5ly-crt.pem
       key_file: /certs/xa5ly-key.pem
       insecure_skip_verify: false
-    namespaces:
-      names: []
   tls_config:
     ca_file: /certs/xa5ly-ca.pem
     cert_file: /certs/xa5ly-crt.pem
@@ -266,6 +260,7 @@
     target_label: __metrics_path__
     replacement: /api/v1/namespaces/${1}/pods/${2}:${3}/proxy/${4}
 - job_name: guest-cluster-xa5ly-node-exporter
+  honor_timestamps: false
   scheme: http
   kubernetes_sd_configs:
   - api_server: https://apiserver.xa5ly
@@ -275,8 +270,6 @@
       cert_file: /certs/xa5ly-crt.pem
       key_file: /certs/xa5ly-key.pem
       insecure_skip_verify: false
-    namespaces:
-      names: []
   relabel_configs:
   - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name]
     regex: kube-system;node-exporter
@@ -306,6 +299,7 @@
     regex: node_systemd_unit_state;(dev-disk-by|run-docker-netns|sys-devices|sys-subsystem-net|var-lib-docker-overlay2|var-lib-docker-containers|var-lib-kubelet-pods).*
     action: drop
 - job_name: guest-cluster-xa5ly-workload
+  honor_timestamps: false
   scheme: https
   kubernetes_sd_configs:
   - api_server: https://apiserver.xa5ly
@@ -315,8 +309,6 @@
       cert_file: /certs/xa5ly-crt.pem
       key_file: /certs/xa5ly-key.pem
       insecure_skip_verify: false
-    namespaces:
-      names: []
   tls_config:
     ca_file: /certs/xa5ly-ca.pem
     cert_file: /certs/xa5ly-crt.pem

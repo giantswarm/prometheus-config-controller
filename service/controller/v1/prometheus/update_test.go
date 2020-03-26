@@ -6,8 +6,13 @@ import (
 	"testing"
 
 	"github.com/davecgh/go-spew/spew"
+	config_util "github.com/prometheus/common/config"
 	"github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/config"
+	sd_config "github.com/prometheus/prometheus/discovery/config"
+	"github.com/prometheus/prometheus/discovery/kubernetes"
+	"github.com/prometheus/prometheus/discovery/targetgroup"
+	"github.com/prometheus/prometheus/pkg/relabel"
 )
 
 // Test_Prometheus_isManaged tests the isManaged function.
@@ -24,8 +29,8 @@ func Test_Prometheus_isManaged(t *testing.T) {
 		{
 			scrapeConfig: config.ScrapeConfig{
 				JobName: "xa5ly",
-				ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-					StaticConfigs: []*config.TargetGroup{
+				ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
+					StaticConfigs: []*targetgroup.Group{
 						{
 							Targets: []model.LabelSet{
 								{"apiserver.xa5ly": ""},
@@ -41,49 +46,53 @@ func Test_Prometheus_isManaged(t *testing.T) {
 			scrapeConfig: config.ScrapeConfig{
 				JobName: "guest-cluster-xa5ly",
 				Scheme:  "https",
-				HTTPClientConfig: config.HTTPClientConfig{
-					TLSConfig: config.TLSConfig{
+				HTTPClientConfig: config_util.HTTPClientConfig{
+					TLSConfig: config_util.TLSConfig{
 						CAFile:             "/certs/xa5ly-ca.pem",
 						CertFile:           "/certs/xa5ly-crt.pem",
 						KeyFile:            "/certs/xa5ly-key.pem",
 						InsecureSkipVerify: true,
 					},
 				},
-				ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-					KubernetesSDConfigs: []*config.KubernetesSDConfig{
+				ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
+					KubernetesSDConfigs: []*kubernetes.SDConfig{
 						{
-							APIServer: config.URL{
+							APIServer: config_util.URL{
 								URL: &url.URL{
 									Scheme: "https",
 									Host:   "apiserver.xa5ly",
 								},
 							},
-							Role: config.KubernetesRoleEndpoint,
-							TLSConfig: config.TLSConfig{
-								CAFile:             "/certs/xa5ly-ca.pem",
-								CertFile:           "/certs/xa5ly-crt.pem",
-								KeyFile:            "/certs/xa5ly-key.pem",
-								InsecureSkipVerify: false,
+							Role: kubernetes.RoleEndpoint,
+							HTTPClientConfig: config_util.HTTPClientConfig{
+								TLSConfig: config_util.TLSConfig{
+									CAFile:             "/certs/xa5ly-ca.pem",
+									CertFile:           "/certs/xa5ly-crt.pem",
+									KeyFile:            "/certs/xa5ly-key.pem",
+									InsecureSkipVerify: false,
+								},
 							},
 						},
 						{
-							APIServer: config.URL{
+							APIServer: config_util.URL{
 								URL: &url.URL{
 									Scheme: "https",
 									Host:   "apiserver.xa5ly",
 								},
 							},
-							Role: config.KubernetesRoleNode,
-							TLSConfig: config.TLSConfig{
-								CAFile:             "/certs/xa5ly-ca.pem",
-								CertFile:           "/certs/xa5ly-crt.pem",
-								KeyFile:            "/certs/xa5ly-key.pem",
-								InsecureSkipVerify: false,
+							Role: kubernetes.RoleNode,
+							HTTPClientConfig: config_util.HTTPClientConfig{
+								TLSConfig: config_util.TLSConfig{
+									CAFile:             "/certs/xa5ly-ca.pem",
+									CertFile:           "/certs/xa5ly-crt.pem",
+									KeyFile:            "/certs/xa5ly-key.pem",
+									InsecureSkipVerify: false,
+								},
 							},
 						},
 					},
 				},
-				RelabelConfigs: []*config.RelabelConfig{
+				RelabelConfigs: []*relabel.Config{
 					{
 						TargetLabel: ClusterIDLabel,
 						Replacement: "xa5ly",
@@ -96,7 +105,7 @@ func Test_Prometheus_isManaged(t *testing.T) {
 		{
 			scrapeConfig: config.ScrapeConfig{
 				JobName: "guest-cluster-xa5ly-cadvisor",
-				RelabelConfigs: []*config.RelabelConfig{
+				RelabelConfigs: []*relabel.Config{
 					{
 						TargetLabel: ClusterIDLabel,
 						Replacement: "xa5ly",
@@ -160,20 +169,20 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 			scrapeConfigs: []config.ScrapeConfig{
 				{
 					JobName: "guest-cluster-xa5ly",
-					ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-						KubernetesSDConfigs: []*config.KubernetesSDConfig{
+					ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
+						KubernetesSDConfigs: []*kubernetes.SDConfig{
 							{
-								APIServer: config.URL{
+								APIServer: config_util.URL{
 									URL: &url.URL{
 										Scheme: "https",
 										Host:   "apiserver.xa5ly",
 									},
 								},
-								Role: config.KubernetesRoleEndpoint,
+								Role: kubernetes.RoleEndpoint,
 							},
 						},
 					},
-					RelabelConfigs: []*config.RelabelConfig{
+					RelabelConfigs: []*relabel.Config{
 						{
 							TargetLabel: ClusterIDLabel,
 							Replacement: "xa5ly",
@@ -186,20 +195,20 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 				ScrapeConfigs: []*config.ScrapeConfig{
 					{
 						JobName: "guest-cluster-xa5ly",
-						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-							KubernetesSDConfigs: []*config.KubernetesSDConfig{
+						ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
+							KubernetesSDConfigs: []*kubernetes.SDConfig{
 								{
-									APIServer: config.URL{
+									APIServer: config_util.URL{
 										URL: &url.URL{
 											Scheme: "https",
 											Host:   "apiserver.xa5ly",
 										},
 									},
-									Role: config.KubernetesRoleEndpoint,
+									Role: kubernetes.RoleEndpoint,
 								},
 							},
 						},
-						RelabelConfigs: []*config.RelabelConfig{
+						RelabelConfigs: []*relabel.Config{
 							{
 								TargetLabel: ClusterIDLabel,
 								Replacement: "xa5ly",
@@ -218,20 +227,20 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 				ScrapeConfigs: []*config.ScrapeConfig{
 					{
 						JobName: "guest-cluster-xa5ly",
-						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-							KubernetesSDConfigs: []*config.KubernetesSDConfig{
+						ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
+							KubernetesSDConfigs: []*kubernetes.SDConfig{
 								{
-									APIServer: config.URL{
+									APIServer: config_util.URL{
 										URL: &url.URL{
 											Scheme: "https",
 											Host:   "apiserver.xa5ly",
 										},
 									},
-									Role: config.KubernetesRoleEndpoint,
+									Role: kubernetes.RoleEndpoint,
 								},
 							},
 						},
-						RelabelConfigs: []*config.RelabelConfig{
+						RelabelConfigs: []*relabel.Config{
 							{
 								TargetLabel: ClusterIDLabel,
 								Replacement: "xa5ly",
@@ -243,20 +252,20 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 			scrapeConfigs: []config.ScrapeConfig{
 				{
 					JobName: "guest-cluster-xa5ly",
-					ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-						KubernetesSDConfigs: []*config.KubernetesSDConfig{
+					ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
+						KubernetesSDConfigs: []*kubernetes.SDConfig{
 							{
-								APIServer: config.URL{
+								APIServer: config_util.URL{
 									URL: &url.URL{
 										Scheme: "https",
 										Host:   "apiserver.xa5ly",
 									},
 								},
-								Role: config.KubernetesRoleEndpoint,
+								Role: kubernetes.RoleEndpoint,
 							},
 						},
 					},
-					RelabelConfigs: []*config.RelabelConfig{
+					RelabelConfigs: []*relabel.Config{
 						{
 							TargetLabel: ClusterIDLabel,
 							Replacement: "xa5ly",
@@ -269,20 +278,20 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 				ScrapeConfigs: []*config.ScrapeConfig{
 					{
 						JobName: "guest-cluster-xa5ly",
-						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-							KubernetesSDConfigs: []*config.KubernetesSDConfig{
+						ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
+							KubernetesSDConfigs: []*kubernetes.SDConfig{
 								{
-									APIServer: config.URL{
+									APIServer: config_util.URL{
 										URL: &url.URL{
 											Scheme: "https",
 											Host:   "apiserver.xa5ly",
 										},
 									},
-									Role: config.KubernetesRoleEndpoint,
+									Role: kubernetes.RoleEndpoint,
 								},
 							},
 						},
-						RelabelConfigs: []*config.RelabelConfig{
+						RelabelConfigs: []*relabel.Config{
 							{
 								TargetLabel: ClusterIDLabel,
 								Replacement: "xa5ly",
@@ -301,20 +310,20 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 				ScrapeConfigs: []*config.ScrapeConfig{
 					{
 						JobName: "guest-cluster-xa5ly",
-						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-							KubernetesSDConfigs: []*config.KubernetesSDConfig{
+						ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
+							KubernetesSDConfigs: []*kubernetes.SDConfig{
 								{
-									APIServer: config.URL{
+									APIServer: config_util.URL{
 										URL: &url.URL{
 											Scheme: "https",
 											Host:   "apiserver.xa5ly",
 										},
 									},
-									Role: config.KubernetesRoleEndpoint,
+									Role: kubernetes.RoleEndpoint,
 								},
 							},
 						},
-						RelabelConfigs: []*config.RelabelConfig{
+						RelabelConfigs: []*relabel.Config{
 							{
 								TargetLabel: ClusterIDLabel,
 								Replacement: "xa5ly",
@@ -326,20 +335,20 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 			scrapeConfigs: []config.ScrapeConfig{
 				{
 					JobName: "guest-cluster-xa5ly",
-					ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-						KubernetesSDConfigs: []*config.KubernetesSDConfig{
+					ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
+						KubernetesSDConfigs: []*kubernetes.SDConfig{
 							{
-								APIServer: config.URL{
+								APIServer: config_util.URL{
 									URL: &url.URL{
 										Scheme: "https",
 										Host:   "apiserver.xa5ly",
 									},
 								},
-								Role: config.KubernetesRoleEndpoint,
+								Role: kubernetes.RoleEndpoint,
 							},
 						},
 					},
-					RelabelConfigs: []*config.RelabelConfig{
+					RelabelConfigs: []*relabel.Config{
 						{
 							TargetLabel: ClusterIDLabel,
 							Replacement: "xa5ly",
@@ -348,20 +357,20 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 				},
 				{
 					JobName: "guest-cluster-jf0sj",
-					ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-						KubernetesSDConfigs: []*config.KubernetesSDConfig{
+					ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
+						KubernetesSDConfigs: []*kubernetes.SDConfig{
 							{
-								APIServer: config.URL{
+								APIServer: config_util.URL{
 									URL: &url.URL{
 										Scheme: "https",
 										Host:   "apiserver.jf02j",
 									},
 								},
-								Role: config.KubernetesRoleEndpoint,
+								Role: kubernetes.RoleEndpoint,
 							},
 						},
 					},
-					RelabelConfigs: []*config.RelabelConfig{
+					RelabelConfigs: []*relabel.Config{
 						{
 							TargetLabel: ClusterIDLabel,
 							Replacement: "jf02j",
@@ -374,20 +383,20 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 				ScrapeConfigs: []*config.ScrapeConfig{
 					{
 						JobName: "guest-cluster-xa5ly",
-						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-							KubernetesSDConfigs: []*config.KubernetesSDConfig{
+						ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
+							KubernetesSDConfigs: []*kubernetes.SDConfig{
 								{
-									APIServer: config.URL{
+									APIServer: config_util.URL{
 										URL: &url.URL{
 											Scheme: "https",
 											Host:   "apiserver.xa5ly",
 										},
 									},
-									Role: config.KubernetesRoleEndpoint,
+									Role: kubernetes.RoleEndpoint,
 								},
 							},
 						},
-						RelabelConfigs: []*config.RelabelConfig{
+						RelabelConfigs: []*relabel.Config{
 							{
 								TargetLabel: ClusterIDLabel,
 								Replacement: "xa5ly",
@@ -396,20 +405,20 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 					},
 					{
 						JobName: "guest-cluster-jf0sj",
-						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-							KubernetesSDConfigs: []*config.KubernetesSDConfig{
+						ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
+							KubernetesSDConfigs: []*kubernetes.SDConfig{
 								{
-									APIServer: config.URL{
+									APIServer: config_util.URL{
 										URL: &url.URL{
 											Scheme: "https",
 											Host:   "apiserver.jf02j",
 										},
 									},
-									Role: config.KubernetesRoleEndpoint,
+									Role: kubernetes.RoleEndpoint,
 								},
 							},
 						},
-						RelabelConfigs: []*config.RelabelConfig{
+						RelabelConfigs: []*relabel.Config{
 							{
 								TargetLabel: ClusterIDLabel,
 								Replacement: "jf02j",
@@ -432,20 +441,20 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 			scrapeConfigs: []config.ScrapeConfig{
 				{
 					JobName: "guest-cluster-xa5ly",
-					ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-						KubernetesSDConfigs: []*config.KubernetesSDConfig{
+					ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
+						KubernetesSDConfigs: []*kubernetes.SDConfig{
 							{
-								APIServer: config.URL{
+								APIServer: config_util.URL{
 									URL: &url.URL{
 										Scheme: "https",
 										Host:   "apiserver.xa5ly",
 									},
 								},
-								Role: config.KubernetesRoleEndpoint,
+								Role: kubernetes.RoleEndpoint,
 							},
 						},
 					},
-					RelabelConfigs: []*config.RelabelConfig{
+					RelabelConfigs: []*relabel.Config{
 						{
 							TargetLabel: ClusterIDLabel,
 							Replacement: "xa5ly",
@@ -461,20 +470,20 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 					},
 					{
 						JobName: "guest-cluster-xa5ly",
-						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-							KubernetesSDConfigs: []*config.KubernetesSDConfig{
+						ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
+							KubernetesSDConfigs: []*kubernetes.SDConfig{
 								{
-									APIServer: config.URL{
+									APIServer: config_util.URL{
 										URL: &url.URL{
 											Scheme: "https",
 											Host:   "apiserver.xa5ly",
 										},
 									},
-									Role: config.KubernetesRoleEndpoint,
+									Role: kubernetes.RoleEndpoint,
 								},
 							},
 						},
-						RelabelConfigs: []*config.RelabelConfig{
+						RelabelConfigs: []*relabel.Config{
 							{
 								TargetLabel: ClusterIDLabel,
 								Replacement: "xa5ly",
@@ -493,20 +502,20 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 				ScrapeConfigs: []*config.ScrapeConfig{
 					{
 						JobName: "guest-cluster-xa5ly",
-						ServiceDiscoveryConfig: config.ServiceDiscoveryConfig{
-							KubernetesSDConfigs: []*config.KubernetesSDConfig{
+						ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
+							KubernetesSDConfigs: []*kubernetes.SDConfig{
 								{
-									APIServer: config.URL{
+									APIServer: config_util.URL{
 										URL: &url.URL{
 											Scheme: "https",
 											Host:   "apiserver.xa5ly",
 										},
 									},
-									Role: config.KubernetesRoleEndpoint,
+									Role: kubernetes.RoleEndpoint,
 								},
 							},
 						},
-						RelabelConfigs: []*config.RelabelConfig{
+						RelabelConfigs: []*relabel.Config{
 							{
 								TargetLabel: ClusterIDLabel,
 								Replacement: "xa5ly",

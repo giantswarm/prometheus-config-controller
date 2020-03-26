@@ -24,7 +24,7 @@ func (r *Resource) getCurrentState(ctx context.Context) (*corev1.ConfigMap, erro
 		r.logger.LogCtx(ctx, "debug", "configmap does not exist")
 		return nil, nil
 	} else if err != nil {
-		return nil, microerror.Maskf(err, "an error occurred fetching the configmap")
+		return nil, microerror.Mask(err)
 	}
 
 	r.logger.LogCtx(ctx, "debug", "found configmap")
