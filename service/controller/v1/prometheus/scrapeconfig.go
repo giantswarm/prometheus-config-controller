@@ -30,9 +30,11 @@ const (
 
 	// APIServerJobType is the job type for scraping Kubernetes API servers.
 	APIServerJobType = "apiserver"
+	// AWSNodeJobType is the job type for scraping aws-node Pods.
+	AWSNodeJobType = "aws-node"
 	// CadvisorJobType is the job type for scraping Cadvisor.
 	CadvisorJobType = "cadvisor"
-	// CalicoNodeJobType is the job type for scraping calico-node PODs.
+	// CalicoNodeJobType is the job type for scraping calico-node Pods.
 	CalicoNodeJobType = "calico-node"
 	// EtcdJobType is the job type for scraping etcd.
 	EtcdJobType = "etcd"
@@ -188,6 +190,12 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 		Regex:        NginxIngressControllerPodNameRegexp,
 		TargetLabel:  MetricPathLabel,
 		Replacement:  key.APIProxyPodMetricsPath(key.NginxIngressControllerNamespace, key.NginxIngressControllerMetricPort),
+	}
+	rewriteAWSNodePath := &relabel.Config{
+		SourceLabels: model.LabelNames{PodSDPodNameLabel},
+		Regex:        AWSNodePodNameRegexp,
+		TargetLabel:  MetricPathLabel,
+		Replacement:  key.APIProxyPodMetricsPath(key.AWSNodeNamespace, key.AWSNodeMetricPort),
 	}
 	rewriteCalicoNodePath := &relabel.Config{
 		SourceLabels: model.LabelNames{PodSDPodNameLabel},
@@ -368,6 +376,45 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 			MetricRelabelConfigs: []*relabel.Config{
 				reflectorRelabelConfig,
 			},
+		},
+
+		{
+			JobName:                getJobName(service, AWSNodeJobType),
+			HTTPClientConfig:       secureHTTPClientConfig,
+			Scheme:                 HttpsScheme,
+			ServiceDiscoveryConfig: podSDConfig,
+			RelabelConfigs: []*relabel.Config{
+				// Only keep kube-state-metrics targets.
+				{
+					SourceLabels: model.LabelNames{PodSDNamespaceLabel, PodSDPodNameLabel},
+					Regex:        AWSNodePodRegexp,
+					Action:       relabel.Keep,
+				},
+				// Add app label.
+				{
+					TargetLabel:  AppLabel,
+					SourceLabels: model.LabelNames{PodSDContainerNameLabel},
+				},
+				// Add namespace label.
+				{
+					TargetLabel:  NamespaceLabel,
+					SourceLabels: model.LabelNames{PodSDNamespaceLabel},
+				},
+				// Add pod_name label.
+				{
+					TargetLabel:  PodNameLabel,
+					SourceLabels: model.LabelNames{PodSDPodNameLabel},
+				},
+				// Add cluster_id label.
+				clusterIDLabelRelabelConfig,
+				// Add cluster_type label.
+				clusterTypeLabelRelabelConfig,
+				// rewrite host to api proxy
+				rewriteAddress,
+				// rewrite metrics scrape path to connect pods
+				rewriteAWSNodePath,
+			},
+			MetricRelabelConfigs: []*relabel.Config{},
 		},
 
 		{
