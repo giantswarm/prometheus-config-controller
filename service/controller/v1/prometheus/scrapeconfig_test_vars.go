@@ -459,12 +459,6 @@ var (
 			},
 			{
 				SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
-				Regex:        NginxIngressControllerPodNameRegexp,
-				TargetLabel:  MetricPathLabel,
-				Replacement:  key.APIProxyPodMetricsPath(key.NginxIngressControllerNamespace, key.NginxIngressControllerMetricPort),
-			},
-			{
-				SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 				Regex:        CalicoNodePodNameRegexp,
 				TargetLabel:  MetricPathLabel,
 				Replacement:  key.APIProxyPodMetricsPath(key.CalicoNodeNamespace, key.CalicoNodeMetricPort),
@@ -532,11 +526,93 @@ var (
 				SourceLabels: model.LabelNames{MetricExportedNamespaceLabel},
 				Regex:        NSRegexp,
 			},
-			// drop useless IC metrics
+		},
+	}
+	TestConfigOneIngress = config.ScrapeConfig{
+		JobName: "guest-cluster-xa5ly-ingress",
+		HTTPClientConfig: config_util.HTTPClientConfig{
+			TLSConfig: config_util.TLSConfig{
+				CAFile:             "/certs/xa5ly-ca.pem",
+				CertFile:           "/certs/xa5ly-crt.pem",
+				KeyFile:            "/certs/xa5ly-key.pem",
+				InsecureSkipVerify: false,
+			},
+		},
+		Scheme: "https",
+		ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
+			KubernetesSDConfigs: []*kubernetes.SDConfig{
+				{
+					APIServer: config_util.URL{
+						URL: &url.URL{
+							Scheme: "https",
+							Host:   "apiserver.xa5ly",
+						},
+					},
+					Role: kubernetes.RoleEndpoint,
+					HTTPClientConfig: config_util.HTTPClientConfig{
+						TLSConfig: config_util.TLSConfig{
+							CAFile:             "/certs/xa5ly-ca.pem",
+							CertFile:           "/certs/xa5ly-crt.pem",
+							KeyFile:            "/certs/xa5ly-key.pem",
+							InsecureSkipVerify: false,
+						},
+					},
+				},
+			},
+		},
+		RelabelConfigs: []*relabel.Config{
 			{
-				Action:       ActionDrop,
+				SourceLabels: model.LabelNames{KubernetesSDNamespaceLabel, KubernetesSDServiceNameLabel},
+				Regex:        IngressWhitelistRegexp,
+				Action:       relabel.Keep,
+			},
+			{
+				TargetLabel:  AppLabel,
+				SourceLabels: model.LabelNames{KubernetesSDServiceNameLabel},
+			},
+			{
+				TargetLabel:  NamespaceLabel,
+				SourceLabels: model.LabelNames{KubernetesSDNamespaceLabel},
+			},
+			{
+				TargetLabel:  PodNameLabel,
+				SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
+			},
+			{
+				TargetLabel:  NodeLabel,
+				SourceLabels: model.LabelNames{KubernetesSDPodNodeNameLabel},
+			},
+			{
+				TargetLabel: ClusterIDLabel,
+				Replacement: "xa5ly",
+			},
+			{
+				TargetLabel: ClusterTypeLabel,
+				Replacement: GuestClusterType,
+			},
+			{
+				TargetLabel: AddressLabel,
+				Replacement: key.APIServiceHost(key.PrefixMaster, "xa5ly"),
+			},
+			{
+				SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
+				Regex:        NginxIngressControllerPodNameRegexp,
+				TargetLabel:  MetricPathLabel,
+				Replacement:  key.APIProxyPodMetricsPath(key.NginxIngressControllerNamespace, key.NginxIngressControllerMetricPort),
+			},
+		},
+		MetricRelabelConfigs: []*relabel.Config{
+			{
+				Action:       ActionRelabel,
+				SourceLabels: model.LabelNames{MetricExportedNamespaceLabel, MetricNamespaceLabel},
+				Regex:        RelabelNamespaceRegexp,
+				Replacement:  GroupCapture,
+				TargetLabel:  ExportedNamespaceLabel,
+			},
+			{
+				Action:       ActionKeep,
 				SourceLabels: model.LabelNames{MetricNameLabel},
-				Regex:        MetricDropICRegexp,
+				Regex:        MetricKeepICRegexp,
 			},
 		},
 	}
@@ -757,6 +833,7 @@ var (
 	TestConfigTwoKubelet             config.ScrapeConfig
 	TestConfigTwoNodeExporter        config.ScrapeConfig
 	TestConfigTwoWorkload            config.ScrapeConfig
+	TestConfigTwoIngress             config.ScrapeConfig
 	TestConfigTwoManagedApp          config.ScrapeConfig
 	TestConfigTwoKubeStateManagedApp config.ScrapeConfig
 )
@@ -770,6 +847,7 @@ func init() {
 	TestConfigTwoKubelet = TestConfigOneKubelet
 	TestConfigTwoNodeExporter = TestConfigOneNodeExporter
 	TestConfigTwoWorkload = TestConfigOneWorkload
+	TestConfigTwoIngress = TestConfigOneIngress
 	TestConfigTwoManagedApp = TestConfigOneManagedApp
 	TestConfigTwoKubeStateManagedApp = TestConfigOneKubeStateManagedApp
 
@@ -920,6 +998,27 @@ func init() {
 		}
 	}
 
+	{
+		TestConfigTwoIngress.JobName = "guest-cluster-0ba9v-ingress"
+		TestConfigTwoIngress.HTTPClientConfig.TLSConfig = tlsConfig
+		TestConfigTwoIngress.ServiceDiscoveryConfig.KubernetesSDConfigs = []*kubernetes.SDConfig{
+			{
+				APIServer: apiServer,
+				Role:      kubernetes.RoleEndpoint,
+				HTTPClientConfig: config_util.HTTPClientConfig{
+					TLSConfig: tlsConfig,
+				},
+			},
+		}
+
+		// Deepcopy relabel configs and change clusterID to match second test config.
+		TestConfigTwoIngress.RelabelConfigs = nil
+		for _, r := range TestConfigOneIngress.RelabelConfigs {
+			newRelabelConfig := *r
+			newRelabelConfig.Replacement = strings.ReplaceAll(r.Replacement, "xa5ly", clusterID)
+			TestConfigTwoIngress.RelabelConfigs = append(TestConfigTwoIngress.RelabelConfigs, &newRelabelConfig)
+		}
+	}
 	{
 		{
 			TestConfigTwoManagedApp.JobName = "guest-cluster-0ba9v-managed-app"

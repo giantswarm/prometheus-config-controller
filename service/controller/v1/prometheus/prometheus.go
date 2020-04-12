@@ -243,8 +243,8 @@ var (
 	// MetricDropFStypeRegexp is the regular expression to match againts not interesting filesystem (for node exporter metrics).
 	MetricDropFStypeRegexp = relabel.MustNewRegexp(`(cgroup|devpts|mqueue|nsfs|overlay|tmpfs)`)
 
-	// MetricDropICRegexp is the regular expression to match against useless metric exposed by IC.
-	MetricDropICRegexp = relabel.MustNewRegexp(`(ingress_controller_ssl_expire_time_seconds|nginx.*)`)
+	// MetricKeepICRegexp is the regular expression to match against metric exposed by IC with low cardinality.
+	MetricKeepICRegexp = relabel.MustNewRegexp(`(nginx_ingress_controller_config_hash|nginx_ingress_controller_config_last_reload_successful|nginx_ingress_controller_config_last_reload_successful_timestamp_seconds|nginx_ingress_controller_nginx_process_connections|nginx_ingress_controller_nginx_process_connections_total|nginx_ingress_controller_nginx_process_cpu_seconds_total|nginx_ingress_controller_nginx_process_num_procs|nginx_ingress_controller_nginx_process_oldest_start_time_seconds|nginx_ingress_controller_nginx_process_read_bytes_total|nginx_ingress_controller_nginx_process_requests_total|nginx_ingress_controller_nginx_process_resident_memory_bytes|nginx_ingress_controller_nginx_process_virtual_memory_bytes|nginx_ingress_controller_nginx_process_write_bytes_total|nginx_ingress_controller_success)`)
 
 	// MetricDropSystemdStateRegexp is the regular expression to match against not interesting systemd unit (for node exporter metrics).
 	MetricDropSystemdStateRegexp = relabel.MustNewRegexp(`node_systemd_unit_state;(active|activating|deactivating|inactive)`)
@@ -306,7 +306,10 @@ var (
 	NodeExporterPortRegexp = relabel.MustNewRegexp(`(.*):10300`)
 
 	// ServiceWhitelistRegexp is the regular expression to match workload targets to scrape.
-	ServiceWhitelistRegexp = relabel.MustNewRegexp(`(kube-system;(cert-exporter|cluster-autoscaler|coredns|kube-state-metrics|net-exporter|nic-exporter|nginx-ingress-controller))|(giantswarm;chart-operator)|(giantswarm-elastic-logging;elastic-logging-elasticsearch-exporter)|(vault-exporter;vault-exporter)`)
+	ServiceWhitelistRegexp = relabel.MustNewRegexp(`(kube-system;(cert-exporter|cluster-autoscaler|coredns|kube-state-metrics|net-exporter|nic-exporter))|(giantswarm;chart-operator)|(giantswarm-elastic-logging;elastic-logging-elasticsearch-exporter)|(vault-exporter;vault-exporter)`)
+
+	// IngressWhitelistRegexp is the regular expression to match workload targets to scrape.
+	IngressWhitelistRegexp = relabel.MustNewRegexp(`(kube-system;nginx-ingress-controller)`)
 )
 
 // GetClusterID returns the value of the cluster annotation.
