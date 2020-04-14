@@ -34,7 +34,7 @@ const (
 	AWSNodeJobType = "aws-node"
 	// CadvisorJobType is the job type for scraping Cadvisor.
 	CadvisorJobType = "cadvisor"
-	// CalicoNodeJobType is the job type for scraping calico-node Pods.
+	// CalicoNodeJobType is the job type for scraping calico-node pods.
 	CalicoNodeJobType = "calico-node"
 	// EtcdJobType is the job type for scraping etcd.
 	EtcdJobType = "etcd"
