@@ -625,7 +625,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 			Scheme:                 HttpsScheme,
 			ServiceDiscoveryConfig: endpointSDConfig,
 			RelabelConfigs: []*relabel.Config{
-				// Only keep kube-state-metrics targets.
+				// Only keep ingress controller targets.
 				{
 					SourceLabels: model.LabelNames{KubernetesSDNamespaceLabel, KubernetesSDServiceNameLabel},
 					Regex:        IngressWhitelistRegexp,
