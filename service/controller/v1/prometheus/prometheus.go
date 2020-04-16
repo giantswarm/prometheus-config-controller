@@ -244,7 +244,7 @@ var (
 	MetricDropFStypeRegexp = relabel.MustNewRegexp(`(cgroup|devpts|mqueue|nsfs|overlay|tmpfs)`)
 
 	// MetricKeepICRegexp is the regular expression to match against metric exposed by IC with low cardinality.
-	MetricKeepICRegexp = relabel.MustNewRegexp(`(nginx_ingress_controller_config_hash|nginx_ingress_controller_config_last_reload_successful|nginx_ingress_controller_config_last_reload_successful_timestamp_seconds|nginx_ingress_controller_nginx_process_connections|nginx_ingress_controller_nginx_process_connections_total|nginx_ingress_controller_nginx_process_cpu_seconds_total|nginx_ingress_controller_nginx_process_num_procs|nginx_ingress_controller_nginx_process_oldest_start_time_seconds|nginx_ingress_controller_nginx_process_read_bytes_total|nginx_ingress_controller_nginx_process_requests_total|nginx_ingress_controller_nginx_process_resident_memory_bytes|nginx_ingress_controller_nginx_process_virtual_memory_bytes|nginx_ingress_controller_nginx_process_write_bytes_total|nginx_ingress_controller_success|^go_.+|^process_.+|^prom.+)`)
+	MetricKeepICRegexp = relabel.MustNewRegexp(`.*`)
 
 	// MetricDropSystemdStateRegexp is the regular expression to match against not interesting systemd unit (for node exporter metrics).
 	MetricDropSystemdStateRegexp = relabel.MustNewRegexp(`node_systemd_unit_state;(active|activating|deactivating|inactive)`)
