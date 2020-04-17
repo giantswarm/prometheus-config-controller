@@ -46,6 +46,8 @@ const (
 	NodeExporterJobType = "node-exporter"
 	// WorkloadJobType is the job type for scraping general workloads.
 	WorkloadJobType = "workload"
+	// IngressJobType is the job type for scraping the ingress controller
+	IngressJobType = "ingress"
 	// KubeStateManagedAppJobType is the job type for scraping kube-state-metrics-provided endpoints for managed apps.
 	KubeStateManagedAppJobType = "kube-state-managed-app"
 
@@ -423,7 +425,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 			Scheme:                 HttpsScheme,
 			ServiceDiscoveryConfig: podSDConfig,
 			RelabelConfigs: []*relabel.Config{
-				// Only keep kube-state-metrics targets.
+				// Only keep calico node targets.
 				{
 					SourceLabels: model.LabelNames{PodSDNamespaceLabel, PodSDPodNameLabel},
 					Regex:        CalicoNodePodRegexp,
@@ -635,7 +637,6 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				rewriteAddress,
 				// rewrite metrics scrape path to connect pods
 				rewriteKubeStateMetricPath,
-				rewriteICMetricPath,
 				rewriteCalicoNodePath,
 				rewriteChartOperatorPath,
 				rewriteCertExporterPath,
@@ -662,11 +663,65 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					SourceLabels: model.LabelNames{MetricExportedNamespaceLabel},
 					Regex:        NSRegexp,
 				},
-				// drop useless IC metrics
+			},
+		},
+
+		{
+			JobName:                getJobName(service, IngressJobType),
+			HTTPClientConfig:       secureHTTPClientConfig,
+			Scheme:                 HttpsScheme,
+			ServiceDiscoveryConfig: endpointSDConfig,
+			RelabelConfigs: []*relabel.Config{
+				// Only keep ingress controller targets.
 				{
-					Action:       ActionDrop,
+					SourceLabels: model.LabelNames{KubernetesSDNamespaceLabel, KubernetesSDServiceNameLabel},
+					Regex:        IngressWhitelistRegexp,
+					Action:       relabel.Keep,
+				},
+				// Add app label.
+				{
+					TargetLabel:  AppLabel,
+					SourceLabels: model.LabelNames{KubernetesSDServiceNameLabel},
+				},
+				// Add namespace label.
+				{
+					TargetLabel:  NamespaceLabel,
+					SourceLabels: model.LabelNames{KubernetesSDNamespaceLabel},
+				},
+				// Add pod_name label.
+				{
+					TargetLabel:  PodNameLabel,
+					SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
+				},
+				// Add node label.
+				{
+					TargetLabel:  NodeLabel,
+					SourceLabels: model.LabelNames{KubernetesSDPodNodeNameLabel},
+				},
+				// Add cluster_id label.
+				clusterIDLabelRelabelConfig,
+				// Add cluster_type label.
+				clusterTypeLabelRelabelConfig,
+				// rewrite host to api proxy
+				rewriteAddress,
+				// rewrite metrics scrape path to connect pods
+				rewriteICMetricPath,
+			},
+			MetricRelabelConfigs: []*relabel.Config{
+				// relabel namespace to exported_namespace for endpoints in kube-system namespace.
+				// this keeps metrics from nginx ingress controller from being dropped by filter below
+				{
+					Action:       ActionRelabel,
+					SourceLabels: model.LabelNames{MetricExportedNamespaceLabel, MetricNamespaceLabel},
+					Regex:        RelabelNamespaceRegexp,
+					Replacement:  GroupCapture,
+					TargetLabel:  ExportedNamespaceLabel,
+				},
+				// keep useful IC metrics
+				{
+					Action:       ActionKeep,
 					SourceLabels: model.LabelNames{MetricNameLabel},
-					Regex:        MetricDropICRegexp,
+					Regex:        MetricKeepICRegexp,
 				},
 			},
 		},
