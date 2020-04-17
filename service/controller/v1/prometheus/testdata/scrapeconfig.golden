@@ -31,6 +31,42 @@
   - source_labels: [__name__]
     regex: (reflector.*)
     action: drop
+- job_name: guest-cluster-xa5ly-aws-node
+  honor_timestamps: false
+  scheme: https
+  kubernetes_sd_configs:
+  - api_server: https://apiserver.xa5ly
+    role: pod
+    tls_config:
+      ca_file: /certs/xa5ly-ca.pem
+      cert_file: /certs/xa5ly-crt.pem
+      key_file: /certs/xa5ly-key.pem
+      insecure_skip_verify: false
+  tls_config:
+    ca_file: /certs/xa5ly-ca.pem
+    cert_file: /certs/xa5ly-crt.pem
+    key_file: /certs/xa5ly-key.pem
+    insecure_skip_verify: false
+  relabel_configs:
+  - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_pod_name]
+    regex: kube-system;aws-node.*
+    action: keep
+  - source_labels: [__meta_kubernetes_pod_container_name]
+    target_label: app
+  - source_labels: [__meta_kubernetes_namespace]
+    target_label: namespace
+  - source_labels: [__meta_kubernetes_pod_name]
+    target_label: pod_name
+  - target_label: cluster_id
+    replacement: xa5ly
+  - target_label: cluster_type
+    replacement: guest
+  - target_label: __address__
+    replacement: master.xa5ly:443
+  - source_labels: [__meta_kubernetes_pod_name]
+    regex: (aws-node.*)
+    target_label: __metrics_path__
+    replacement: /api/v1/namespaces/kube-system/pods/${1}:61678/proxy/metrics
 - job_name: guest-cluster-xa5ly-cadvisor
   honor_timestamps: false
   scheme: https

@@ -122,7 +122,7 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 
 		expectedScrapeConfigs []config.ScrapeConfig
 	}{
-		// Test that when there are no services available,
+		// 0. Test that when there are no services available,
 		// no scrape configs are returned.
 		{
 			services:             nil,
@@ -131,7 +131,7 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 			expectedScrapeConfigs: []config.ScrapeConfig{},
 		},
 
-		// Test that a non-annotated service does not create a scrape config.
+		// 1. Test that a non-annotated service does not create a scrape config.
 		{
 			services: []v1.Service{
 				{
@@ -146,7 +146,7 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 			expectedScrapeConfigs: []config.ScrapeConfig{},
 		},
 
-		// Test that a service that specifies the cluster annotation creates a scrape config.
+		// 2. Test that a service that specifies the cluster annotation creates a scrape config.
 		{
 			services: []v1.Service{
 				{
@@ -163,6 +163,7 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 
 			expectedScrapeConfigs: []config.ScrapeConfig{
 				TestConfigOneApiserver,
+				TestConfigOneAWSNode,
 				TestConfigOneCadvisor,
 				TestConfigOneCalicoNode,
 				TestConfigOneIngress,
@@ -174,7 +175,7 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 			},
 		},
 
-		// Test that two services that specify different clusters create separate configs.
+		// 3. Test that two services that specify different clusters create separate configs.
 		{
 			services: []v1.Service{
 				{
@@ -200,6 +201,7 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 
 			expectedScrapeConfigs: []config.ScrapeConfig{
 				TestConfigTwoApiserver,
+				TestConfigTwoAWSNode,
 				TestConfigTwoCadvisor,
 				TestConfigTwoCalicoNode,
 				TestConfigTwoIngress,
@@ -210,6 +212,7 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 				TestConfigTwoWorkload,
 
 				TestConfigOneApiserver,
+				TestConfigOneAWSNode,
 				TestConfigOneCadvisor,
 				TestConfigOneCalicoNode,
 				TestConfigOneIngress,
@@ -264,6 +267,7 @@ func Test_Prometheus_GetScrapeConfigs_Deterministic(t *testing.T) {
 
 	expectedScrapeConfigs := []config.ScrapeConfig{
 		TestConfigTwoApiserver,
+		TestConfigTwoAWSNode,
 		TestConfigTwoCadvisor,
 		TestConfigTwoCalicoNode,
 		TestConfigTwoIngress,
@@ -274,6 +278,7 @@ func Test_Prometheus_GetScrapeConfigs_Deterministic(t *testing.T) {
 		TestConfigTwoWorkload,
 
 		TestConfigOneApiserver,
+		TestConfigOneAWSNode,
 		TestConfigOneCadvisor,
 		TestConfigOneCalicoNode,
 		TestConfigOneIngress,

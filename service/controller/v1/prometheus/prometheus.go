@@ -167,6 +167,9 @@ var (
 
 // Giant Swarm metrics schema values.
 const (
+	// AWSNodeAppName is the label value for aws-node targets.
+	AWSNodeAppName = "aws-node"
+
 	// CadvisorAppName is the label value for Cadvisor targets.
 	CadvisorAppName = "cadvisor"
 
@@ -214,6 +217,12 @@ const (
 var (
 	// APIServerRegexp is the regular expression to match against Kubernetes API servers.
 	APIServerRegexp = relabel.MustNewRegexp(`default;kubernetes`)
+
+	// AWSNodePodRegexp is the regular expression to match aws-node pod name and namespace.
+	AWSNodePodRegexp = relabel.MustNewRegexp(`kube-system;aws-node.*`)
+
+	// AWSNodePodNameRegexp is the regular expression to match aws-node pod name.
+	AWSNodePodNameRegexp = relabel.MustNewRegexp(`(aws-node.*)`)
 
 	// CalicoNodePodRegexp is the regular expression to match calico-node pod name and namespace.
 	CalicoNodePodRegexp = relabel.MustNewRegexp(`kube-system;calico-node.*`)

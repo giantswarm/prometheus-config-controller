@@ -10,6 +10,7 @@ import (
 )
 
 const (
+	AWSNodeMetricPort                = "61678"
 	ElasticLoggingMetricPort         = "9108"
 	NginxIngressControllerMetricPort = "10254"
 	KubeStateMetricsPort             = "10301"
@@ -22,6 +23,7 @@ const (
 	NicExporterMetricPort            = "10800"
 	VaultExporterMetricPort          = "9410"
 
+	AWSNodeNamespace                = "kube-system"
 	ElasticLoggingNamespace         = "giantswarm-elastic-logging"
 	NginxIngressControllerNamespace = "kube-system"
 	KubeStateMetricsNamespace       = "kube-system"
