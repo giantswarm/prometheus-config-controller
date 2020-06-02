@@ -176,6 +176,9 @@ const (
 	// CalicoNodeAppName is the label value for calico-node targets.
 	CalicoNodeAppName = "calico-node"
 
+	// DockerAppName is the label value for Docker targets.
+	DockerAppName = "docker"
+
 	// GuestClusterType is the cluster type for guest clusters.
 	GuestClusterType = "guest"
 
@@ -205,6 +208,9 @@ const (
 const (
 	// CadvisorMetricsPath is the path under which cadvisor metrics can be scraped.
 	CadvisorMetricsPath = "/api/v1/nodes/${1}:10250/proxy/metrics/cadvisor"
+
+	// DockerMetricsPath is the path under which docker metrics can be scraped.
+	DockerMetricsPath = "/api/v1/nodes/${1}:9393/metrics"
 
 	// NodeExporterPort is the path under which node-exporter metrics can be scraped.
 	NodeExporterPort = "${1}:10300"

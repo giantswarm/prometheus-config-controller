@@ -36,6 +36,8 @@ const (
 	CadvisorJobType = "cadvisor"
 	// CalicoNodeJobType is the job type for scraping calico-node pods.
 	CalicoNodeJobType = "calico-node"
+	// DockerDaemonJobType is the job type for scraping docker daemon.
+	DockerDaemonJobType = "docker-daemon"
 	// EtcdJobType is the job type for scraping etcd.
 	EtcdJobType = "etcd"
 	// KubeletJobType is the job type for scraping kubelets.
@@ -454,6 +456,41 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				rewriteAddress,
 				// rewrite metrics scrape path to connect pods
 				rewriteCalicoNodePath,
+			},
+			MetricRelabelConfigs: []*relabel.Config{},
+		},
+
+		{
+			JobName:                getJobName(service, DockerDaemonJobType),
+			HTTPClientConfig:       secureHTTPClientConfig,
+			Scheme:                 HttpsScheme,
+			ServiceDiscoveryConfig: nodeSDConfig,
+			RelabelConfigs: []*relabel.Config{
+				// Relabel address to kubernetes service.
+				{
+					TargetLabel: model.AddressLabel,
+					Replacement: getTargetHost(service),
+				},
+				// Relabel metrics path to cadvisor proxy.
+				{
+					SourceLabels: model.LabelNames{KubernetesSDNodeNameLabel},
+					Replacement:  DockerMetricsPath,
+					TargetLabel:  model.MetricsPathLabel,
+				},
+				// Add app label.
+				{
+					TargetLabel: AppLabel,
+					Replacement: DockerAppName,
+				},
+				// Add cluster_id label.
+				clusterIDLabelRelabelConfig,
+				// Add cluster_type label.
+				clusterTypeLabelRelabelConfig,
+				// Add ip label.
+				ipLabelRelabelConfig,
+				// Add role label.
+				roleLabelRelabelConfig,
+				missingRoleLabelRelabelConfig,
 			},
 			MetricRelabelConfigs: []*relabel.Config{},
 		},
