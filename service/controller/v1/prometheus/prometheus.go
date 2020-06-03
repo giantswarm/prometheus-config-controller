@@ -210,7 +210,7 @@ const (
 	CadvisorMetricsPath = "/api/v1/nodes/${1}:10250/proxy/metrics/cadvisor"
 
 	// DockerMetricsPath is the path under which docker metrics can be scraped.
-	DockerMetricsPath = "/api/v1/nodes/${1}:9393/metrics"
+	DockerMetricsPath = "/api/v1/nodes/${1}:9393/proxy/metrics"
 
 	// NodeExporterPort is the path under which node-exporter metrics can be scraped.
 	NodeExporterPort = "${1}:10300"
