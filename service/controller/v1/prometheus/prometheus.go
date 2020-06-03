@@ -176,6 +176,9 @@ const (
 	// CalicoNodeAppName is the label value for calico-node targets.
 	CalicoNodeAppName = "calico-node"
 
+	// DockerAppName is the label value for Docker targets.
+	DockerAppName = "docker"
+
 	// GuestClusterType is the cluster type for guest clusters.
 	GuestClusterType = "guest"
 
@@ -206,6 +209,9 @@ const (
 	// CadvisorMetricsPath is the path under which cadvisor metrics can be scraped.
 	CadvisorMetricsPath = "/api/v1/nodes/${1}:10250/proxy/metrics/cadvisor"
 
+	// DockerMetricsPath is the path under which docker metrics can be scraped.
+	DockerMetricsPath = "/api/v1/nodes/${1}:9393/proxy/metrics"
+
 	// NodeExporterPort is the path under which node-exporter metrics can be scraped.
 	NodeExporterPort = "${1}:10300"
 
@@ -229,6 +235,9 @@ var (
 
 	// CalicoNodePodNameRegexp is the regular expression to match calico-node pod name.
 	CalicoNodePodNameRegexp = relabel.MustNewRegexp(`(calico-node.*)`)
+
+	// DockerMetricsNameRegexp is the regular expression to keep only Docker metrics which we need for performance tracking.
+	DockerMetricsNameRegexp = relabel.MustNewRegexp(`(process_virtual_memory_bytes|process_resident_memory_bytes)`)
 
 	// EmptyRegexp is the regular expression to match against the empty string.
 	EmptyRegexp = relabel.MustNewRegexp(``)
