@@ -168,9 +168,6 @@
   - source_labels: [__meta_kubernetes_node_name]
     target_label: __metrics_path__
     replacement: /api/v1/nodes/${1}:9393/proxy/metrics
-  - source_labels: [__name__]
-    regex: (process_virtual_memory_bytes|process_resident_memory_bytes)
-    action: keep
   - target_label: app
     replacement: docker
   - target_label: cluster_id
@@ -185,6 +182,10 @@
     regex: null
     target_label: role
     replacement: worker
+  metric_relabel_configs:
+  - source_labels: [__name__]
+    regex: (process_virtual_memory_bytes|process_resident_memory_bytes)
+    action: keep
 - job_name: guest-cluster-xa5ly-ingress
   honor_timestamps: false
   scheme: https

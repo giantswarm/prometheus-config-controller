@@ -352,11 +352,6 @@ var (
 				TargetLabel:  model.MetricsPathLabel,
 			},
 			{
-				SourceLabels: model.LabelNames{MetricNameLabel},
-				Regex:        DockerMetricsNameRegexp,
-				Action:       ActionKeep,
-			},
-			{
 				TargetLabel: AppLabel,
 				Replacement: DockerAppName,
 			},
@@ -383,7 +378,13 @@ var (
 				TargetLabel:  RoleLabel,
 			},
 		},
-		MetricRelabelConfigs: []*relabel.Config{},
+		MetricRelabelConfigs: []*relabel.Config{
+			{
+				SourceLabels: model.LabelNames{MetricNameLabel},
+				Regex:        DockerMetricsNameRegexp,
+				Action:       ActionKeep,
+			},
+		},
 	}
 	TestConfigOneKubelet = config.ScrapeConfig{
 		JobName: "guest-cluster-xa5ly-kubelet",
