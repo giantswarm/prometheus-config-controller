@@ -236,6 +236,9 @@ var (
 	// CalicoNodePodNameRegexp is the regular expression to match calico-node pod name.
 	CalicoNodePodNameRegexp = relabel.MustNewRegexp(`(calico-node.*)`)
 
+	// DockerMetricsNameRegexp is the regular expression to keep only Docker metrics which we need for performance tracking.
+	DockerMetricsNameRegexp = relabel.MustNewRegexp(`(process_virtual_memory_bytes|process_resident_memory_bytes)`)
+
 	// EmptyRegexp is the regular expression to match against the empty string.
 	EmptyRegexp = relabel.MustNewRegexp(``)
 

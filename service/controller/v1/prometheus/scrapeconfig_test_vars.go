@@ -352,6 +352,11 @@ var (
 				TargetLabel:  model.MetricsPathLabel,
 			},
 			{
+				SourceLabels: model.LabelNames{MetricNameLabel},
+				Regex:        DockerMetricsNameRegexp,
+				Action:       ActionKeep,
+			},
+			{
 				TargetLabel: AppLabel,
 				Replacement: DockerAppName,
 			},

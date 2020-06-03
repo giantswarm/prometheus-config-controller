@@ -477,6 +477,12 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					Replacement:  DockerMetricsPath,
 					TargetLabel:  model.MetricsPathLabel,
 				},
+				// Keep only metrics with names listed in DockerMetricsNameRegexp.
+				{
+					SourceLabels: model.LabelNames{MetricNameLabel},
+					Regex:        DockerMetricsNameRegexp,
+					Action:       ActionKeep,
+				},
 				// Add app label.
 				{
 					TargetLabel: AppLabel,
