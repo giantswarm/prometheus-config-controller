@@ -309,83 +309,6 @@ var (
 		},
 		MetricRelabelConfigs: []*relabel.Config{},
 	}
-	TestConfigOneDocker = config.ScrapeConfig{
-		JobName: "guest-cluster-xa5ly-docker-daemon",
-		Scheme:  "https",
-		HTTPClientConfig: config_util.HTTPClientConfig{
-			TLSConfig: config_util.TLSConfig{
-				CAFile:             "/certs/xa5ly-ca.pem",
-				CertFile:           "/certs/xa5ly-crt.pem",
-				KeyFile:            "/certs/xa5ly-key.pem",
-				InsecureSkipVerify: false,
-			},
-		},
-		ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
-			KubernetesSDConfigs: []*kubernetes.SDConfig{
-				{
-					APIServer: config_util.URL{
-						URL: &url.URL{
-							Scheme: "https",
-							Host:   "apiserver.xa5ly",
-						},
-					},
-					Role: kubernetes.RoleNode,
-					HTTPClientConfig: config_util.HTTPClientConfig{
-						TLSConfig: config_util.TLSConfig{
-							CAFile:             "/certs/xa5ly-ca.pem",
-							CertFile:           "/certs/xa5ly-crt.pem",
-							KeyFile:            "/certs/xa5ly-key.pem",
-							InsecureSkipVerify: false,
-						},
-					},
-				},
-			},
-		},
-		RelabelConfigs: []*relabel.Config{
-			{
-				TargetLabel: model.AddressLabel,
-				Replacement: "apiserver.xa5ly",
-			},
-			{
-				SourceLabels: model.LabelNames{KubernetesSDNodeNameLabel},
-				Replacement:  DockerMetricsPath,
-				TargetLabel:  model.MetricsPathLabel,
-			},
-			{
-				TargetLabel: AppLabel,
-				Replacement: DockerAppName,
-			},
-			{
-				TargetLabel: ClusterIDLabel,
-				Replacement: "xa5ly",
-			},
-			{
-				TargetLabel: ClusterTypeLabel,
-				Replacement: GuestClusterType,
-			},
-			{
-				TargetLabel:  IPLabel,
-				SourceLabels: model.LabelNames{KubernetesSDNodeAddressInternalIPLabel},
-			},
-			{
-				TargetLabel:  RoleLabel,
-				SourceLabels: model.LabelNames{KubernetesSDNodeLabelRole},
-			},
-			{
-				SourceLabels: model.LabelNames{KubernetesSDNodeLabelRole},
-				Regex:        EmptyRegexp,
-				Replacement:  WorkerRole,
-				TargetLabel:  RoleLabel,
-			},
-		},
-		MetricRelabelConfigs: []*relabel.Config{
-			{
-				SourceLabels: model.LabelNames{MetricNameLabel},
-				Regex:        DockerMetricsNameRegexp,
-				Action:       ActionKeep,
-			},
-		},
-	}
 	TestConfigOneKubelet = config.ScrapeConfig{
 		JobName: "guest-cluster-xa5ly-kubelet",
 		Scheme:  "https",
@@ -979,7 +902,6 @@ var (
 	TestConfigTwoAWSNode             config.ScrapeConfig
 	TestConfigTwoCadvisor            config.ScrapeConfig
 	TestConfigTwoCalicoNode          config.ScrapeConfig
-	TestConfigTwoDocker              config.ScrapeConfig
 	TestConfigTwoKubelet             config.ScrapeConfig
 	TestConfigTwoNodeExporter        config.ScrapeConfig
 	TestConfigTwoWorkload            config.ScrapeConfig
@@ -995,7 +917,6 @@ func init() {
 	TestConfigTwoAWSNode = TestConfigOneAWSNode
 	TestConfigTwoCadvisor = TestConfigOneCadvisor
 	TestConfigTwoCalicoNode = TestConfigOneCalicoNode
-	TestConfigTwoDocker = TestConfigOneDocker
 	TestConfigTwoKubelet = TestConfigOneKubelet
 	TestConfigTwoNodeExporter = TestConfigOneNodeExporter
 	TestConfigTwoWorkload = TestConfigOneWorkload
@@ -1081,28 +1002,6 @@ func init() {
 			newRelabelConfig := *r
 			newRelabelConfig.Replacement = strings.ReplaceAll(r.Replacement, "xa5ly", clusterID)
 			TestConfigTwoCadvisor.RelabelConfigs = append(TestConfigTwoCadvisor.RelabelConfigs, &newRelabelConfig)
-		}
-	}
-
-	{
-		TestConfigTwoDocker.JobName = "guest-cluster-0ba9v-docker-daemon"
-		TestConfigTwoDocker.HTTPClientConfig.TLSConfig = tlsConfig
-		TestConfigTwoDocker.ServiceDiscoveryConfig.KubernetesSDConfigs = []*kubernetes.SDConfig{
-			{
-				APIServer: apiServer,
-				Role:      kubernetes.RoleNode,
-				HTTPClientConfig: config_util.HTTPClientConfig{
-					TLSConfig: tlsConfig,
-				},
-			},
-		}
-
-		// Deepcopy relabel configs and change clusterID to match second test config.
-		TestConfigTwoDocker.RelabelConfigs = nil
-		for _, r := range TestConfigOneDocker.RelabelConfigs {
-			newRelabelConfig := *r
-			newRelabelConfig.Replacement = strings.ReplaceAll(r.Replacement, "xa5ly", clusterID)
-			TestConfigTwoDocker.RelabelConfigs = append(TestConfigTwoDocker.RelabelConfigs, &newRelabelConfig)
 		}
 	}
 
