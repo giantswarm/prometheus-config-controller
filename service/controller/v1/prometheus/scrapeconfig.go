@@ -461,48 +461,6 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 		},
 
 		{
-			JobName:                getJobName(service, DockerDaemonJobType),
-			HTTPClientConfig:       secureHTTPClientConfig,
-			Scheme:                 HttpsScheme,
-			ServiceDiscoveryConfig: nodeSDConfig,
-			RelabelConfigs: []*relabel.Config{
-				// Relabel address to kubernetes service.
-				{
-					TargetLabel: model.AddressLabel,
-					Replacement: getTargetHost(service),
-				},
-				// Relabel metrics path to cadvisor proxy.
-				{
-					SourceLabels: model.LabelNames{KubernetesSDNodeNameLabel},
-					Replacement:  DockerMetricsPath,
-					TargetLabel:  model.MetricsPathLabel,
-				},
-				// Add app label.
-				{
-					TargetLabel: AppLabel,
-					Replacement: DockerAppName,
-				},
-				// Add cluster_id label.
-				clusterIDLabelRelabelConfig,
-				// Add cluster_type label.
-				clusterTypeLabelRelabelConfig,
-				// Add ip label.
-				ipLabelRelabelConfig,
-				// Add role label.
-				roleLabelRelabelConfig,
-				missingRoleLabelRelabelConfig,
-			},
-			MetricRelabelConfigs: []*relabel.Config{
-				// Keep only metrics with names listed in DockerMetricsNameRegexp.
-				{
-					SourceLabels: model.LabelNames{MetricNameLabel},
-					Regex:        DockerMetricsNameRegexp,
-					Action:       ActionKeep,
-				},
-			},
-		},
-
-		{
 			JobName:                getJobName(service, KubeStateManagedAppJobType),
 			HTTPClientConfig:       secureHTTPClientConfig,
 			Scheme:                 HttpsScheme,
