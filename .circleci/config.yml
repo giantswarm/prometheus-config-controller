@@ -52,14 +52,21 @@ jobs:
 workflows:
   build:
     jobs:
-      - build
-      - architect/push-to-docker-legacy:
+      - build:
+          filters:
+            tags:
+              only: /.*/
+
+      - architect/push-to-docker:
           name: push-prometheus-config-controller-to-quay
           image: "quay.io/giantswarm/prometheus-config-controller"
           username_envar: "QUAY_USERNAME"
           password_envar: "QUAY_PASSWORD"
           requires:
             - build
+          filters:
+            tags:
+              only: /.*/
 
       - hold-push-prometheus-config-controller-to-aliyun-pr:
           type: approval
@@ -70,7 +77,7 @@ workflows:
             branches:
               ignore: master
 
-      - architect/push-to-docker-legacy:
+      - architect/push-to-docker:
           name: push-prometheus-config-controller-to-aliyun-pr
           image: "registry-intl.cn-shanghai.aliyuncs.com/giantswarm/prometheus-config-controller"
           username_envar: "ALIYUN_USERNAME"
@@ -84,7 +91,7 @@ workflows:
               ignore: master
 
       # Push to Aliyun should execute without manual approval on master.
-      - architect/push-to-docker-legacy:
+      - architect/push-to-docker:
           name: push-prometheus-config-controller-to-aliyun-master
           image: "registry-intl.cn-shanghai.aliyuncs.com/giantswarm/prometheus-config-controller"
           username_envar: "ALIYUN_USERNAME"
@@ -95,6 +102,9 @@ workflows:
           filters:
             branches:
               only: master
+            tags:
+              only: /.*/
+
       - deploy:
           name: deploy
           requires:
@@ -103,3 +113,5 @@ workflows:
           filters:
             branches:
               only: master
+            tags:
+              only: /.*/
