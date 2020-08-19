@@ -1,24 +1,22 @@
-package controller
+package resource
 
 import (
 	"os"
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/controller"
-	"github.com/giantswarm/operatorkit/resource"
-	"github.com/giantswarm/operatorkit/resource/crud"
-	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
-	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
-	"github.com/spf13/afero"
-	"k8s.io/client-go/kubernetes"
-
+	"github.com/giantswarm/operatorkit/v2/pkg/resource"
+	"github.com/giantswarm/operatorkit/v2/pkg/resource/crud"
+	"github.com/giantswarm/operatorkit/v2/pkg/resource/wrapper/metricsresource"
+	"github.com/giantswarm/operatorkit/v2/pkg/resource/wrapper/retryresource"
 	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/resource/certificate"
 	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/resource/configmap"
 	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/resource/reload"
+	"github.com/spf13/afero"
+	"k8s.io/client-go/kubernetes"
 )
 
-type prometheusResourceSetConfig struct {
+type Config struct {
 	K8sClient kubernetes.Interface
 	Logger    micrologger.Logger
 
@@ -32,7 +30,7 @@ type prometheusResourceSetConfig struct {
 	PrometheusAddress  string
 }
 
-func newPrometheusResourceSet(config prometheusResourceSetConfig) (*controller.ResourceSet, error) {
+func New(config Config) ([]resource.Interface, error) {
 	var err error
 
 	var certificateResource resource.Interface
@@ -113,34 +111,17 @@ func newPrometheusResourceSet(config prometheusResourceSetConfig) (*controller.R
 
 	{
 		c := metricsresource.WrapConfig{}
+
 		resources, err = metricsresource.Wrap(resources, c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
-	handlesFunc := func(obj interface{}) bool {
-		return true
-	}
-
-	var resourceSet *controller.ResourceSet
-	{
-		c := controller.ResourceSetConfig{
-			Handles:   handlesFunc,
-			Logger:    config.Logger,
-			Resources: resources,
-		}
-
-		resourceSet, err = controller.NewResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	return resourceSet, nil
+	return resources, nil
 }
 
-func toCRUDResource(logger micrologger.Logger, ops crud.Interface) (resource.Interface, error) {
+func toCRUDResource(logger micrologger.Logger, ops crud.Interface) (*crud.Resource, error) {
 	c := crud.ResourceConfig{
 		CRUD:   ops,
 		Logger: logger,

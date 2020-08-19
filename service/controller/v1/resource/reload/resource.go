@@ -87,7 +87,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding %#q ConfigMap in namespace %#q", r.configMapName, r.configMapNamespace))
 
-		cm, err = r.k8sClient.CoreV1().ConfigMaps(r.configMapNamespace).Get(r.configMapName, metav1.GetOptions{})
+		cm, err = r.k8sClient.CoreV1().ConfigMaps(r.configMapNamespace).Get(ctx, r.configMapName, metav1.GetOptions{})
 		if err != nil {
 			return microerror.Mask(err)
 		}

@@ -17,6 +17,7 @@ func (r *Resource) getCurrentState(ctx context.Context) (*corev1.ConfigMap, erro
 	r.logger.LogCtx(ctx, "debug", fmt.Sprintf("fetching configmap: %s/%s", r.configMapNamespace, r.configMapName))
 
 	configMap, err := r.k8sClient.CoreV1().ConfigMaps(r.configMapNamespace).Get(
+		ctx,
 		r.configMapName, metav1.GetOptions{},
 	)
 

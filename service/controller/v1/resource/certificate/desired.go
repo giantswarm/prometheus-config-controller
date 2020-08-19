@@ -25,7 +25,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	r.logger.LogCtx(ctx, "debug", "fetching all services")
 
 	servicesTimer := prometheusclient.NewTimer(kubernetesResource.WithLabelValues("services", "list"))
-	services, err := r.k8sClient.CoreV1().Services("").List(metav1.ListOptions{
+	services, err := r.k8sClient.CoreV1().Services("").List(ctx, metav1.ListOptions{
 		LabelSelector: serviceLabelSelector,
 	})
 	servicesTimer.ObserveDuration()
@@ -44,7 +44,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		clusterID := prometheus.GetClusterID(service)
 
 		certificatesTimer := prometheusclient.NewTimer(kubernetesResource.WithLabelValues("secrets", "list"))
-		certificates, err := r.k8sClient.CoreV1().Secrets(r.certNamespace).List(metav1.ListOptions{
+		certificates, err := r.k8sClient.CoreV1().Secrets(r.certNamespace).List(ctx, metav1.ListOptions{
 			LabelSelector: fmt.Sprintf(
 				"clusterComponent=%s, clusterID=%s",
 				r.certComponentName,

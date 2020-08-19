@@ -423,13 +423,13 @@ func Test_Resource_Certificate_GetDesiredState(t *testing.T) {
 		}
 
 		for _, service := range test.services {
-			if _, err := fakeK8sClient.CoreV1().Services(service.Namespace).Create(service); err != nil {
+			if _, err := fakeK8sClient.CoreV1().Services(service.Namespace).Create(context.TODO(), service, metav1.CreateOptions{}); err != nil {
 				t.Fatalf("%d: error returned creating service: %s\n", index, err)
 			}
 		}
 
 		for _, secret := range test.secrets {
-			if _, err := fakeK8sClient.CoreV1().Secrets(secret.Namespace).Create(secret); err != nil {
+			if _, err := fakeK8sClient.CoreV1().Secrets(secret.Namespace).Create(context.TODO(), secret, metav1.CreateOptions{}); err != nil {
 				t.Fatalf("%d: error returned creating secret: %s\n", index, err)
 			}
 		}
