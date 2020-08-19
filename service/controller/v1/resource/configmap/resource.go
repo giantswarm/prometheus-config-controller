@@ -7,6 +7,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -97,9 +98,9 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 			return nil
 		}
 
-		r.k8sClient.CoreV1().ConfigMaps(cm.GetNamespace()).Update(cm)
+		r.k8sClient.CoreV1().ConfigMaps(cm.GetNamespace()).Update(ctx, cm, metav1.UpdateOptions{})
 		if apierrors.IsNotFound(err) {
-			r.k8sClient.CoreV1().ConfigMaps(cm.GetNamespace()).Create(cm)
+			r.k8sClient.CoreV1().ConfigMaps(cm.GetNamespace()).Create(ctx, cm, metav1.CreateOptions{})
 			if err != nil {
 				return microerror.Mask(err)
 			}

@@ -20,6 +20,7 @@ func (r *Resource) getDesiredState(ctx context.Context) (*corev1.ConfigMap, erro
 	r.logger.LogCtx(ctx, "debug", fmt.Sprintf("fetching configmap: %s/%s", r.configMapNamespace, r.configMapName))
 
 	configMap, err := r.k8sClient.CoreV1().ConfigMaps(r.configMapNamespace).Get(
+		ctx,
 		r.configMapName, metav1.GetOptions{},
 	)
 
@@ -41,7 +42,7 @@ func (r *Resource) getDesiredState(ctx context.Context) (*corev1.ConfigMap, erro
 
 	r.logger.LogCtx(ctx, "debug", fmt.Sprintf("fetching all services"))
 
-	services, err := r.k8sClient.CoreV1().Services("").List(metav1.ListOptions{
+	services, err := r.k8sClient.CoreV1().Services("").List(ctx, metav1.ListOptions{
 		LabelSelector: key.LabelSelectorService().String(),
 	})
 

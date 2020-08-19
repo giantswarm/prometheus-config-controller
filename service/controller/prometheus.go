@@ -1,15 +1,17 @@
 package controller
 
 import (
-	"github.com/giantswarm/k8sclient"
+	"github.com/giantswarm/k8sclient/v4/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/controller"
+	"github.com/giantswarm/operatorkit/v2/pkg/controller"
+	"github.com/giantswarm/operatorkit/v2/pkg/resource"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/giantswarm/prometheus-config-controller/pkg/project"
 	"github.com/giantswarm/prometheus-config-controller/service/controller/v1/key"
+	controllerresource "github.com/giantswarm/prometheus-config-controller/service/controller/v1/resource"
 )
 
 type PrometheusConfig struct {
@@ -65,12 +67,12 @@ func NewPrometheus(config PrometheusConfig) (*Prometheus, error) {
 
 	var err error
 
-	var resourceSet *controller.ResourceSet
+	var resources []resource.Interface
 	{
-		c := prometheusResourceSetConfig{
-			K8sClient: config.K8sClient.K8sClient(),
-			Logger:    config.Logger,
+		c := controllerresource.Config{
 
+			K8sClient:          config.K8sClient.K8sClient(),
+			Logger:             config.Logger,
 			ConfigMapKey:       config.ConfigMapKey,
 			ConfigMapName:      config.ConfigMapName,
 			ConfigMapNamespace: config.ConfigMapNamespace,
@@ -80,8 +82,7 @@ func NewPrometheus(config PrometheusConfig) (*Prometheus, error) {
 			CertPermission:     config.CertPermission,
 			PrometheusAddress:  config.PrometheusAddress,
 		}
-
-		resourceSet, err = newPrometheusResourceSet(c)
+		resources, err = controllerresource.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -94,13 +95,10 @@ func NewPrometheus(config PrometheusConfig) (*Prometheus, error) {
 			NewRuntimeObjectFunc: func() runtime.Object {
 				return new(corev1.Service)
 			},
-			Logger: config.Logger,
-			ResourceSets: []*controller.ResourceSet{
-				resourceSet,
-			},
-			Selector: key.LabelSelectorService(),
-
-			Name: project.Name(),
+			Logger:    config.Logger,
+			Resources: resources,
+			Selector:  key.LabelSelectorService(),
+			Name:      project.Name(),
 		}
 
 		operatorkitController, err = controller.New(c)
