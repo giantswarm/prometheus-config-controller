@@ -231,12 +231,6 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 		TargetLabel:  MetricPathLabel,
 		Replacement:  key.APIProxyPodMetricsPath(key.CoreDNSNamespace, key.CoreDNSMetricPort),
 	}
-	rewriteKiamPath := &relabel.Config{
-		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
-		Regex:        KiamPodNameRegexp,
-		TargetLabel:  MetricPathLabel,
-		Replacement:  key.APIProxyPodMetricsPath(key.KiamMetricPort, key.KiamNamespace),
-	}
 	rewriteElasticLoggingMetricPath := &relabel.Config{
 		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 		Regex:        ElasticLoggingPodNameRegexp,
@@ -254,6 +248,12 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 		Regex:        NicExporterPodNameRegexp,
 		TargetLabel:  MetricPathLabel,
 		Replacement:  key.APIProxyPodMetricsPath(key.NicExporterNamespace, key.NicExporterMetricPort),
+	}
+	rewriteKiamPath := &relabel.Config{
+		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
+		Regex:        KiamPodNameRegexp,
+		TargetLabel:  MetricPathLabel,
+		Replacement:  key.APIProxyPodMetricsPath(key.KiamNamespace, key.KiamMetricPort),
 	}
 	rewriteVaultExporterPath := &relabel.Config{
 		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
@@ -693,9 +693,9 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				rewriteClusterAutoscalerPath,
 				rewriteCoreDNSPath,
 				rewriteElasticLoggingMetricPath,
-				rewriteKiamPath,
 				rewriteNetExporterPath,
 				rewriteNicExporterPath,
+				rewriteKiamPath,
 				rewriteVaultExporterPath,
 			},
 			MetricRelabelConfigs: []*relabel.Config{

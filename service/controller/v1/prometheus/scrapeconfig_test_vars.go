@@ -655,6 +655,12 @@ var (
 			},
 			{
 				SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
+				Regex:        KiamPodNameRegexp,
+				TargetLabel:  MetricPathLabel,
+				Replacement:  key.APIProxyPodMetricsPath(key.KiamNamespace, key.KiamMetricPort),
+			},
+			{
+				SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 				Regex:        VaultExporterPodNameRegexp,
 				TargetLabel:  MetricPathLabel,
 				Replacement:  key.APIProxyPodMetricsPath(key.VaultExporterNamespace, key.VaultExporterMetricPort),
