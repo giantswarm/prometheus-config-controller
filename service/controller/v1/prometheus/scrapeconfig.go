@@ -255,6 +255,12 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 		TargetLabel:  MetricPathLabel,
 		Replacement:  key.APIProxyPodMetricsPath(key.KiamNamespace, key.KiamMetricPort),
 	}
+	rewriteKubeProxyPath := &relabel.Config{
+		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
+		Regex:        KubeProxyPodNameRegexp,
+		TargetLabel:  MetricPathLabel,
+		Replacement:  key.APIProxyPodMetricsPath(key.KubeProxyNamespace, key.KubeProxyMetricPort),
+	}
 	rewriteVaultExporterPath := &relabel.Config{
 		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 		Regex:        VaultExporterPodNameRegexp,
@@ -696,6 +702,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				rewriteNetExporterPath,
 				rewriteNicExporterPath,
 				rewriteKiamPath,
+				rewriteKubeProxyPath,
 				rewriteVaultExporterPath,
 			},
 			MetricRelabelConfigs: []*relabel.Config{

@@ -303,6 +303,9 @@ var (
 	// KiamPodNameRegexp is the regular expression to match kiam pod name.
 	KiamPodNameRegexp = relabel.MustNewRegexp(`(kiam-agent.*|kiam-server.*)`)
 
+	// KubeProxyPodNameRegexp is the regular expression to match kube-proxy pod name.
+	KubeProxyPodNameRegexp = relabel.MustNewRegexp(`(kube-proxy.*)`)
+
 	// NetExporterPodNameRegexp is the regular expression to match net-exporter pod name.
 	NetExporterPodNameRegexp = relabel.MustNewRegexp(`(net-exporter.*)`)
 
@@ -327,7 +330,7 @@ var (
 	NodeExporterPortRegexp = relabel.MustNewRegexp(`(.*):10300`)
 
 	// ServiceWhitelistRegexp is the regular expression to match workload targets to scrape.
-	ServiceWhitelistRegexp = relabel.MustNewRegexp(`(kube-system;(cert-exporter|cluster-autoscaler|coredns|kiam-agent|kiam-server|kube-state-metrics|net-exporter|nic-exporter))|(giantswarm;chart-operator)|(giantswarm-elastic-logging;elastic-logging-elasticsearch-exporter)|(vault-exporter;vault-exporter)`)
+	ServiceWhitelistRegexp = relabel.MustNewRegexp(`(kube-system;(cert-exporter|cluster-autoscaler|coredns|kiam-agent|kiam-server|kube-proxy|kube-state-metrics|net-exporter|nic-exporter))|(giantswarm;chart-operator)|(giantswarm-elastic-logging;elastic-logging-elasticsearch-exporter)|(vault-exporter;vault-exporter)`)
 
 	// IngressWhitelistRegexp is the regular expression to match workload targets to scrape.
 	IngressWhitelistRegexp = relabel.MustNewRegexp(`(kube-system;nginx-ingress-controller)`)
