@@ -686,6 +686,12 @@ var (
 				SourceLabels: model.LabelNames{MetricExportedNamespaceLabel},
 				Regex:        NSRegexp,
 			},
+			// keep only kube-proxy iptables restore errors metrics
+			{
+				Action:       ActionKeep,
+				SourceLabels: model.LabelNames{MetricNameLabel},
+				Regex:        MetricsKeepKubeProxyIptableRegexp,
+			},
 		},
 	}
 	TestConfigOneIngress = config.ScrapeConfig{
