@@ -511,3 +511,6 @@
   - source_labels: [exported_namespace]
     regex: (kube-system|giantswarm.*|vault-exporter)
     action: keep
+  - source_labels: [__name__]
+    regex: (kubeproxy_sync_proxy_rules_iptables_restore_failures_total)
+    action: keep
