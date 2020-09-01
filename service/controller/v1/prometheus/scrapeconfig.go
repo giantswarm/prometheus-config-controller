@@ -721,6 +721,12 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					SourceLabels: model.LabelNames{MetricExportedNamespaceLabel},
 					Regex:        NSRegexp,
 				},
+				// keep only kube-proxy iptables restore errors metrics
+				{
+					Action:       ActionKeep,
+					SourceLabels: model.LabelNames{MetricNameLabel},
+					Regex:        MetricsKeepKubeProxyIptableRegexp,
+				},
 			},
 		},
 
