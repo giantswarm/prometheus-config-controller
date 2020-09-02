@@ -589,6 +589,10 @@ var (
 				Replacement: GuestClusterType,
 			},
 			{
+				TargetLabel: AddressLabel,
+				Replacement: key.APIServiceHost(key.PrefixMaster, "xa5ly"),
+			},
+			{
 				SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 				Regex:        KubeProxyPodNameRegexp,
 				TargetLabel:  MetricPathLabel,

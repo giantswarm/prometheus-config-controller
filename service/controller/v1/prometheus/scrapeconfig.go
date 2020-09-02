@@ -875,6 +875,8 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				clusterIDLabelRelabelConfig,
 				// Add cluster_type label.
 				clusterTypeLabelRelabelConfig,
+				// rewrite host to api proxy
+				rewriteAddress,
 				rewriteKubeProxyPath,
 			},
 			MetricRelabelConfigs: []*relabel.Config{

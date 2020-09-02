@@ -259,6 +259,8 @@
     replacement: xa5ly
   - target_label: cluster_type
     replacement: guest
+  - target_label: __address__
+    replacement: master.xa5ly:443
   - source_labels: [__meta_kubernetes_pod_name]
     regex: (kube-proxy.*)
     target_label: __metrics_path__
