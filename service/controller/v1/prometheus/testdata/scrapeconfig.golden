@@ -235,15 +235,20 @@
     action: keep
 - job_name: guest-cluster-xa5ly-kube-proxy
   honor_timestamps: false
-  scheme: http
+  scheme: https
   kubernetes_sd_configs:
   - api_server: https://apiserver.xa5ly
-    role: endpoints
+    role: pod
     tls_config:
       ca_file: /certs/xa5ly-ca.pem
       cert_file: /certs/xa5ly-crt.pem
       key_file: /certs/xa5ly-key.pem
       insecure_skip_verify: false
+  tls_config:
+    ca_file: /certs/xa5ly-ca.pem
+    cert_file: /certs/xa5ly-crt.pem
+    key_file: /certs/xa5ly-key.pem
+    insecure_skip_verify: false
   relabel_configs:
   - source_labels: [__meta_kubernetes_pod_name]
     regex: (kube-proxy.*)
@@ -254,6 +259,10 @@
     replacement: xa5ly
   - target_label: cluster_type
     replacement: guest
+  - source_labels: [__meta_kubernetes_pod_name]
+    regex: (kube-proxy.*)
+    target_label: __metrics_path__
+    replacement: /api/v1/namespaces/kube-system/pods/${1}:10249/proxy/metrics
   metric_relabel_configs:
   - source_labels: [__name__]
     regex: (kubeproxy_sync_proxy_rules_iptables_restore_failures_total)
@@ -519,10 +528,6 @@
     regex: (kiam-agent.*|kiam-server.*)
     target_label: __metrics_path__
     replacement: /api/v1/namespaces/kube-system/pods/${1}:9620/proxy/metrics
-  - source_labels: [__meta_kubernetes_pod_name]
-    regex: (kube-proxy.*)
-    target_label: __metrics_path__
-    replacement: /api/v1/namespaces/kube-system/pods/${1}:10249/proxy/metrics
   - source_labels: [__meta_kubernetes_pod_name]
     regex: (vault-exporter.*)
     target_label: __metrics_path__

@@ -703,7 +703,6 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				rewriteNetExporterPath,
 				rewriteNicExporterPath,
 				rewriteKiamPath,
-				rewriteKubeProxyPath,
 				rewriteVaultExporterPath,
 			},
 			MetricRelabelConfigs: []*relabel.Config{
@@ -852,10 +851,12 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				rewriteManagedAppMetricPath,
 			},
 		},
+
 		{
 			JobName:                getJobName(service, KubeProxyJobType),
-			Scheme:                 HttpScheme,
-			ServiceDiscoveryConfig: endpointSDConfig,
+			HTTPClientConfig:       secureHTTPClientConfig,
+			Scheme:                 HttpsScheme,
+			ServiceDiscoveryConfig: podSDConfig,
 			RelabelConfigs: []*relabel.Config{
 				// Only keep node-exporter endpoints.
 				{
@@ -874,6 +875,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				clusterIDLabelRelabelConfig,
 				// Add cluster_type label.
 				clusterTypeLabelRelabelConfig,
+				rewriteKubeProxyPath,
 			},
 			MetricRelabelConfigs: []*relabel.Config{
 				// keep only kube-proxy iptables restore errors metrics

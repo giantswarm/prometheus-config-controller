@@ -533,9 +533,18 @@ var (
 			},
 		},
 	}
+
 	TestConfigOneKubeProxy = config.ScrapeConfig{
 		JobName: "guest-cluster-xa5ly-kube-proxy",
-		Scheme:  "http",
+		Scheme:  "https",
+		HTTPClientConfig: config_util.HTTPClientConfig{
+			TLSConfig: config_util.TLSConfig{
+				CAFile:             "/certs/xa5ly-ca.pem",
+				CertFile:           "/certs/xa5ly-crt.pem",
+				KeyFile:            "/certs/xa5ly-key.pem",
+				InsecureSkipVerify: false,
+			},
+		},
 		ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
 			KubernetesSDConfigs: []*kubernetes.SDConfig{
 				{
@@ -545,7 +554,7 @@ var (
 							Host:   "apiserver.xa5ly",
 						},
 					},
-					Role: kubernetes.RoleEndpoint,
+					Role: kubernetes.RolePod,
 					HTTPClientConfig: config_util.HTTPClientConfig{
 						TLSConfig: config_util.TLSConfig{
 							CAFile:             "/certs/xa5ly-ca.pem",
@@ -579,6 +588,12 @@ var (
 				TargetLabel: ClusterTypeLabel,
 				Replacement: GuestClusterType,
 			},
+			{
+				SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
+				Regex:        KubeProxyPodNameRegexp,
+				TargetLabel:  MetricPathLabel,
+				Replacement:  key.APIProxyPodMetricsPath(key.KubeProxyNamespace, key.KubeProxyMetricPort),
+			},
 		},
 		MetricRelabelConfigs: []*relabel.Config{
 			// keep only kube-proxy iptables restore errors metrics
@@ -589,6 +604,7 @@ var (
 			},
 		},
 	}
+
 	TestConfigOneWorkload = config.ScrapeConfig{
 		JobName: "guest-cluster-xa5ly-workload",
 		HTTPClientConfig: config_util.HTTPClientConfig{
@@ -717,12 +733,6 @@ var (
 			},
 			{
 				SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
-				Regex:        KubeProxyPodNameRegexp,
-				TargetLabel:  MetricPathLabel,
-				Replacement:  key.APIProxyPodMetricsPath(key.KubeProxyNamespace, key.KubeProxyMetricPort),
-			},
-			{
-				SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
 				Regex:        VaultExporterPodNameRegexp,
 				TargetLabel:  MetricPathLabel,
 				Replacement:  key.APIProxyPodMetricsPath(key.VaultExporterNamespace, key.VaultExporterMetricPort),
@@ -741,12 +751,6 @@ var (
 				Action:       ActionKeep,
 				SourceLabels: model.LabelNames{MetricExportedNamespaceLabel},
 				Regex:        NSRegexp,
-			},
-			// keep only kube-proxy iptables restore errors metrics
-			{
-				Action:       ActionKeep,
-				SourceLabels: model.LabelNames{MetricNameLabel},
-				Regex:        MetricsKeepKubeProxyIptableRegexp,
 			},
 		},
 	}
@@ -1060,6 +1064,7 @@ var (
 	TestConfigTwoIngress             config.ScrapeConfig
 	TestConfigTwoManagedApp          config.ScrapeConfig
 	TestConfigTwoKubeStateManagedApp config.ScrapeConfig
+	TestConfigTwoKubeProxy           config.ScrapeConfig
 )
 
 func init() {
@@ -1076,6 +1081,7 @@ func init() {
 	TestConfigTwoIngress = TestConfigOneIngress
 	TestConfigTwoManagedApp = TestConfigOneManagedApp
 	TestConfigTwoKubeStateManagedApp = TestConfigOneKubeStateManagedApp
+	TestConfigTwoKubeProxy = TestConfigOneKubeProxy
 
 	apiServer := config_util.URL{URL: &url.URL{
 		Scheme: "https",
@@ -1333,6 +1339,30 @@ func init() {
 				newRelabelConfig := *r
 				newRelabelConfig.Replacement = strings.ReplaceAll(r.Replacement, "xa5ly", clusterID)
 				TestConfigTwoKubeStateManagedApp.RelabelConfigs = append(TestConfigTwoKubeStateManagedApp.RelabelConfigs, &newRelabelConfig)
+			}
+		}
+	}
+
+	{
+		{
+			TestConfigTwoKubeProxy.JobName = "guest-cluster-0ba9v-kube-proxy"
+			TestConfigTwoKubeProxy.HTTPClientConfig.TLSConfig = tlsConfig
+			TestConfigTwoKubeProxy.ServiceDiscoveryConfig.KubernetesSDConfigs = []*kubernetes.SDConfig{
+				{
+					APIServer: apiServer,
+					Role:      kubernetes.RolePod,
+					HTTPClientConfig: config_util.HTTPClientConfig{
+						TLSConfig: tlsConfig,
+					},
+				},
+			}
+
+			// Deepcopy relabel configs and change clusterID to match second test config.
+			TestConfigTwoKubeProxy.RelabelConfigs = nil
+			for _, r := range TestConfigOneKubeProxy.RelabelConfigs {
+				newRelabelConfig := *r
+				newRelabelConfig.Replacement = strings.ReplaceAll(r.Replacement, "xa5ly", clusterID)
+				TestConfigTwoKubeProxy.RelabelConfigs = append(TestConfigTwoKubeProxy.RelabelConfigs, &newRelabelConfig)
 			}
 		}
 	}
