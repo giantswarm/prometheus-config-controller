@@ -52,6 +52,8 @@ const (
 	IngressJobType = "ingress"
 	// KubeStateManagedAppJobType is the job type for scraping kube-state-metrics-provided endpoints for managed apps.
 	KubeStateManagedAppJobType = "kube-state-managed-app"
+	// KubeProxyJobType is the job type for scraping node-exporters
+	KubeProxyJobType = "kube-proxy"
 
 	// ActionKeep is action type that keeps only matching metrics.
 	ActionKeep = "keep"
@@ -652,7 +654,6 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				},
 			},
 		},
-
 		{
 			JobName:                getJobName(service, WorkloadJobType),
 			HTTPClientConfig:       secureHTTPClientConfig,
@@ -720,12 +721,6 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					Action:       ActionKeep,
 					SourceLabels: model.LabelNames{MetricExportedNamespaceLabel},
 					Regex:        NSRegexp,
-				},
-				// keep only kube-proxy iptables restore errors metrics
-				{
-					Action:       ActionKeep,
-					SourceLabels: model.LabelNames{MetricNameLabel},
-					Regex:        MetricsKeepKubeProxyIptableRegexp,
 				},
 			},
 		},
@@ -855,6 +850,38 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				rewriteAddress,
 				// Relabel metrics path to specific managed app proxy.
 				rewriteManagedAppMetricPath,
+			},
+		},
+		{
+			JobName:                getJobName(service, KubeProxyJobType),
+			Scheme:                 HttpScheme,
+			ServiceDiscoveryConfig: endpointSDConfig,
+			RelabelConfigs: []*relabel.Config{
+				// Only keep node-exporter endpoints.
+				{
+					SourceLabels: model.LabelNames{
+						KubernetesSDPodNameLabel,
+					},
+					Regex:  KubeProxyPodNameRegexp,
+					Action: relabel.Keep,
+				},
+				// Add app label.
+				{
+					TargetLabel: AppLabel,
+					Replacement: KubeProxyAppName,
+				},
+				// Add cluster_id label.
+				clusterIDLabelRelabelConfig,
+				// Add cluster_type label.
+				clusterTypeLabelRelabelConfig,
+			},
+			MetricRelabelConfigs: []*relabel.Config{
+				// keep only kube-proxy iptables restore errors metrics
+				{
+					Action:       ActionKeep,
+					SourceLabels: model.LabelNames{MetricNameLabel},
+					Regex:        MetricsKeepKubeProxyIptableRegexp,
+				},
 			},
 		},
 	}

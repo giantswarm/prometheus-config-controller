@@ -533,6 +533,62 @@ var (
 			},
 		},
 	}
+	TestConfigOneKubeProxy = config.ScrapeConfig{
+		JobName: "guest-cluster-xa5ly-kube-proxy",
+		Scheme:  "http",
+		ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
+			KubernetesSDConfigs: []*kubernetes.SDConfig{
+				{
+					APIServer: config_util.URL{
+						URL: &url.URL{
+							Scheme: "https",
+							Host:   "apiserver.xa5ly",
+						},
+					},
+					Role: kubernetes.RoleEndpoint,
+					HTTPClientConfig: config_util.HTTPClientConfig{
+						TLSConfig: config_util.TLSConfig{
+							CAFile:             "/certs/xa5ly-ca.pem",
+							CertFile:           "/certs/xa5ly-crt.pem",
+							KeyFile:            "/certs/xa5ly-key.pem",
+							InsecureSkipVerify: false,
+						},
+					},
+				},
+			},
+		},
+		RelabelConfigs: []*relabel.Config{
+			// Only keep node-exporter endpoints.
+			{
+				SourceLabels: model.LabelNames{
+					KubernetesSDPodNameLabel,
+				},
+				Regex:  KubeProxyPodNameRegexp,
+				Action: relabel.Keep,
+			},
+			// Add app label.
+			{
+				TargetLabel: AppLabel,
+				Replacement: KubeProxyAppName,
+			},
+			{
+				TargetLabel: ClusterIDLabel,
+				Replacement: "xa5ly",
+			},
+			{
+				TargetLabel: ClusterTypeLabel,
+				Replacement: GuestClusterType,
+			},
+		},
+		MetricRelabelConfigs: []*relabel.Config{
+			// keep only kube-proxy iptables restore errors metrics
+			{
+				Action:       ActionKeep,
+				SourceLabels: model.LabelNames{MetricNameLabel},
+				Regex:        MetricsKeepKubeProxyIptableRegexp,
+			},
+		},
+	}
 	TestConfigOneWorkload = config.ScrapeConfig{
 		JobName: "guest-cluster-xa5ly-workload",
 		HTTPClientConfig: config_util.HTTPClientConfig{

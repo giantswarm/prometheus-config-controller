@@ -233,6 +233,31 @@
   - source_labels: [__name__]
     regex: (nginx_ingress_controller_config_hash|nginx_ingress_controller_config_last_reload_successful|nginx_ingress_controller_config_last_reload_successful_timestamp_seconds|nginx_ingress_controller_nginx_process_connections|nginx_ingress_controller_nginx_process_connections_total|nginx_ingress_controller_nginx_process_cpu_seconds_total|nginx_ingress_controller_nginx_process_num_procs|nginx_ingress_controller_nginx_process_oldest_start_time_seconds|nginx_ingress_controller_nginx_process_read_bytes_total|nginx_ingress_controller_nginx_process_requests_total|nginx_ingress_controller_nginx_process_resident_memory_bytes|nginx_ingress_controller_nginx_process_virtual_memory_bytes|nginx_ingress_controller_nginx_process_write_bytes_total|nginx_ingress_controller_success|^go_.+|^process_.+|^prom.+)
     action: keep
+- job_name: guest-cluster-xa5ly-kube-proxy
+  honor_timestamps: false
+  scheme: http
+  kubernetes_sd_configs:
+  - api_server: https://apiserver.xa5ly
+    role: endpoints
+    tls_config:
+      ca_file: /certs/xa5ly-ca.pem
+      cert_file: /certs/xa5ly-crt.pem
+      key_file: /certs/xa5ly-key.pem
+      insecure_skip_verify: false
+  relabel_configs:
+  - source_labels: [__meta_kubernetes_pod_name]
+    regex: (kube-proxy.*)
+    action: keep
+  - target_label: app
+    replacement: kube-proxy
+  - target_label: cluster_id
+    replacement: xa5ly
+  - target_label: cluster_type
+    replacement: guest
+  metric_relabel_configs:
+  - source_labels: [__name__]
+    regex: (kubeproxy_sync_proxy_rules_iptables_restore_failures_total)
+    action: keep
 - job_name: guest-cluster-xa5ly-kube-state-managed-app
   honor_timestamps: false
   scheme: https
@@ -438,7 +463,7 @@
     insecure_skip_verify: false
   relabel_configs:
   - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name]
-    regex: (kube-system;(cert-exporter|cluster-autoscaler|coredns|kiam-agent|kiam-server|kube-proxy|kube-state-metrics|net-exporter|nic-exporter))|(giantswarm;chart-operator)|(giantswarm-elastic-logging;elastic-logging-elasticsearch-exporter)|(vault-exporter;vault-exporter)
+    regex: (kube-system;(cert-exporter|cluster-autoscaler|coredns|kiam-agent|kiam-server|kube-state-metrics|net-exporter|nic-exporter))|(giantswarm;chart-operator)|(giantswarm-elastic-logging;elastic-logging-elasticsearch-exporter)|(vault-exporter;vault-exporter)
     action: keep
   - source_labels: [__meta_kubernetes_service_name]
     target_label: app
@@ -510,7 +535,4 @@
     action: replace
   - source_labels: [exported_namespace]
     regex: (kube-system|giantswarm.*|vault-exporter)
-    action: keep
-  - source_labels: [__name__]
-    regex: (kubeproxy_sync_proxy_rules_iptables_restore_failures_total)
     action: keep
