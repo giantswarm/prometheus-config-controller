@@ -191,6 +191,9 @@ const (
 	// NodeExporterAppName is the label value for node-exporters.
 	NodeExporterAppName = "node-exporter"
 
+	// NodeExporterAppName is the label value for node-exporters.
+	KubeProxyAppName = "kube-proxy"
+
 	// WorkerRole is the label value used for Kubernetes workers.
 	WorkerRole = "worker"
 
@@ -302,6 +305,12 @@ var (
 
 	// KiamPodNameRegexp is the regular expression to match kiam pod name.
 	KiamPodNameRegexp = relabel.MustNewRegexp(`(kiam-agent.*|kiam-server.*)`)
+
+	// KubeProxyPodNameRegexp is the regular expression to match kube-proxy pod name.
+	KubeProxyPodNameRegexp = relabel.MustNewRegexp(`(kube-proxy.*)`)
+
+	// MetricsDropReflectorRegexp is the regular expression to match against spammy reflector metrics returned by the Kubelet.
+	MetricsKeepKubeProxyIptableRegexp = relabel.MustNewRegexp(`(kubeproxy_sync_proxy_rules_iptables_restore_failures_total)`)
 
 	// NetExporterPodNameRegexp is the regular expression to match net-exporter pod name.
 	NetExporterPodNameRegexp = relabel.MustNewRegexp(`(net-exporter.*)`)

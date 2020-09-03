@@ -233,6 +233,42 @@
   - source_labels: [__name__]
     regex: (nginx_ingress_controller_config_hash|nginx_ingress_controller_config_last_reload_successful|nginx_ingress_controller_config_last_reload_successful_timestamp_seconds|nginx_ingress_controller_nginx_process_connections|nginx_ingress_controller_nginx_process_connections_total|nginx_ingress_controller_nginx_process_cpu_seconds_total|nginx_ingress_controller_nginx_process_num_procs|nginx_ingress_controller_nginx_process_oldest_start_time_seconds|nginx_ingress_controller_nginx_process_read_bytes_total|nginx_ingress_controller_nginx_process_requests_total|nginx_ingress_controller_nginx_process_resident_memory_bytes|nginx_ingress_controller_nginx_process_virtual_memory_bytes|nginx_ingress_controller_nginx_process_write_bytes_total|nginx_ingress_controller_success|^go_.+|^process_.+|^prom.+)
     action: keep
+- job_name: guest-cluster-xa5ly-kube-proxy
+  honor_timestamps: false
+  scheme: https
+  kubernetes_sd_configs:
+  - api_server: https://apiserver.xa5ly
+    role: pod
+    tls_config:
+      ca_file: /certs/xa5ly-ca.pem
+      cert_file: /certs/xa5ly-crt.pem
+      key_file: /certs/xa5ly-key.pem
+      insecure_skip_verify: false
+  tls_config:
+    ca_file: /certs/xa5ly-ca.pem
+    cert_file: /certs/xa5ly-crt.pem
+    key_file: /certs/xa5ly-key.pem
+    insecure_skip_verify: false
+  relabel_configs:
+  - source_labels: [__meta_kubernetes_pod_name]
+    regex: (kube-proxy.*)
+    action: keep
+  - target_label: app
+    replacement: kube-proxy
+  - target_label: cluster_id
+    replacement: xa5ly
+  - target_label: cluster_type
+    replacement: guest
+  - target_label: __address__
+    replacement: master.xa5ly:443
+  - source_labels: [__meta_kubernetes_pod_name]
+    regex: (kube-proxy.*)
+    target_label: __metrics_path__
+    replacement: /api/v1/namespaces/kube-system/pods/${1}:10249/proxy/metrics
+  metric_relabel_configs:
+  - source_labels: [__name__]
+    regex: (kubeproxy_sync_proxy_rules_iptables_restore_failures_total)
+    action: keep
 - job_name: guest-cluster-xa5ly-kube-state-managed-app
   honor_timestamps: false
   scheme: https

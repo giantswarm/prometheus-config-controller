@@ -52,6 +52,8 @@ const (
 	IngressJobType = "ingress"
 	// KubeStateManagedAppJobType is the job type for scraping kube-state-metrics-provided endpoints for managed apps.
 	KubeStateManagedAppJobType = "kube-state-managed-app"
+	// KubeProxyJobType is the job type for scraping node-exporters
+	KubeProxyJobType = "kube-proxy"
 
 	// ActionKeep is action type that keeps only matching metrics.
 	ActionKeep = "keep"
@@ -254,6 +256,12 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 		Regex:        KiamPodNameRegexp,
 		TargetLabel:  MetricPathLabel,
 		Replacement:  key.APIProxyPodMetricsPath(key.KiamNamespace, key.KiamMetricPort),
+	}
+	rewriteKubeProxyPath := &relabel.Config{
+		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
+		Regex:        KubeProxyPodNameRegexp,
+		TargetLabel:  MetricPathLabel,
+		Replacement:  key.APIProxyPodMetricsPath(key.KubeProxyNamespace, key.KubeProxyMetricPort),
 	}
 	rewriteVaultExporterPath := &relabel.Config{
 		SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
@@ -646,7 +654,6 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				},
 			},
 		},
-
 		{
 			JobName:                getJobName(service, WorkloadJobType),
 			HTTPClientConfig:       secureHTTPClientConfig,
@@ -842,6 +849,43 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				rewriteAddress,
 				// Relabel metrics path to specific managed app proxy.
 				rewriteManagedAppMetricPath,
+			},
+		},
+
+		{
+			JobName:                getJobName(service, KubeProxyJobType),
+			HTTPClientConfig:       secureHTTPClientConfig,
+			Scheme:                 HttpsScheme,
+			ServiceDiscoveryConfig: podSDConfig,
+			RelabelConfigs: []*relabel.Config{
+				// Only keep node-exporter endpoints.
+				{
+					SourceLabels: model.LabelNames{
+						KubernetesSDPodNameLabel,
+					},
+					Regex:  KubeProxyPodNameRegexp,
+					Action: relabel.Keep,
+				},
+				// Add app label.
+				{
+					TargetLabel: AppLabel,
+					Replacement: KubeProxyAppName,
+				},
+				// Add cluster_id label.
+				clusterIDLabelRelabelConfig,
+				// Add cluster_type label.
+				clusterTypeLabelRelabelConfig,
+				// rewrite host to api proxy
+				rewriteAddress,
+				rewriteKubeProxyPath,
+			},
+			MetricRelabelConfigs: []*relabel.Config{
+				// keep only kube-proxy iptables restore errors metrics
+				{
+					Action:       ActionKeep,
+					SourceLabels: model.LabelNames{MetricNameLabel},
+					Regex:        MetricsKeepKubeProxyIptableRegexp,
+				},
 			},
 		},
 	}

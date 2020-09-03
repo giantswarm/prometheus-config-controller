@@ -533,6 +533,82 @@ var (
 			},
 		},
 	}
+
+	TestConfigOneKubeProxy = config.ScrapeConfig{
+		JobName: "guest-cluster-xa5ly-kube-proxy",
+		Scheme:  "https",
+		HTTPClientConfig: config_util.HTTPClientConfig{
+			TLSConfig: config_util.TLSConfig{
+				CAFile:             "/certs/xa5ly-ca.pem",
+				CertFile:           "/certs/xa5ly-crt.pem",
+				KeyFile:            "/certs/xa5ly-key.pem",
+				InsecureSkipVerify: false,
+			},
+		},
+		ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
+			KubernetesSDConfigs: []*kubernetes.SDConfig{
+				{
+					APIServer: config_util.URL{
+						URL: &url.URL{
+							Scheme: "https",
+							Host:   "apiserver.xa5ly",
+						},
+					},
+					Role: kubernetes.RolePod,
+					HTTPClientConfig: config_util.HTTPClientConfig{
+						TLSConfig: config_util.TLSConfig{
+							CAFile:             "/certs/xa5ly-ca.pem",
+							CertFile:           "/certs/xa5ly-crt.pem",
+							KeyFile:            "/certs/xa5ly-key.pem",
+							InsecureSkipVerify: false,
+						},
+					},
+				},
+			},
+		},
+		RelabelConfigs: []*relabel.Config{
+			// Only keep node-exporter endpoints.
+			{
+				SourceLabels: model.LabelNames{
+					KubernetesSDPodNameLabel,
+				},
+				Regex:  KubeProxyPodNameRegexp,
+				Action: relabel.Keep,
+			},
+			// Add app label.
+			{
+				TargetLabel: AppLabel,
+				Replacement: KubeProxyAppName,
+			},
+			{
+				TargetLabel: ClusterIDLabel,
+				Replacement: "xa5ly",
+			},
+			{
+				TargetLabel: ClusterTypeLabel,
+				Replacement: GuestClusterType,
+			},
+			{
+				TargetLabel: AddressLabel,
+				Replacement: key.APIServiceHost(key.PrefixMaster, "xa5ly"),
+			},
+			{
+				SourceLabels: model.LabelNames{KubernetesSDPodNameLabel},
+				Regex:        KubeProxyPodNameRegexp,
+				TargetLabel:  MetricPathLabel,
+				Replacement:  key.APIProxyPodMetricsPath(key.KubeProxyNamespace, key.KubeProxyMetricPort),
+			},
+		},
+		MetricRelabelConfigs: []*relabel.Config{
+			// keep only kube-proxy iptables restore errors metrics
+			{
+				Action:       ActionKeep,
+				SourceLabels: model.LabelNames{MetricNameLabel},
+				Regex:        MetricsKeepKubeProxyIptableRegexp,
+			},
+		},
+	}
+
 	TestConfigOneWorkload = config.ScrapeConfig{
 		JobName: "guest-cluster-xa5ly-workload",
 		HTTPClientConfig: config_util.HTTPClientConfig{
@@ -992,6 +1068,7 @@ var (
 	TestConfigTwoIngress             config.ScrapeConfig
 	TestConfigTwoManagedApp          config.ScrapeConfig
 	TestConfigTwoKubeStateManagedApp config.ScrapeConfig
+	TestConfigTwoKubeProxy           config.ScrapeConfig
 )
 
 func init() {
@@ -1008,6 +1085,7 @@ func init() {
 	TestConfigTwoIngress = TestConfigOneIngress
 	TestConfigTwoManagedApp = TestConfigOneManagedApp
 	TestConfigTwoKubeStateManagedApp = TestConfigOneKubeStateManagedApp
+	TestConfigTwoKubeProxy = TestConfigOneKubeProxy
 
 	apiServer := config_util.URL{URL: &url.URL{
 		Scheme: "https",
@@ -1265,6 +1343,30 @@ func init() {
 				newRelabelConfig := *r
 				newRelabelConfig.Replacement = strings.ReplaceAll(r.Replacement, "xa5ly", clusterID)
 				TestConfigTwoKubeStateManagedApp.RelabelConfigs = append(TestConfigTwoKubeStateManagedApp.RelabelConfigs, &newRelabelConfig)
+			}
+		}
+	}
+
+	{
+		{
+			TestConfigTwoKubeProxy.JobName = "guest-cluster-0ba9v-kube-proxy"
+			TestConfigTwoKubeProxy.HTTPClientConfig.TLSConfig = tlsConfig
+			TestConfigTwoKubeProxy.ServiceDiscoveryConfig.KubernetesSDConfigs = []*kubernetes.SDConfig{
+				{
+					APIServer: apiServer,
+					Role:      kubernetes.RolePod,
+					HTTPClientConfig: config_util.HTTPClientConfig{
+						TLSConfig: tlsConfig,
+					},
+				},
+			}
+
+			// Deepcopy relabel configs and change clusterID to match second test config.
+			TestConfigTwoKubeProxy.RelabelConfigs = nil
+			for _, r := range TestConfigOneKubeProxy.RelabelConfigs {
+				newRelabelConfig := *r
+				newRelabelConfig.Replacement = strings.ReplaceAll(r.Replacement, "xa5ly", clusterID)
+				TestConfigTwoKubeProxy.RelabelConfigs = append(TestConfigTwoKubeProxy.RelabelConfigs, &newRelabelConfig)
 			}
 		}
 	}
