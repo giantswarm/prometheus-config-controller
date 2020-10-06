@@ -666,6 +666,12 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					Regex:        ServiceWhitelistRegexp,
 					Action:       relabel.Keep,
 				},
+				// Drop customer kiam pods to keep only Giantswarm managed kiam pods
+				{
+					SourceLabels: model.LabelNames{KubernetesSDPodNameLabel, PodSDGiantswarmServiceTypeLabel},
+					Regex:        KiamPodNameRegexpNonManaged,
+					Action:       relabel.Drop,
+				},
 				// Add app label.
 				{
 					TargetLabel:  AppLabel,
