@@ -310,7 +310,7 @@ var (
 	// KiamPodNameRegexp is the regular expression to match kiam pod name.
 	KiamPodNameRegexp = relabel.MustNewRegexp(`(kiam-agent.*|kiam-server.*)`)
 
-	// KiamPodNameRegexpNonManaged is the regular expression to match kiam pod  and empty giatnswarm.io/managed-type label.
+	// KiamPodNameRegexpNonManaged is the regular expression to match kiam pod and empty giatnswarm.io/managed-type label, which indicate a non-managed kiam pod.
 	KiamPodNameRegexpNonManaged = relabel.MustNewRegexp(`(kiam-agent.*|kiam-server.*);`)
 
 	// KubeProxyPodNameRegexp is the regular expression to match kube-proxy pod name.
