@@ -106,6 +106,10 @@ var (
 	// PodSDNamespaceLabel is the label applied to the target by Prometheus POD
 	// service discovery that holds the target's Kubernetes namespace.
 	PodSDNamespaceLabel = model.LabelName("__meta_kubernetes_namespace")
+
+	// PodSDGiantswarmServiceTypeLabel is the label applied to the target by Prometheus POD
+	// service discovery that holds the target's Kubernetes pod's label 'giantswarm.io/service_type'.
+	PodSDGiantswarmServiceTypeLabel = model.LabelName("__meta_kubernetes_pod_label_giantswarm_io_service_type")
 )
 
 // Giant Swarm metrics schema labels.
@@ -305,6 +309,9 @@ var (
 
 	// KiamPodNameRegexp is the regular expression to match kiam pod name.
 	KiamPodNameRegexp = relabel.MustNewRegexp(`(kiam-agent.*|kiam-server.*)`)
+
+	// KiamPodNameRegexpNonManaged is the regular expression to match kiam pod and empty giatnswarm.io/managed-type label, which indicate a non-managed kiam pod.
+	KiamPodNameRegexpNonManaged = relabel.MustNewRegexp(`(kiam-agent.*|kiam-server.*);`)
 
 	// KubeProxyPodNameRegexp is the regular expression to match kube-proxy pod name.
 	KubeProxyPodNameRegexp = relabel.MustNewRegexp(`(kube-proxy.*)`)

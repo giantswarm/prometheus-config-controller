@@ -648,6 +648,11 @@ var (
 				Action:       relabel.Keep,
 			},
 			{
+				SourceLabels: model.LabelNames{KubernetesSDPodNameLabel, PodSDGiantswarmServiceTypeLabel},
+				Regex:        KiamPodNameRegexpNonManaged,
+				Action:       relabel.Drop,
+			},
+			{
 				TargetLabel:  AppLabel,
 				SourceLabels: model.LabelNames{KubernetesSDServiceNameLabel},
 			},
