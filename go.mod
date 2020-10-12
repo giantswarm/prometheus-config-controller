@@ -17,7 +17,7 @@ require (
 	github.com/google/go-cmp v0.5.1
 	github.com/prometheus/client_golang v1.7.1
 	github.com/prometheus/common v0.11.1
-	github.com/prometheus/prometheus v1.8.2-0.20190424153033-d3245f150225
+	github.com/prometheus/prometheus v2.20.1+incompatible
 	github.com/spf13/afero v1.2.2
 	github.com/spf13/viper v1.6.2
 	gopkg.in/yaml.v2 v2.3.0
