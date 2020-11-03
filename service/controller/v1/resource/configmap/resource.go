@@ -24,6 +24,8 @@ type Config struct {
 	ConfigMapKey       string
 	ConfigMapName      string
 	ConfigMapNamespace string
+
+	Provider string
 }
 
 type Resource struct {
@@ -34,6 +36,7 @@ type Resource struct {
 	configMapKey       string
 	configMapName      string
 	configMapNamespace string
+	provider           string
 }
 
 func New(config Config) (*Resource, error) {
@@ -65,6 +68,8 @@ func New(config Config) (*Resource, error) {
 		configMapKey:       config.ConfigMapKey,
 		configMapName:      config.ConfigMapName,
 		configMapNamespace: config.ConfigMapNamespace,
+
+		provider: config.Provider,
 	}
 
 	return r, nil

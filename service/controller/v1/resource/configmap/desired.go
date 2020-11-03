@@ -50,8 +50,13 @@ func (r *Resource) getDesiredState(ctx context.Context) (*corev1.ConfigMap, erro
 		return nil, microerror.Mask(err)
 	}
 
+	config := prometheus.Config{
+		CertDirectory: r.certDirectory,
+		Provider:      r.provider,
+	}
+
 	r.logger.LogCtx(ctx, "debug", fmt.Sprintf("computing desired state of configmap"))
-	scrapeConfigs, err := prometheus.GetScrapeConfigs(services.Items, r.certDirectory)
+	scrapeConfigs, err := prometheus.GetScrapeConfigs(services.Items, config)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}

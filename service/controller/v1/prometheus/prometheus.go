@@ -352,6 +352,11 @@ var (
 	IngressWhitelistRegexp = relabel.MustNewRegexp(`(kube-system;nginx-ingress-controller)`)
 )
 
+type Config struct {
+	CertDirectory string
+	Provider      string
+}
+
 // GetClusterID returns the value of the cluster annotation.
 // Assumed that the service contains this annotation, see `FilterInvalidServices`.
 func GetClusterID(service v1.Service) string {

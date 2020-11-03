@@ -26,6 +26,7 @@ type PrometheusConfig struct {
 	CertNamespace      string
 	CertPermission     int
 	PrometheusAddress  string
+	Provider           string
 }
 
 type Prometheus struct {
@@ -81,6 +82,7 @@ func NewPrometheus(config PrometheusConfig) (*Prometheus, error) {
 			CertNamespace:      config.CertNamespace,
 			CertPermission:     config.CertPermission,
 			PrometheusAddress:  config.PrometheusAddress,
+			Provider:           config.Provider,
 		}
 		resources, err = controllerresource.New(c)
 		if err != nil {

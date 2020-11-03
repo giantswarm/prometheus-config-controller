@@ -28,6 +28,7 @@ type Config struct {
 	CertNamespace      string
 	CertPermission     int
 	PrometheusAddress  string
+	Provider           string
 }
 
 func New(config Config) ([]resource.Interface, error) {

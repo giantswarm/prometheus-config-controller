@@ -91,10 +91,10 @@ func getEtcdTarget(etcdUrl string) model.LabelSet {
 
 // getScrapeConfigs takes a Service, and returns a list of ScrapeConfigs.
 // It is assumed that filtering has already taken place, and the cluster annotation exists.
-func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.ScrapeConfig {
+func getScrapeConfigs(service v1.Service, metaConfig Config) []config.ScrapeConfig {
+	certificateDirectory := metaConfig.CertDirectory
 	clusterID := GetClusterID(service)
-	// providerLabel := labels.FromStrings("provider", "aws")
-	provider := "aws-test"
+	provider := metaConfig.Provider
 
 	secureTLSConfig := config_util.TLSConfig{
 		CAFile:             key.CAPath(certificateDirectory, clusterID),
@@ -955,12 +955,12 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 
 // GetScrapeConfigs takes a list of Kubernetes Services,
 // and returns a list of Prometheus ScrapeConfigs.
-func GetScrapeConfigs(services []v1.Service, certificateDirectory string) ([]config.ScrapeConfig, error) {
+func GetScrapeConfigs(services []v1.Service, metaConfig Config) ([]config.ScrapeConfig, error) {
 	filteredServices := FilterInvalidServices(services)
 
 	scrapeConfigs := []config.ScrapeConfig{}
 	for _, service := range filteredServices {
-		scrapeConfigs = append(scrapeConfigs, getScrapeConfigs(service, certificateDirectory)...)
+		scrapeConfigs = append(scrapeConfigs, getScrapeConfigs(service, metaConfig)...)
 	}
 
 	sort.Slice(scrapeConfigs, func(i, j int) bool {
