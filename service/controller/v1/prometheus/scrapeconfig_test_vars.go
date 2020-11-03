@@ -81,6 +81,10 @@ var (
 				SourceLabels: model.LabelNames{MetricNameLabel},
 				Regex:        MetricsDropReflectorRegexp,
 			},
+			{
+				TargetLabel: ProviderLabel,
+				Replacement: "aws-test",
+			},
 		},
 	}
 	TestConfigOneAWSNode = config.ScrapeConfig{
@@ -152,7 +156,12 @@ var (
 				Replacement:  key.APIProxyPodMetricsPath(key.AWSNodeNamespace, key.AWSNodeMetricPort),
 			},
 		},
-		MetricRelabelConfigs: []*relabel.Config{},
+		MetricRelabelConfigs: []*relabel.Config{
+			{
+				TargetLabel: ProviderLabel,
+				Replacement: "aws-test",
+			},
+		},
 	}
 	TestConfigOneCadvisor = config.ScrapeConfig{
 		JobName: "guest-cluster-xa5ly-cadvisor",
@@ -236,6 +245,10 @@ var (
 				SourceLabels: model.LabelNames{MetricNameLabel},
 				Regex:        MetricDropContainerNetworkRegexp,
 			},
+			{
+				TargetLabel: ProviderLabel,
+				Replacement: "aws-test",
+			},
 		},
 	}
 	TestConfigOneCalicoNode = config.ScrapeConfig{
@@ -307,7 +320,12 @@ var (
 				Replacement:  key.APIProxyPodMetricsPath(key.CalicoNodeNamespace, key.CalicoNodeMetricPort),
 			},
 		},
-		MetricRelabelConfigs: []*relabel.Config{},
+		MetricRelabelConfigs: []*relabel.Config{
+			{
+				TargetLabel: ProviderLabel,
+				Replacement: "aws-test",
+			},
+		},
 	}
 	TestConfigOneDocker = config.ScrapeConfig{
 		JobName: "guest-cluster-xa5ly-docker-daemon",
@@ -384,6 +402,10 @@ var (
 				Regex:        DockerMetricsNameRegexp,
 				Action:       ActionKeep,
 			},
+			{
+				TargetLabel: ProviderLabel,
+				Replacement: "aws-test",
+			},
 		},
 	}
 	TestConfigOneKubelet = config.ScrapeConfig{
@@ -451,6 +473,10 @@ var (
 				Action:       ActionDrop,
 				SourceLabels: model.LabelNames{MetricNameLabel},
 				Regex:        MetricsDropReflectorRegexp,
+			},
+			{
+				TargetLabel: ProviderLabel,
+				Replacement: "aws-test",
 			},
 		},
 	}
@@ -531,6 +557,10 @@ var (
 				SourceLabels: model.LabelNames{MetricNameLabel, MetricSystemdNameLabel},
 				Regex:        MetricDropSystemdNameRegexp,
 			},
+			{
+				TargetLabel: ProviderLabel,
+				Replacement: "aws-test",
+			},
 		},
 	}
 
@@ -605,6 +635,10 @@ var (
 				Action:       ActionKeep,
 				SourceLabels: model.LabelNames{MetricNameLabel},
 				Regex:        MetricsKeepKubeProxyIptableRegexp,
+			},
+			{
+				TargetLabel: ProviderLabel,
+				Replacement: "aws-test",
 			},
 		},
 	}
@@ -761,6 +795,10 @@ var (
 				SourceLabels: model.LabelNames{MetricExportedNamespaceLabel},
 				Regex:        NSRegexp,
 			},
+			{
+				TargetLabel: ProviderLabel,
+				Replacement: "aws-test",
+			},
 		},
 	}
 	TestConfigOneIngress = config.ScrapeConfig{
@@ -848,6 +886,10 @@ var (
 				Action:       ActionKeep,
 				SourceLabels: model.LabelNames{MetricNameLabel},
 				Regex:        MetricKeepICRegexp,
+			},
+			{
+				TargetLabel: ProviderLabel,
+				Replacement: "aws-test",
 			},
 		},
 	}
@@ -947,6 +989,12 @@ var (
 				Regex:       ManagedAppSourceRegexp,
 				TargetLabel: MetricPathLabel,
 				Replacement: key.ManagedAppPodMetricsPath(),
+			},
+		},
+		MetricRelabelConfigs: []*relabel.Config{
+			{
+				TargetLabel: ProviderLabel,
+				Replacement: "aws-test",
 			},
 		},
 	}
@@ -1056,6 +1104,10 @@ var (
 				Regex:        NonEmptyRegexp,
 				TargetLabel:  ManagedAppWorkloadNameLabel,
 				Replacement:  GroupCapture,
+			},
+			{
+				TargetLabel: ProviderLabel,
+				Replacement: "aws-test",
 			},
 		},
 	}

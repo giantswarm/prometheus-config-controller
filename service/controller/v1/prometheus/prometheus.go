@@ -162,6 +162,9 @@ var (
 	// PodNameLabel is the label used to hold the pod name.
 	PodNameLabel = "pod_name"
 
+	// ProviderLabel is the label used to hold the provider type.
+	ProviderLabel = "provider"
+
 	// NodeLabel is the label used to hold the node name.
 	NodeLabel = "node"
 
