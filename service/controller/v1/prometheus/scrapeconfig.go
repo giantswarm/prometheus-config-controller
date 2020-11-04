@@ -95,6 +95,7 @@ func getScrapeConfigs(service v1.Service, metaConfig Config) []config.ScrapeConf
 	certificateDirectory := metaConfig.CertDirectory
 	clusterID := GetClusterID(service)
 	provider := metaConfig.Provider
+	fmt.Println(fmt.Sprintf("setting provider label to %s", provider))
 
 	secureTLSConfig := config_util.TLSConfig{
 		CAFile:             key.CAPath(certificateDirectory, clusterID),

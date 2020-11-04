@@ -59,6 +59,9 @@ func New(config Config) (*Resource, error) {
 	if config.ConfigMapNamespace == "" {
 		return nil, microerror.Maskf(invalidConfigError, "config.ConfigMapNamespace must not be empty")
 	}
+	if config.Provider == "" {
+		return nil, microerror.Maskf(invalidConfigError, "config.Provider must not be empty")
+	}
 
 	r := &Resource{
 		k8sClient: config.K8sClient,
