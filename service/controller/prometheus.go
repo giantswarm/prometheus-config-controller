@@ -65,6 +65,9 @@ func NewPrometheus(config PrometheusConfig) (*Prometheus, error) {
 	if config.PrometheusAddress == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.PrometheusAddress must not be empty", config)
 	}
+	if config.Provider == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Provider must not be empty", config)
+	}
 
 	var err error
 
