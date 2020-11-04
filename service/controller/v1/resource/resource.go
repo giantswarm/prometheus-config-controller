@@ -68,6 +68,8 @@ func New(config Config) ([]resource.Interface, error) {
 			ConfigMapKey:       config.ConfigMapKey,
 			ConfigMapName:      config.ConfigMapName,
 			ConfigMapNamespace: config.ConfigMapNamespace,
+
+			Provider: config.Provider,
 		}
 
 		configMapResource, err = configmap.New(c)
