@@ -1,5 +1,6 @@
 package prometheus
 
 type Prometheus struct {
-	Address string
+	Address  string
+	Provider string
 }

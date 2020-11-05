@@ -104,6 +104,7 @@ func New(config Config) (*Service, error) {
 			CertNamespace:      config.Viper.GetString(config.Flag.Service.Resource.Certificate.Namespace),
 			CertPermission:     config.Viper.GetInt(config.Flag.Service.Resource.Certificate.Permission),
 			PrometheusAddress:  config.Viper.GetString(config.Flag.Service.Prometheus.Address),
+			Provider:           config.Viper.GetString(config.Flag.Service.Prometheus.Provider),
 		}
 
 		prometheusController, err = controller.NewPrometheus(c)

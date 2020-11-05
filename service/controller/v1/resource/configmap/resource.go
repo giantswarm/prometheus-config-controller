@@ -24,6 +24,8 @@ type Config struct {
 	ConfigMapKey       string
 	ConfigMapName      string
 	ConfigMapNamespace string
+
+	Provider string
 }
 
 type Resource struct {
@@ -34,6 +36,7 @@ type Resource struct {
 	configMapKey       string
 	configMapName      string
 	configMapNamespace string
+	provider           string
 }
 
 func New(config Config) (*Resource, error) {
@@ -56,6 +59,9 @@ func New(config Config) (*Resource, error) {
 	if config.ConfigMapNamespace == "" {
 		return nil, microerror.Maskf(invalidConfigError, "config.ConfigMapNamespace must not be empty")
 	}
+	if config.Provider == "" {
+		return nil, microerror.Maskf(invalidConfigError, "config.Provider must not be empty")
+	}
 
 	r := &Resource{
 		k8sClient: config.K8sClient,
@@ -65,6 +71,8 @@ func New(config Config) (*Resource, error) {
 		configMapKey:       config.ConfigMapKey,
 		configMapName:      config.ConfigMapName,
 		configMapNamespace: config.ConfigMapNamespace,
+
+		provider: config.Provider,
 	}
 
 	return r, nil

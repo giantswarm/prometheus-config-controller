@@ -91,8 +91,10 @@ func getEtcdTarget(etcdUrl string) model.LabelSet {
 
 // getScrapeConfigs takes a Service, and returns a list of ScrapeConfigs.
 // It is assumed that filtering has already taken place, and the cluster annotation exists.
-func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.ScrapeConfig {
+func getScrapeConfigs(service v1.Service, metaConfig Config) []config.ScrapeConfig {
+	certificateDirectory := metaConfig.CertDirectory
 	clusterID := GetClusterID(service)
+	provider := metaConfig.Provider
 
 	secureTLSConfig := config_util.TLSConfig{
 		CAFile:             key.CAPath(certificateDirectory, clusterID),
@@ -169,6 +171,10 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 	clusterTypeLabelRelabelConfig := &relabel.Config{
 		TargetLabel: ClusterTypeLabel,
 		Replacement: GuestClusterType,
+	}
+	providerLabelRelabelConfig := &relabel.Config{
+		TargetLabel: ProviderLabel,
+		Replacement: provider,
 	}
 	reflectorRelabelConfig := &relabel.Config{
 		Action:       ActionDrop,
@@ -319,6 +325,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					Regex:        MetricDropBucketLatencies,
 				},
 				reflectorRelabelConfig,
+				providerLabelRelabelConfig,
 			},
 		},
 
@@ -367,6 +374,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					SourceLabels: model.LabelNames{MetricNameLabel},
 					Regex:        MetricDropContainerNetworkRegexp,
 				},
+				providerLabelRelabelConfig,
 			},
 		},
 
@@ -393,6 +401,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 			},
 			MetricRelabelConfigs: []*relabel.Config{
 				reflectorRelabelConfig,
+				providerLabelRelabelConfig,
 			},
 		},
 
@@ -432,7 +441,9 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				// rewrite metrics scrape path to connect pods
 				rewriteAWSNodePath,
 			},
-			MetricRelabelConfigs: []*relabel.Config{},
+			MetricRelabelConfigs: []*relabel.Config{
+				providerLabelRelabelConfig,
+			},
 		},
 
 		{
@@ -471,7 +482,9 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				// rewrite metrics scrape path to connect pods
 				rewriteCalicoNodePath,
 			},
-			MetricRelabelConfigs: []*relabel.Config{},
+			MetricRelabelConfigs: []*relabel.Config{
+				providerLabelRelabelConfig,
+			},
 		},
 
 		{
@@ -513,6 +526,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					Regex:        DockerMetricsNameRegexp,
 					Action:       ActionKeep,
 				},
+				providerLabelRelabelConfig,
 			},
 		},
 
@@ -592,6 +606,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					TargetLabel:  ManagedAppWorkloadNameLabel,
 					Replacement:  GroupCapture,
 				},
+				providerLabelRelabelConfig,
 			},
 		},
 
@@ -652,6 +667,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					SourceLabels: model.LabelNames{MetricNameLabel, MetricSystemdNameLabel},
 					Regex:        MetricDropSystemdNameRegexp,
 				},
+				providerLabelRelabelConfig,
 			},
 		},
 		{
@@ -727,6 +743,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					SourceLabels: model.LabelNames{MetricExportedNamespaceLabel},
 					Regex:        NSRegexp,
 				},
+				providerLabelRelabelConfig,
 			},
 		},
 
@@ -787,6 +804,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					SourceLabels: model.LabelNames{MetricNameLabel},
 					Regex:        MetricKeepICRegexp,
 				},
+				providerLabelRelabelConfig,
 			},
 		},
 
@@ -856,6 +874,9 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 				// Relabel metrics path to specific managed app proxy.
 				rewriteManagedAppMetricPath,
 			},
+			MetricRelabelConfigs: []*relabel.Config{
+				providerLabelRelabelConfig,
+			},
 		},
 
 		{
@@ -892,6 +913,7 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 					SourceLabels: model.LabelNames{MetricNameLabel},
 					Regex:        MetricsKeepKubeProxyIptableRegexp,
 				},
+				providerLabelRelabelConfig,
 			},
 		},
 	}
@@ -933,12 +955,12 @@ func getScrapeConfigs(service v1.Service, certificateDirectory string) []config.
 
 // GetScrapeConfigs takes a list of Kubernetes Services,
 // and returns a list of Prometheus ScrapeConfigs.
-func GetScrapeConfigs(services []v1.Service, certificateDirectory string) ([]config.ScrapeConfig, error) {
+func GetScrapeConfigs(services []v1.Service, metaConfig Config) ([]config.ScrapeConfig, error) {
 	filteredServices := FilterInvalidServices(services)
 
 	scrapeConfigs := []config.ScrapeConfig{}
 	for _, service := range filteredServices {
-		scrapeConfigs = append(scrapeConfigs, getScrapeConfigs(service, certificateDirectory)...)
+		scrapeConfigs = append(scrapeConfigs, getScrapeConfigs(service, metaConfig)...)
 	}
 
 	sort.Slice(scrapeConfigs, func(i, j int) bool {

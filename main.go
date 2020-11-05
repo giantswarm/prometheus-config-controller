@@ -121,6 +121,7 @@ func mainError() error {
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.TLS.KeyFile, "", "Key file path to use to authenticate with Kubernetes.")
 
 	daemonCommand.PersistentFlags().String(f.Service.Prometheus.Address, "http://127.0.0.1:9090", "Address of Prometheus to reload.")
+	daemonCommand.PersistentFlags().String(f.Service.Prometheus.Provider, "", "The name of the provider where Prometheus is running.")
 
 	daemonCommand.PersistentFlags().Int(f.Service.Resource.Retries, 3, "Number of times to retry resources.")
 

@@ -28,6 +28,7 @@ type Config struct {
 	CertNamespace      string
 	CertPermission     int
 	PrometheusAddress  string
+	Provider           string
 }
 
 func New(config Config) ([]resource.Interface, error) {
@@ -67,6 +68,8 @@ func New(config Config) ([]resource.Interface, error) {
 			ConfigMapKey:       config.ConfigMapKey,
 			ConfigMapName:      config.ConfigMapName,
 			ConfigMapNamespace: config.ConfigMapNamespace,
+
+			Provider: config.Provider,
 		}
 
 		configMapResource, err = configmap.New(c)

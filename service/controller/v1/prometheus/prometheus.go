@@ -162,6 +162,9 @@ var (
 	// PodNameLabel is the label used to hold the pod name.
 	PodNameLabel = "pod_name"
 
+	// ProviderLabel is the label used to hold the provider type.
+	ProviderLabel = "provider"
+
 	// NodeLabel is the label used to hold the node name.
 	NodeLabel = "node"
 
@@ -348,6 +351,11 @@ var (
 	// IngressWhitelistRegexp is the regular expression to match workload targets to scrape.
 	IngressWhitelistRegexp = relabel.MustNewRegexp(`(kube-system;nginx-ingress-controller)`)
 )
+
+type Config struct {
+	CertDirectory string
+	Provider      string
+}
 
 // GetClusterID returns the value of the cluster annotation.
 // Assumed that the service contains this annotation, see `FilterInvalidServices`.

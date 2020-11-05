@@ -119,6 +119,7 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 	tests := []struct {
 		services             []v1.Service
 		certificateDirectory string
+		provider             string
 
 		expectedScrapeConfigs []config.ScrapeConfig
 	}{
@@ -127,6 +128,7 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 		{
 			services:             nil,
 			certificateDirectory: "/certs",
+			provider:             "aws-test",
 
 			expectedScrapeConfigs: []config.ScrapeConfig{},
 		},
@@ -142,6 +144,7 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 				},
 			},
 			certificateDirectory: "/certs",
+			provider:             "aws-test",
 
 			expectedScrapeConfigs: []config.ScrapeConfig{},
 		},
@@ -160,6 +163,7 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 				},
 			},
 			certificateDirectory: "/certs",
+			provider:             "aws-test",
 
 			expectedScrapeConfigs: []config.ScrapeConfig{
 				TestConfigOneApiserver,
@@ -200,6 +204,7 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 				},
 			},
 			certificateDirectory: "/certs",
+			provider:             "aws-test",
 
 			expectedScrapeConfigs: []config.ScrapeConfig{
 				TestConfigTwoApiserver,
@@ -232,7 +237,11 @@ func Test_Prometheus_GetScrapeConfigs(t *testing.T) {
 	}
 
 	for index, test := range tests {
-		scrapeConfigs, err := GetScrapeConfigs(test.services, test.certificateDirectory)
+		metaConfig := Config{
+			CertDirectory: test.certificateDirectory,
+			Provider:      test.provider,
+		}
+		scrapeConfigs, err := GetScrapeConfigs(test.services, metaConfig)
 		if err != nil {
 			t.Fatalf("%d: error returned creating scrape configs: %s\n", index, err)
 		}
@@ -300,7 +309,11 @@ func Test_Prometheus_GetScrapeConfigs_Deterministic(t *testing.T) {
 	}
 
 	for index := 0; index < 50; index++ {
-		scrapeConfigs, err := GetScrapeConfigs(services, "/certs")
+		metaConfig := Config{
+			CertDirectory: "/certs",
+			Provider:      "aws-test",
+		}
+		scrapeConfigs, err := GetScrapeConfigs(services, metaConfig)
 		if err != nil {
 			t.Fatalf("%d: error returned creating scrape configs: %s\n", index, err)
 		}
@@ -335,7 +348,11 @@ func Test_Prometheus_YamlMarshal(t *testing.T) {
 		},
 	}
 
-	scrapeConfigs, err := GetScrapeConfigs([]v1.Service{service}, "/certs")
+	metaConfig := Config{
+		CertDirectory: "/certs",
+		Provider:      "aws-test",
+	}
+	scrapeConfigs, err := GetScrapeConfigs([]v1.Service{service}, metaConfig)
 	if err != nil {
 		t.Fatalf("error returned creating scrape configs: %s\n", err)
 	}

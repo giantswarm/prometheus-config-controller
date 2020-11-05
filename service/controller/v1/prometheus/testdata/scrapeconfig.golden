@@ -31,6 +31,8 @@
   - source_labels: [__name__]
     regex: (reflector.*)
     action: drop
+  - target_label: provider
+    replacement: aws-test
 - job_name: guest-cluster-xa5ly-aws-node
   honor_timestamps: false
   scheme: https
@@ -67,6 +69,9 @@
     regex: (aws-node.*)
     target_label: __metrics_path__
     replacement: /api/v1/namespaces/kube-system/pods/${1}:61678/proxy/metrics
+  metric_relabel_configs:
+  - target_label: provider
+    replacement: aws-test
 - job_name: guest-cluster-xa5ly-cadvisor
   honor_timestamps: false
   scheme: https
@@ -110,6 +115,8 @@
   - source_labels: [__name__]
     regex: container_network_.*
     action: drop
+  - target_label: provider
+    replacement: aws-test
 - job_name: guest-cluster-xa5ly-calico-node
   honor_timestamps: false
   scheme: https
@@ -146,6 +153,9 @@
     regex: (calico-node.*)
     target_label: __metrics_path__
     replacement: /api/v1/namespaces/kube-system/pods/${1}:9091/proxy/metrics
+  metric_relabel_configs:
+  - target_label: provider
+    replacement: aws-test
 - job_name: guest-cluster-xa5ly-docker-daemon
   honor_timestamps: false
   scheme: https
@@ -186,6 +196,8 @@
   - source_labels: [__name__]
     regex: (process_virtual_memory_bytes|process_resident_memory_bytes)
     action: keep
+  - target_label: provider
+    replacement: aws-test
 - job_name: guest-cluster-xa5ly-ingress
   honor_timestamps: false
   scheme: https
@@ -233,6 +245,8 @@
   - source_labels: [__name__]
     regex: (nginx_ingress_controller_config_hash|nginx_ingress_controller_config_last_reload_successful|nginx_ingress_controller_config_last_reload_successful_timestamp_seconds|nginx_ingress_controller_nginx_process_connections|nginx_ingress_controller_nginx_process_connections_total|nginx_ingress_controller_nginx_process_cpu_seconds_total|nginx_ingress_controller_nginx_process_num_procs|nginx_ingress_controller_nginx_process_oldest_start_time_seconds|nginx_ingress_controller_nginx_process_read_bytes_total|nginx_ingress_controller_nginx_process_requests_total|nginx_ingress_controller_nginx_process_resident_memory_bytes|nginx_ingress_controller_nginx_process_virtual_memory_bytes|nginx_ingress_controller_nginx_process_write_bytes_total|nginx_ingress_controller_success|^go_.+|^process_.+|^prom.+)
     action: keep
+  - target_label: provider
+    replacement: aws-test
 - job_name: guest-cluster-xa5ly-kube-proxy
   honor_timestamps: false
   scheme: https
@@ -269,6 +283,8 @@
   - source_labels: [__name__]
     regex: (kubeproxy_sync_proxy_rules_iptables_restore_failures_total)
     action: keep
+  - target_label: provider
+    replacement: aws-test
 - job_name: guest-cluster-xa5ly-kube-state-managed-app
   honor_timestamps: false
   scheme: https
@@ -331,6 +347,8 @@
     regex: (.+)
     target_label: workload_name
     replacement: ${1}
+  - target_label: provider
+    replacement: aws-test
 - job_name: guest-cluster-xa5ly-kubelet
   honor_timestamps: false
   scheme: https
@@ -366,6 +384,8 @@
   - source_labels: [__name__]
     regex: (reflector.*)
     action: drop
+  - target_label: provider
+    replacement: aws-test
 - job_name: guest-cluster-xa5ly-managed-app
   honor_timestamps: false
   scheme: https
@@ -417,6 +437,9 @@
     regex: (.*);(.*);(.*);(.*)
     target_label: __metrics_path__
     replacement: /api/v1/namespaces/${1}/pods/${2}:${3}/proxy/${4}
+  metric_relabel_configs:
+  - target_label: provider
+    replacement: aws-test
 - job_name: guest-cluster-xa5ly-node-exporter
   honor_timestamps: false
   scheme: http
@@ -456,6 +479,8 @@
   - source_labels: [__name__, name]
     regex: node_systemd_unit_state;(dev-disk-by|run-docker-netns|sys-devices|sys-subsystem-net|var-lib-docker-overlay2|var-lib-docker-containers|var-lib-kubelet-pods).*
     action: drop
+  - target_label: provider
+    replacement: aws-test
 - job_name: guest-cluster-xa5ly-workload
   honor_timestamps: false
   scheme: https
@@ -546,3 +571,5 @@
   - source_labels: [exported_namespace]
     regex: (kube-system|giantswarm.*|vault-exporter)
     action: keep
+  - target_label: provider
+    replacement: aws-test

@@ -26,6 +26,7 @@ type PrometheusConfig struct {
 	CertNamespace      string
 	CertPermission     int
 	PrometheusAddress  string
+	Provider           string
 }
 
 type Prometheus struct {
@@ -64,6 +65,9 @@ func NewPrometheus(config PrometheusConfig) (*Prometheus, error) {
 	if config.PrometheusAddress == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.PrometheusAddress must not be empty", config)
 	}
+	if config.Provider == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Provider must not be empty", config)
+	}
 
 	var err error
 
@@ -81,6 +85,7 @@ func NewPrometheus(config PrometheusConfig) (*Prometheus, error) {
 			CertNamespace:      config.CertNamespace,
 			CertPermission:     config.CertPermission,
 			PrometheusAddress:  config.PrometheusAddress,
+			Provider:           config.Provider,
 		}
 		resources, err = controllerresource.New(c)
 		if err != nil {
