@@ -944,12 +944,10 @@ func getScrapeConfigs(service v1.Service, metaConfig Config) []config.ScrapeConf
 				Scheme:                 HttpsScheme,
 				HTTPClientConfig:       secureHTTPClientConfig,
 				ServiceDiscoveryConfig: etcdStaticConfig,
-
-				RelabelConfigs: []*relabel.Config{
-					MetricRelabelConfigs: []*relabel.Config{
-						providerLabelRelabelConfig,
-					},
+				MetricRelabelConfigs: []*relabel.Config{
+					providerLabelRelabelConfig,
 				},
+
 			}
 			// append etcd scrape config
 			scrapeConfigs = append(scrapeConfigs, etcdScrapeConfig)
