@@ -934,6 +934,7 @@ func getScrapeConfigs(service v1.Service, metaConfig Config) []config.ScrapeConf
 						Labels: model.LabelSet{
 							model.LabelName(ClusterTypeLabel): model.LabelValue(GuestClusterType),
 							model.LabelName(ClusterIDLabel):   model.LabelValue(clusterID),
+							model.LabelName(ProviderLabel):   model.LabelValue(provider),
 						},
 					},
 				},
