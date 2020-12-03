@@ -931,7 +931,6 @@ func getScrapeConfigs(service v1.Service, metaConfig Config) []config.ScrapeConf
 						Targets: []model.LabelSet{
 							getEtcdTarget(service.Annotations[key.AnnotationEtcdDomain]),
 						},
-						//test
 						Labels: model.LabelSet{
 							model.LabelName(ClusterTypeLabel): model.LabelValue(GuestClusterType),
 							model.LabelName(ClusterIDLabel):   model.LabelValue(clusterID),
