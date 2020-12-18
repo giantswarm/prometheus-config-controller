@@ -440,6 +440,9 @@
   metric_relabel_configs:
   - target_label: provider
     replacement: aws-test
+  - source_labels: [__name__]
+    regex: (nginx_ingress_controller_request_duration_seconds_bucket|nginx_ingress_controller_response_size_bucket|nginx_ingress_controller_request_size_bucket|nginx_ingress_controller_response_duration_seconds_bucket|nginx_ingress_controller_bytes_sent_bucket)
+    action: drop
 - job_name: guest-cluster-xa5ly-node-exporter
   honor_timestamps: false
   scheme: http
