@@ -7,9 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- Removed high cardinality `nginx-ingress-controller` metrics from managed apps job.
+
 ## [1.1.2] - 2020-12-07
 
-## Added
+### Added
 
 - Add `provider` label to StaticConfigs for etcd metrics.
 

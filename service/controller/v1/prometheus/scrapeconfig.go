@@ -876,6 +876,12 @@ func getScrapeConfigs(service v1.Service, metaConfig Config) []config.ScrapeConf
 			},
 			MetricRelabelConfigs: []*relabel.Config{
 				providerLabelRelabelConfig,
+				// Drop high cardinality ingress controller metrics.
+				{
+					Action:       ActionDrop,
+					SourceLabels: model.LabelNames{MetricNameLabel},
+					Regex:        relabel.MustNewRegexp(`(nginx_ingress_controller_request_duration_seconds_bucket|nginx_ingress_controller_response_size_bucket|nginx_ingress_controller_request_size_bucket|nginx_ingress_controller_response_duration_seconds_bucket|nginx_ingress_controller_bytes_sent_bucket)`),
+				},
 			},
 		},
 
