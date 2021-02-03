@@ -170,7 +170,7 @@ func getScrapeConfigs(service v1.Service, metaConfig Config) []config.ScrapeConf
 	}
 	clusterTypeLabelRelabelConfig := &relabel.Config{
 		TargetLabel: ClusterTypeLabel,
-		Replacement: GuestClusterType,
+		Replacement: WorkloadClusterType,
 	}
 	providerLabelRelabelConfig := &relabel.Config{
 		TargetLabel: ProviderLabel,
@@ -938,7 +938,7 @@ func getScrapeConfigs(service v1.Service, metaConfig Config) []config.ScrapeConf
 							getEtcdTarget(service.Annotations[key.AnnotationEtcdDomain]),
 						},
 						Labels: model.LabelSet{
-							model.LabelName(ClusterTypeLabel): model.LabelValue(GuestClusterType),
+							model.LabelName(ClusterTypeLabel): model.LabelValue(WorkloadClusterType),
 							model.LabelName(ClusterIDLabel):   model.LabelValue(clusterID),
 							model.LabelName(ProviderLabel):    model.LabelValue(provider),
 						},

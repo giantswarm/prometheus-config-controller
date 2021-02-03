@@ -66,7 +66,7 @@ var (
 			},
 			{
 				TargetLabel: ClusterTypeLabel,
-				Replacement: GuestClusterType,
+				Replacement: WorkloadClusterType,
 			},
 		},
 		MetricRelabelConfigs: []*relabel.Config{
@@ -143,7 +143,7 @@ var (
 			},
 			{
 				TargetLabel: ClusterTypeLabel,
-				Replacement: GuestClusterType,
+				Replacement: WorkloadClusterType,
 			},
 			{
 				TargetLabel: AddressLabel,
@@ -215,7 +215,7 @@ var (
 			},
 			{
 				TargetLabel: ClusterTypeLabel,
-				Replacement: GuestClusterType,
+				Replacement: WorkloadClusterType,
 			},
 			{
 				TargetLabel:  IPLabel,
@@ -307,7 +307,7 @@ var (
 			},
 			{
 				TargetLabel: ClusterTypeLabel,
-				Replacement: GuestClusterType,
+				Replacement: WorkloadClusterType,
 			},
 			{
 				TargetLabel: AddressLabel,
@@ -379,7 +379,7 @@ var (
 			},
 			{
 				TargetLabel: ClusterTypeLabel,
-				Replacement: GuestClusterType,
+				Replacement: WorkloadClusterType,
 			},
 			{
 				TargetLabel:  IPLabel,
@@ -451,7 +451,7 @@ var (
 			},
 			{
 				TargetLabel: ClusterTypeLabel,
-				Replacement: GuestClusterType,
+				Replacement: WorkloadClusterType,
 			},
 			{
 				TargetLabel:  IPLabel,
@@ -529,7 +529,7 @@ var (
 			},
 			{
 				TargetLabel: ClusterTypeLabel,
-				Replacement: GuestClusterType,
+				Replacement: WorkloadClusterType,
 			},
 			{
 				SourceLabels: model.LabelNames{model.AddressLabel},
@@ -616,7 +616,7 @@ var (
 			},
 			{
 				TargetLabel: ClusterTypeLabel,
-				Replacement: GuestClusterType,
+				Replacement: WorkloadClusterType,
 			},
 			{
 				TargetLabel: AddressLabel,
@@ -708,7 +708,7 @@ var (
 			},
 			{
 				TargetLabel: ClusterTypeLabel,
-				Replacement: GuestClusterType,
+				Replacement: WorkloadClusterType,
 			},
 			{
 				TargetLabel: AddressLabel,
@@ -861,7 +861,7 @@ var (
 			},
 			{
 				TargetLabel: ClusterTypeLabel,
-				Replacement: GuestClusterType,
+				Replacement: WorkloadClusterType,
 			},
 			{
 				TargetLabel: AddressLabel,
@@ -974,7 +974,7 @@ var (
 			},
 			{
 				TargetLabel: ClusterTypeLabel,
-				Replacement: GuestClusterType,
+				Replacement: WorkloadClusterType,
 			},
 			{
 				TargetLabel: AddressLabel,
@@ -1051,7 +1051,7 @@ var (
 			},
 			{
 				TargetLabel: ClusterTypeLabel,
-				Replacement: GuestClusterType,
+				Replacement: WorkloadClusterType,
 			},
 			{
 				TargetLabel: AddressLabel,

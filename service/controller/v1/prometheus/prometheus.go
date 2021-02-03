@@ -186,8 +186,8 @@ const (
 	// DockerAppName is the label value for Docker targets.
 	DockerAppName = "docker"
 
-	// GuestClusterType is the cluster type for guest clusters.
-	GuestClusterType = "guest"
+	// WorkloadClusterType is the cluster type for workload clusters.
+	WorkloadClusterType = "workload"
 
 	// KubeletAppName is the label value for kubelets.
 	KubeletAppName = "kubelet"
