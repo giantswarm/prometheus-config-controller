@@ -187,7 +187,7 @@ const (
 	DockerAppName = "docker"
 
 	// WorkloadClusterType is the cluster type for workload clusters.
-	WorkloadClusterType = "workload"
+	WorkloadClusterType = "workload_cluster"
 
 	// KubeletAppName is the label value for kubelets.
 	KubeletAppName = "kubelet"
