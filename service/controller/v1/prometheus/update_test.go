@@ -124,14 +124,14 @@ func Test_Prometheus_isManaged(t *testing.T) {
 
 		{
 			scrapeConfig: config.ScrapeConfig{
-				JobName: "host-cluster-gauss",
+				JobName: "management-cluster-gauss",
 			},
 			isManaged: false,
 		},
 
 		{
 			scrapeConfig: config.ScrapeConfig{
-				JobName: "host-cluster-gauss-cadvisor",
+				JobName: "management-cluster-gauss-cadvisor",
 			},
 			isManaged: false,
 		},
