@@ -1,4 +1,4 @@
-- job_name: guest-cluster-xa5ly-apiserver
+- job_name: workload-cluster-xa5ly-apiserver
   honor_timestamps: false
   scheme: https
   kubernetes_sd_configs:
@@ -23,7 +23,7 @@
   - target_label: cluster_id
     replacement: xa5ly
   - target_label: cluster_type
-    replacement: guest
+    replacement: workload
   metric_relabel_configs:
   - source_labels: [__name__]
     regex: (apiserver_admission_controller_admission_latencies_seconds_.*|apiserver_admission_step_admission_latencies_seconds_.*|apiserver_request_count|apiserver_request_duration_seconds_.*|apiserver_request_latencies_.*|apiserver_request_total|apiserver_response_sizes_.*|rest_client_request_latency_seconds_.*)
@@ -33,7 +33,7 @@
     action: drop
   - target_label: provider
     replacement: aws-test
-- job_name: guest-cluster-xa5ly-aws-node
+- job_name: workload-cluster-xa5ly-aws-node
   honor_timestamps: false
   scheme: https
   kubernetes_sd_configs:
@@ -62,7 +62,7 @@
   - target_label: cluster_id
     replacement: xa5ly
   - target_label: cluster_type
-    replacement: guest
+    replacement: workload
   - target_label: __address__
     replacement: master.xa5ly:443
   - source_labels: [__meta_kubernetes_pod_name]
@@ -72,7 +72,7 @@
   metric_relabel_configs:
   - target_label: provider
     replacement: aws-test
-- job_name: guest-cluster-xa5ly-cadvisor
+- job_name: workload-cluster-xa5ly-cadvisor
   honor_timestamps: false
   scheme: https
   kubernetes_sd_configs:
@@ -99,7 +99,7 @@
   - target_label: cluster_id
     replacement: xa5ly
   - target_label: cluster_type
-    replacement: guest
+    replacement: workload
   - source_labels: [__meta_kubernetes_node_address_InternalIP]
     target_label: ip
   - source_labels: [__meta_kubernetes_node_label_role]
@@ -117,7 +117,7 @@
     action: drop
   - target_label: provider
     replacement: aws-test
-- job_name: guest-cluster-xa5ly-calico-node
+- job_name: workload-cluster-xa5ly-calico-node
   honor_timestamps: false
   scheme: https
   kubernetes_sd_configs:
@@ -146,7 +146,7 @@
   - target_label: cluster_id
     replacement: xa5ly
   - target_label: cluster_type
-    replacement: guest
+    replacement: workload
   - target_label: __address__
     replacement: master.xa5ly:443
   - source_labels: [__meta_kubernetes_pod_name]
@@ -156,7 +156,7 @@
   metric_relabel_configs:
   - target_label: provider
     replacement: aws-test
-- job_name: guest-cluster-xa5ly-docker-daemon
+- job_name: workload-cluster-xa5ly-docker-daemon
   honor_timestamps: false
   scheme: https
   kubernetes_sd_configs:
@@ -183,7 +183,7 @@
   - target_label: cluster_id
     replacement: xa5ly
   - target_label: cluster_type
-    replacement: guest
+    replacement: workload
   - source_labels: [__meta_kubernetes_node_address_InternalIP]
     target_label: ip
   - source_labels: [__meta_kubernetes_node_label_role]
@@ -198,7 +198,7 @@
     action: keep
   - target_label: provider
     replacement: aws-test
-- job_name: guest-cluster-xa5ly-ingress
+- job_name: workload-cluster-xa5ly-ingress
   honor_timestamps: false
   scheme: https
   kubernetes_sd_configs:
@@ -229,7 +229,7 @@
   - target_label: cluster_id
     replacement: xa5ly
   - target_label: cluster_type
-    replacement: guest
+    replacement: workload
   - target_label: __address__
     replacement: master.xa5ly:443
   - source_labels: [__meta_kubernetes_pod_name]
@@ -247,7 +247,7 @@
     action: keep
   - target_label: provider
     replacement: aws-test
-- job_name: guest-cluster-xa5ly-kube-proxy
+- job_name: workload-cluster-xa5ly-kube-proxy
   honor_timestamps: false
   scheme: https
   kubernetes_sd_configs:
@@ -272,7 +272,7 @@
   - target_label: cluster_id
     replacement: xa5ly
   - target_label: cluster_type
-    replacement: guest
+    replacement: workload
   - target_label: __address__
     replacement: master.xa5ly:443
   - source_labels: [__meta_kubernetes_pod_name]
@@ -285,7 +285,7 @@
     action: keep
   - target_label: provider
     replacement: aws-test
-- job_name: guest-cluster-xa5ly-kube-state-managed-app
+- job_name: workload-cluster-xa5ly-kube-state-managed-app
   honor_timestamps: false
   scheme: https
   kubernetes_sd_configs:
@@ -310,7 +310,7 @@
   - target_label: cluster_id
     replacement: xa5ly
   - target_label: cluster_type
-    replacement: guest
+    replacement: workload
   - target_label: __address__
     replacement: master.xa5ly:443
   - source_labels: [__meta_kubernetes_pod_name]
@@ -349,7 +349,7 @@
     replacement: ${1}
   - target_label: provider
     replacement: aws-test
-- job_name: guest-cluster-xa5ly-kubelet
+- job_name: workload-cluster-xa5ly-kubelet
   honor_timestamps: false
   scheme: https
   kubernetes_sd_configs:
@@ -371,7 +371,7 @@
   - target_label: cluster_id
     replacement: xa5ly
   - target_label: cluster_type
-    replacement: guest
+    replacement: workload
   - source_labels: [__meta_kubernetes_node_address_InternalIP]
     target_label: ip
   - source_labels: [__meta_kubernetes_node_label_role]
@@ -386,7 +386,7 @@
     action: drop
   - target_label: provider
     replacement: aws-test
-- job_name: guest-cluster-xa5ly-managed-app
+- job_name: workload-cluster-xa5ly-managed-app
   honor_timestamps: false
   scheme: https
   kubernetes_sd_configs:
@@ -430,7 +430,7 @@
   - target_label: cluster_id
     replacement: xa5ly
   - target_label: cluster_type
-    replacement: guest
+    replacement: workload
   - target_label: __address__
     replacement: master.xa5ly:443
   - source_labels: [namespace, pod_name, __meta_kubernetes_service_annotation_giantswarm_io_monitoring_port, __meta_kubernetes_service_annotation_giantswarm_io_monitoring_path]
@@ -443,7 +443,7 @@
   - source_labels: [__name__]
     regex: (nginx_ingress_controller_request_duration_seconds_bucket|nginx_ingress_controller_response_size_bucket|nginx_ingress_controller_request_size_bucket|nginx_ingress_controller_response_duration_seconds_bucket|nginx_ingress_controller_bytes_sent_bucket)
     action: drop
-- job_name: guest-cluster-xa5ly-node-exporter
+- job_name: workload-cluster-xa5ly-node-exporter
   honor_timestamps: false
   scheme: http
   kubernetes_sd_configs:
@@ -467,7 +467,7 @@
   - target_label: cluster_id
     replacement: xa5ly
   - target_label: cluster_type
-    replacement: guest
+    replacement: workload
   - source_labels: [__address__]
     regex: (.*):10300
     target_label: ip
@@ -484,7 +484,7 @@
     action: drop
   - target_label: provider
     replacement: aws-test
-- job_name: guest-cluster-xa5ly-workload
+- job_name: workload-cluster-xa5ly-workload
   honor_timestamps: false
   scheme: https
   kubernetes_sd_configs:
@@ -518,7 +518,7 @@
   - target_label: cluster_id
     replacement: xa5ly
   - target_label: cluster_type
-    replacement: guest
+    replacement: workload
   - target_label: __address__
     replacement: master.xa5ly:443
   - source_labels: [__meta_kubernetes_pod_name]

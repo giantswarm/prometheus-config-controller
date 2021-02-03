@@ -16,7 +16,7 @@ import (
 
 var (
 	TestConfigOneApiserver = config.ScrapeConfig{
-		JobName: "guest-cluster-xa5ly-apiserver",
+		JobName: "workload-cluster-xa5ly-apiserver",
 		Scheme:  "https",
 		HTTPClientConfig: config_util.HTTPClientConfig{
 			TLSConfig: config_util.TLSConfig{
@@ -88,7 +88,7 @@ var (
 		},
 	}
 	TestConfigOneAWSNode = config.ScrapeConfig{
-		JobName: "guest-cluster-xa5ly-aws-node",
+		JobName: "workload-cluster-xa5ly-aws-node",
 		Scheme:  "https",
 		HTTPClientConfig: config_util.HTTPClientConfig{
 			TLSConfig: config_util.TLSConfig{
@@ -164,7 +164,7 @@ var (
 		},
 	}
 	TestConfigOneCadvisor = config.ScrapeConfig{
-		JobName: "guest-cluster-xa5ly-cadvisor",
+		JobName: "workload-cluster-xa5ly-cadvisor",
 		Scheme:  "https",
 		HTTPClientConfig: config_util.HTTPClientConfig{
 			TLSConfig: config_util.TLSConfig{
@@ -252,7 +252,7 @@ var (
 		},
 	}
 	TestConfigOneCalicoNode = config.ScrapeConfig{
-		JobName: "guest-cluster-xa5ly-calico-node",
+		JobName: "workload-cluster-xa5ly-calico-node",
 		Scheme:  "https",
 		HTTPClientConfig: config_util.HTTPClientConfig{
 			TLSConfig: config_util.TLSConfig{
@@ -328,7 +328,7 @@ var (
 		},
 	}
 	TestConfigOneDocker = config.ScrapeConfig{
-		JobName: "guest-cluster-xa5ly-docker-daemon",
+		JobName: "workload-cluster-xa5ly-docker-daemon",
 		Scheme:  "https",
 		HTTPClientConfig: config_util.HTTPClientConfig{
 			TLSConfig: config_util.TLSConfig{
@@ -409,7 +409,7 @@ var (
 		},
 	}
 	TestConfigOneKubelet = config.ScrapeConfig{
-		JobName: "guest-cluster-xa5ly-kubelet",
+		JobName: "workload-cluster-xa5ly-kubelet",
 		Scheme:  "https",
 		HTTPClientConfig: config_util.HTTPClientConfig{
 			TLSConfig: config_util.TLSConfig{
@@ -481,7 +481,7 @@ var (
 		},
 	}
 	TestConfigOneNodeExporter = config.ScrapeConfig{
-		JobName: "guest-cluster-xa5ly-node-exporter",
+		JobName: "workload-cluster-xa5ly-node-exporter",
 		Scheme:  "http",
 		ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
 			KubernetesSDConfigs: []*kubernetes.SDConfig{
@@ -565,7 +565,7 @@ var (
 	}
 
 	TestConfigOneKubeProxy = config.ScrapeConfig{
-		JobName: "guest-cluster-xa5ly-kube-proxy",
+		JobName: "workload-cluster-xa5ly-kube-proxy",
 		Scheme:  "https",
 		HTTPClientConfig: config_util.HTTPClientConfig{
 			TLSConfig: config_util.TLSConfig{
@@ -644,7 +644,7 @@ var (
 	}
 
 	TestConfigOneWorkload = config.ScrapeConfig{
-		JobName: "guest-cluster-xa5ly-workload",
+		JobName: "workload-cluster-xa5ly-workload",
 		HTTPClientConfig: config_util.HTTPClientConfig{
 			TLSConfig: config_util.TLSConfig{
 				CAFile:             "/certs/xa5ly-ca.pem",
@@ -802,7 +802,7 @@ var (
 		},
 	}
 	TestConfigOneIngress = config.ScrapeConfig{
-		JobName: "guest-cluster-xa5ly-ingress",
+		JobName: "workload-cluster-xa5ly-ingress",
 		HTTPClientConfig: config_util.HTTPClientConfig{
 			TLSConfig: config_util.TLSConfig{
 				CAFile:             "/certs/xa5ly-ca.pem",
@@ -894,7 +894,7 @@ var (
 		},
 	}
 	TestConfigOneManagedApp = config.ScrapeConfig{
-		JobName: "guest-cluster-xa5ly-managed-app",
+		JobName: "workload-cluster-xa5ly-managed-app",
 		HTTPClientConfig: config_util.HTTPClientConfig{
 			TLSConfig: config_util.TLSConfig{
 				CAFile:             "/certs/xa5ly-ca.pem",
@@ -1004,7 +1004,7 @@ var (
 		},
 	}
 	TestConfigOneKubeStateManagedApp = config.ScrapeConfig{
-		JobName: "guest-cluster-xa5ly-kube-state-managed-app",
+		JobName: "workload-cluster-xa5ly-kube-state-managed-app",
 		HTTPClientConfig: config_util.HTTPClientConfig{
 			TLSConfig: config_util.TLSConfig{
 				CAFile:             "/certs/xa5ly-ca.pem",
@@ -1164,7 +1164,7 @@ func init() {
 	}
 
 	{
-		TestConfigTwoApiserver.JobName = "guest-cluster-0ba9v-apiserver"
+		TestConfigTwoApiserver.JobName = "workload-cluster-0ba9v-apiserver"
 		TestConfigTwoApiserver.HTTPClientConfig.TLSConfig = tlsConfig
 		TestConfigTwoApiserver.HTTPClientConfig.TLSConfig.InsecureSkipVerify = true
 		TestConfigTwoApiserver.ServiceDiscoveryConfig.KubernetesSDConfigs = []*kubernetes.SDConfig{
@@ -1187,7 +1187,7 @@ func init() {
 	}
 
 	{
-		TestConfigTwoAWSNode.JobName = "guest-cluster-0ba9v-aws-node"
+		TestConfigTwoAWSNode.JobName = "workload-cluster-0ba9v-aws-node"
 		TestConfigTwoAWSNode.HTTPClientConfig.TLSConfig = tlsConfig
 		TestConfigTwoAWSNode.ServiceDiscoveryConfig.KubernetesSDConfigs = []*kubernetes.SDConfig{
 			{
@@ -1209,7 +1209,7 @@ func init() {
 	}
 
 	{
-		TestConfigTwoCadvisor.JobName = "guest-cluster-0ba9v-cadvisor"
+		TestConfigTwoCadvisor.JobName = "workload-cluster-0ba9v-cadvisor"
 		TestConfigTwoCadvisor.HTTPClientConfig.TLSConfig = tlsConfig
 		TestConfigTwoCadvisor.ServiceDiscoveryConfig.KubernetesSDConfigs = []*kubernetes.SDConfig{
 			{
@@ -1231,7 +1231,7 @@ func init() {
 	}
 
 	{
-		TestConfigTwoDocker.JobName = "guest-cluster-0ba9v-docker-daemon"
+		TestConfigTwoDocker.JobName = "workload-cluster-0ba9v-docker-daemon"
 		TestConfigTwoDocker.HTTPClientConfig.TLSConfig = tlsConfig
 		TestConfigTwoDocker.ServiceDiscoveryConfig.KubernetesSDConfigs = []*kubernetes.SDConfig{
 			{
@@ -1253,7 +1253,7 @@ func init() {
 	}
 
 	{
-		TestConfigTwoCalicoNode.JobName = "guest-cluster-0ba9v-calico-node"
+		TestConfigTwoCalicoNode.JobName = "workload-cluster-0ba9v-calico-node"
 		TestConfigTwoCalicoNode.HTTPClientConfig.TLSConfig = tlsConfig
 		TestConfigTwoCalicoNode.ServiceDiscoveryConfig.KubernetesSDConfigs = []*kubernetes.SDConfig{
 			{
@@ -1275,7 +1275,7 @@ func init() {
 	}
 
 	{
-		TestConfigTwoKubelet.JobName = "guest-cluster-0ba9v-kubelet"
+		TestConfigTwoKubelet.JobName = "workload-cluster-0ba9v-kubelet"
 		TestConfigTwoKubelet.HTTPClientConfig.TLSConfig = tlsConfig
 		TestConfigTwoKubelet.HTTPClientConfig.TLSConfig.InsecureSkipVerify = true
 		TestConfigTwoKubelet.ServiceDiscoveryConfig.KubernetesSDConfigs = []*kubernetes.SDConfig{
@@ -1298,7 +1298,7 @@ func init() {
 	}
 
 	{
-		TestConfigTwoNodeExporter.JobName = "guest-cluster-0ba9v-node-exporter"
+		TestConfigTwoNodeExporter.JobName = "workload-cluster-0ba9v-node-exporter"
 		TestConfigTwoNodeExporter.ServiceDiscoveryConfig.KubernetesSDConfigs = []*kubernetes.SDConfig{
 			{
 				APIServer: apiServer,
@@ -1319,7 +1319,7 @@ func init() {
 	}
 
 	{
-		TestConfigTwoWorkload.JobName = "guest-cluster-0ba9v-workload"
+		TestConfigTwoWorkload.JobName = "workload-cluster-0ba9v-workload"
 		TestConfigTwoWorkload.HTTPClientConfig.TLSConfig = tlsConfig
 		TestConfigTwoWorkload.ServiceDiscoveryConfig.KubernetesSDConfigs = []*kubernetes.SDConfig{
 			{
@@ -1341,7 +1341,7 @@ func init() {
 	}
 
 	{
-		TestConfigTwoIngress.JobName = "guest-cluster-0ba9v-ingress"
+		TestConfigTwoIngress.JobName = "workload-cluster-0ba9v-ingress"
 		TestConfigTwoIngress.HTTPClientConfig.TLSConfig = tlsConfig
 		TestConfigTwoIngress.ServiceDiscoveryConfig.KubernetesSDConfigs = []*kubernetes.SDConfig{
 			{
@@ -1363,7 +1363,7 @@ func init() {
 	}
 	{
 		{
-			TestConfigTwoManagedApp.JobName = "guest-cluster-0ba9v-managed-app"
+			TestConfigTwoManagedApp.JobName = "workload-cluster-0ba9v-managed-app"
 			TestConfigTwoManagedApp.HTTPClientConfig.TLSConfig = tlsConfig
 			TestConfigTwoManagedApp.ServiceDiscoveryConfig.KubernetesSDConfigs = []*kubernetes.SDConfig{
 				{
@@ -1387,7 +1387,7 @@ func init() {
 
 	{
 		{
-			TestConfigTwoKubeStateManagedApp.JobName = "guest-cluster-0ba9v-kube-state-managed-app"
+			TestConfigTwoKubeStateManagedApp.JobName = "workload-cluster-0ba9v-kube-state-managed-app"
 			TestConfigTwoKubeStateManagedApp.HTTPClientConfig.TLSConfig = tlsConfig
 			TestConfigTwoKubeStateManagedApp.ServiceDiscoveryConfig.KubernetesSDConfigs = []*kubernetes.SDConfig{
 				{
@@ -1411,7 +1411,7 @@ func init() {
 
 	{
 		{
-			TestConfigTwoKubeProxy.JobName = "guest-cluster-0ba9v-kube-proxy"
+			TestConfigTwoKubeProxy.JobName = "workload-cluster-0ba9v-kube-proxy"
 			TestConfigTwoKubeProxy.HTTPClientConfig.TLSConfig = tlsConfig
 			TestConfigTwoKubeProxy.ServiceDiscoveryConfig.KubernetesSDConfigs = []*kubernetes.SDConfig{
 				{

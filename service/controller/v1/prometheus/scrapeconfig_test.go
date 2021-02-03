@@ -34,7 +34,7 @@ func Test_Prometheus_getJobName(t *testing.T) {
 				},
 			},
 			name:            "cadvisor",
-			expectedJobName: "guest-cluster-bar-cadvisor",
+			expectedJobName: "workload-cluster-bar-cadvisor",
 		},
 	}
 

@@ -44,7 +44,7 @@ func Test_Prometheus_isManaged(t *testing.T) {
 
 		{
 			scrapeConfig: config.ScrapeConfig{
-				JobName: "guest-cluster-xa5ly",
+				JobName: "workload-cluster-xa5ly",
 				Scheme:  "https",
 				HTTPClientConfig: config_util.HTTPClientConfig{
 					TLSConfig: config_util.TLSConfig{
@@ -104,7 +104,7 @@ func Test_Prometheus_isManaged(t *testing.T) {
 
 		{
 			scrapeConfig: config.ScrapeConfig{
-				JobName: "guest-cluster-xa5ly-cadvisor",
+				JobName: "workload-cluster-xa5ly-cadvisor",
 				RelabelConfigs: []*relabel.Config{
 					{
 						TargetLabel: ClusterIDLabel,
@@ -117,7 +117,7 @@ func Test_Prometheus_isManaged(t *testing.T) {
 
 		{
 			scrapeConfig: config.ScrapeConfig{
-				JobName: "guest-cluster-xa5ly-cadvisor",
+				JobName: "workload-cluster-xa5ly-cadvisor",
 			},
 			isManaged: true,
 		},
@@ -168,7 +168,7 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 			},
 			scrapeConfigs: []config.ScrapeConfig{
 				{
-					JobName: "guest-cluster-xa5ly",
+					JobName: "workload-cluster-xa5ly",
 					ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
 						KubernetesSDConfigs: []*kubernetes.SDConfig{
 							{
@@ -194,7 +194,7 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 			expectedConfig: config.Config{
 				ScrapeConfigs: []*config.ScrapeConfig{
 					{
-						JobName: "guest-cluster-xa5ly",
+						JobName: "workload-cluster-xa5ly",
 						ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
 							KubernetesSDConfigs: []*kubernetes.SDConfig{
 								{
@@ -226,7 +226,7 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 			config: config.Config{
 				ScrapeConfigs: []*config.ScrapeConfig{
 					{
-						JobName: "guest-cluster-xa5ly",
+						JobName: "workload-cluster-xa5ly",
 						ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
 							KubernetesSDConfigs: []*kubernetes.SDConfig{
 								{
@@ -251,7 +251,7 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 			},
 			scrapeConfigs: []config.ScrapeConfig{
 				{
-					JobName: "guest-cluster-xa5ly",
+					JobName: "workload-cluster-xa5ly",
 					ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
 						KubernetesSDConfigs: []*kubernetes.SDConfig{
 							{
@@ -277,7 +277,7 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 			expectedConfig: config.Config{
 				ScrapeConfigs: []*config.ScrapeConfig{
 					{
-						JobName: "guest-cluster-xa5ly",
+						JobName: "workload-cluster-xa5ly",
 						ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
 							KubernetesSDConfigs: []*kubernetes.SDConfig{
 								{
@@ -309,7 +309,7 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 			config: config.Config{
 				ScrapeConfigs: []*config.ScrapeConfig{
 					{
-						JobName: "guest-cluster-xa5ly",
+						JobName: "workload-cluster-xa5ly",
 						ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
 							KubernetesSDConfigs: []*kubernetes.SDConfig{
 								{
@@ -334,7 +334,7 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 			},
 			scrapeConfigs: []config.ScrapeConfig{
 				{
-					JobName: "guest-cluster-xa5ly",
+					JobName: "workload-cluster-xa5ly",
 					ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
 						KubernetesSDConfigs: []*kubernetes.SDConfig{
 							{
@@ -356,7 +356,7 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 					},
 				},
 				{
-					JobName: "guest-cluster-jf0sj",
+					JobName: "workload-cluster-jf0sj",
 					ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
 						KubernetesSDConfigs: []*kubernetes.SDConfig{
 							{
@@ -382,7 +382,7 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 			expectedConfig: config.Config{
 				ScrapeConfigs: []*config.ScrapeConfig{
 					{
-						JobName: "guest-cluster-xa5ly",
+						JobName: "workload-cluster-xa5ly",
 						ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
 							KubernetesSDConfigs: []*kubernetes.SDConfig{
 								{
@@ -404,7 +404,7 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 						},
 					},
 					{
-						JobName: "guest-cluster-jf0sj",
+						JobName: "workload-cluster-jf0sj",
 						ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
 							KubernetesSDConfigs: []*kubernetes.SDConfig{
 								{
@@ -440,7 +440,7 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 			},
 			scrapeConfigs: []config.ScrapeConfig{
 				{
-					JobName: "guest-cluster-xa5ly",
+					JobName: "workload-cluster-xa5ly",
 					ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
 						KubernetesSDConfigs: []*kubernetes.SDConfig{
 							{
@@ -469,7 +469,7 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 						JobName: "kubernetes-nodes",
 					},
 					{
-						JobName: "guest-cluster-xa5ly",
+						JobName: "workload-cluster-xa5ly",
 						ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
 							KubernetesSDConfigs: []*kubernetes.SDConfig{
 								{
@@ -501,7 +501,7 @@ func Test_Prometheus_UpdateConfig(t *testing.T) {
 			config: config.Config{
 				ScrapeConfigs: []*config.ScrapeConfig{
 					{
-						JobName: "guest-cluster-xa5ly",
+						JobName: "workload-cluster-xa5ly",
 						ServiceDiscoveryConfig: sd_config.ServiceDiscoveryConfig{
 							KubernetesSDConfigs: []*kubernetes.SDConfig{
 								{

@@ -20,8 +20,8 @@ import (
 )
 
 const (
-	// jobNamePrefix is the prefix for all guest cluster jobs.
-	jobNamePrefix = "guest-cluster"
+	// jobNamePrefix is the prefix for all workload cluster jobs.
+	jobNamePrefix = "workload-cluster"
 
 	// HttpScheme is the scheme for http connections.
 	HttpScheme = "http"
